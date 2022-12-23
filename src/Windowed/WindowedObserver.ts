@@ -1,5 +1,4 @@
 import { Observer, Subject } from "rxjs"
-import { StorageKey } from "../models/Storage"
 import { Window } from "../models/Window"
 import { Windowed } from "../models/Windowed"
 
