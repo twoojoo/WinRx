@@ -2,14 +2,13 @@ import { Observer } from "rxjs"
 import { StorageItem } from "../models/Storage"
 import { Window, WindowOptions } from "../models/Window"
 
-export type TumblingWindowOptions<T> = WindowOptions<T> & {size: number}
+export type CountingWindowOptions<T> = WindowOptions<T> & {size: number}
 
-export class TumblingWindow<T> extends Window<T> {
+export class CountingWindow<T> extends Window<T> {
     private _size: number
+    private _counter: number = 0
 
-    private _interval: NodeJS.Timer | undefined
-
-    constructor(options: TumblingWindowOptions<T>) {
+    constructor(options: CountingWindowOptions<T>) {
         super({
             storage: options.storage,
             closeOnComplete: options.closeOnComplete,
@@ -20,13 +19,10 @@ export class TumblingWindow<T> extends Window<T> {
     }
 
     onStart(observer:  Observer<T[]>): void {
-        this._interval = setInterval(() => {
-            this.consume(observer)
-        }, this._size)
+        return
     }
 
     consume(observer: any): void {
-        if (!this._interval) throw Error("missing interval")
         const items = this._storage.retrieveAll()
         this._storage.clearAll()
         this.consumeItems(observer, items)
@@ -34,5 +30,11 @@ export class TumblingWindow<T> extends Window<T> {
 
     onItem(observer: Observer<T[]>, item: StorageItem<T>): void {
         this._storage.storeItem(item)
+        this._counter ++
+    
+        if (this._counter >= this._size) {
+            this.consume(observer)
+            this._counter = 0
+        }
     }
 }

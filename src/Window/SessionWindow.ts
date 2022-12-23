@@ -1,5 +1,5 @@
 import { Observer } from "rxjs"
-import { ItemToStore, StorageKey } from "../models/Storage"
+import { StorageItem, StorageKey } from "../models/Storage"
 import { Window, WindowOptions } from "../models/Window"
 
 export type SessionWindowOptions<T> = WindowOptions<T> & { maxDuration: number, timeoutSize: number }
@@ -31,7 +31,7 @@ export class SessionWindow<T> extends Window<T> {
         return
     }
 
-    onItem(observer: Observer<T[]>, item: ItemToStore<T>): void {
+    onItem(observer: Observer<T[]>, item: StorageItem<T>): void {
         const key = item.key
         if (!this._timeouts[key]) this._timeouts[key] = {
             windowDuration: undefined,
@@ -48,7 +48,7 @@ export class SessionWindow<T> extends Window<T> {
             }, this._maxDuration)
         }
 
-        //On any new item rest window timeout. 
+        //On any new item reset window timeout. 
         //If timeout ends, consume all messages and reset all key timeouts
         if (this._timeouts[key].windowTimeout) clearTimeout(this._timeouts[key].windowTimeout)
         this._timeouts[key].windowTimeout = setTimeout(() => {
@@ -61,17 +61,23 @@ export class SessionWindow<T> extends Window<T> {
     }
 
     consume(observer: any): void {
-        const keys = this._storage.retrieveKeys()
-        keys.forEach(k => this.consumeByKey(observer, k))
+        const items = this._storage.retrieveAll()
+        this._storage.clearAll()
+
+        const itemsByKey: {[key: StorageKey]: StorageItem<T>[]} = {}
+        for (let i of items) {
+            if (!itemsByKey[i.key]) itemsByKey[i.key] = []
+            itemsByKey[i.key].push(i)
+        }
+
+        for (let items of Object.values(itemsByKey)) {
+            this.consumeItems(observer, items)
+        }
     }
 
-    private consumeByKey(observer: any, key: StorageKey) {
+    private consumeByKey(observer: Observer<T[]>, key: StorageKey) {
         const items = this._storage.retrieveByKey(key)
         this._storage.clearByKey(key)
-
-        for (let [action, itemsByTimestamps] of Object.entries(items)) {
-            const items = Object.values(itemsByTimestamps).flat()
-            observer[action](items)
-        }
+        this.consumeItems(observer, items)
     }
 }

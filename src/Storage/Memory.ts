@@ -1,7 +1,7 @@
-import { Storage, StorageKey, StorageStructureByKey, StorageStructureByAction, ItemToStore } from "../models/Storage"
+import { Storage, StorageKey, StorageItem } from "../models/Storage"
 
 export class Memory<T> extends Storage<T> {
-    private _memory: StorageStructureByKey<T> = {}
+    private _memory: StorageItem<T>[] = []
 
     constructor() {
         super()
@@ -11,47 +11,41 @@ export class Memory<T> extends Storage<T> {
         return Object.keys(this._memory)
     }
 
-    storeItem(item: ItemToStore<T>): void {
-        const {key, timestamp, value, action} = item
-        if (!this._memory[key]) this._memory[key] = {}
-        if (!this._memory[key][action]) this._memory[key][action] = {}
-        if (!this._memory[key][action][timestamp]) this._memory[key][action][timestamp] = []
-        this._memory[key][action][timestamp].push(value)
+    storeItem(item: StorageItem<T>): void {
+        this._memory.push(item)
     }
 
-    retrieveByKey(key: StorageKey): StorageStructureByAction<T> {
-        return this._memory[key]
+    retrieveByKey(key: StorageKey): StorageItem<T>[] {
+        return this._memory.filter(i => i.key == key)
     }
 
-    retrieveAll(): StorageStructureByKey<T> {
+    retrieveAll(): StorageItem<T>[] {
         return this._memory
     }
 
+    retrieveByTimestamp(filter: (timestap: number) => boolean): StorageItem<T>[] {
+        return this._memory.filter(i => filter(i.timestamp))
+    }
+
     clearByKey(key: StorageKey): void {
-        this._memory[key] = {}
+        this._memory = this._memory.filter(i => i.key != key)
     }
     
-    clearByTimeStamp(key: StorageKey): void {
-        
+    clearByTimeStamp(filter: (timestap: number) => boolean): void {
+        console.log("before delete:", this._memory.length)
+        this._memory = this._memory.filter(i => !filter(i.timestamp))
+        console.log("after delete:", this._memory.length)
     }
 
     clearAll(): void {
-        this._memory = {}
+        this._memory = []
     }
 
     isEmptyByKey(key: StorageKey): boolean {
-        if (!this._memory[key]) return true
-        else return false
+        return this._memory.filter(i => i.key == key).length == 0
     }
 
     isEmptyAll(): boolean {
-        const keys = Object.keys(this._memory)
-
-        const notEmpty = keys.filter(k => {
-            if (!this._memory[k]) return false 
-            else return JSON.stringify(this._memory[k]) == "{}"
-        })
-
-        return notEmpty.length == 0
+        return this._memory.length == 0
     }
 }
