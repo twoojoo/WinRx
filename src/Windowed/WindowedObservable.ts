@@ -19,16 +19,13 @@ export class WindowedObservable<T> extends Windowed<T>{
     }
 
     from(observable: Observable<T>): Observable<T[]> {
-
-        const newObservable = new Observable<T[]>(subscriber => {
+        return new Observable<T[]>(subscriber => {
             observable.subscribe(this._internalWindowedObserver.from({
                 next: (v) => subscriber.next((v as any)), 
                 error: (v) =>  subscriber.error((v as any)),
                 complete: () => subscriber.complete() 
             }))
         })
-
-        return newObservable
     }
 
 }
