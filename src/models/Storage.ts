@@ -1,10 +1,31 @@
 export type StorageKey = number | string
-export type StorageItemExta = { observerAction?: string }
+export type StorageAction = "next" | "error" | "complete"
+
+export type ItemToStore<T> = {
+    key: StorageKey,
+    action: StorageAction,
+    timestamp: number,
+    value: T
+}
+
+export type StorageStructureByTimestamp<T> = {
+    [timestamp: number]: T[]
+}
+
+export type StorageStructureByAction<T> = {
+    [action: string]: StorageStructureByTimestamp<T>
+}
+
+export type StorageStructureByKey<T> = {
+    [key: StorageKey]: StorageStructureByAction<T>
+}
 
 export abstract class Storage<T> {
-
-    abstract storeItem(key: StorageKey, item: { value: T, timestamp: number, extra: StorageItemExta }): void
-    abstract retrieveItems(key: StorageKey): { value: T; timestamp: number; extra: StorageItemExta }[]
-    abstract clear(key: StorageKey): void
-    abstract isEmpty(key: StorageKey): boolean
+    abstract storeItem(item: ItemToStore<T>): void
+    abstract retrieveByKey(key: StorageKey): StorageStructureByAction<T>
+    abstract retrieveAll(): StorageStructureByKey<T>
+    abstract clearByKey(key: StorageKey): void
+    abstract clearAll(key: StorageKey): void
+    abstract isEmptyByKey(key: StorageKey): boolean
+    abstract isEmptyAll(): boolean
 }

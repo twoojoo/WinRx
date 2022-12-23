@@ -3,75 +3,54 @@ import { StorageKey } from "../models/Storage"
 import { Window } from "../models/Window"
 import { Windowed } from "../models/Windowed"
 
-enum ObserverAction {
-    Next = "next",
-    Error = "error",
-    Complete = "complete"
-}
-
 export type WindowOptions<T> = {
-    window: Window<T>,
-    closeOnError?: boolean
+    window: Window<T>
 }
 
 export class WindowedObserver<T> extends Windowed<T> {
     private _window: Window<T>
-    private _closeOnError: boolean    
-    private _observer: any //should be observer but tsc give compile errors
     
-    constructor(options: WindowOptions<T>) {
+    constructor(window: Window<T>) {
         super()
-        this._window = options.window
-        this._closeOnError = options.closeOnError || false
+        this._window = window
     }
 
     /** Derive WindowedObserver from an RXJS Observable. */
     from(observer: Observer<T> | Subject<T>): Observer<T> | Subject<T> {
-        this._observer = Object.assign({}, observer)
+        const newObserver = Object.assign({}, observer)
+        this._window.open(newObserver as Observer<T[]> | Subject<T[]>)
         
         observer.next = (value: T) => {
             const key = this.getEventKey(value)
             const timestamp = this.getEventTimestamp(value)
-
-            if (this._window._storage.isEmpty(key)) this.openWindow(key)
             
-            this._window._storage.storeItem(key, {
+            this._window._storage.storeItem({
+                key,
                 timestamp,
                 value,
-                extra: {observerAction: ObserverAction.Next}
+                action: "next"
             })
         }
         
         observer.error = (value: T) => {
             const key = this.getEventKey(value)
             const timestamp = this.getEventTimestamp(value)
-
-            if (this._window._storage.isEmpty(key)) this.openWindow(key)
             
-            this._window._storage.storeItem(key, {
+            this._window._storage.storeItem({
+                key,
                 timestamp,
                 value,
-                extra: {observerAction: ObserverAction.Error}
+                action: "error"
             })
-            
-            if (this._closeOnError) {
-                const items = this._window.consume(key)
-                this._observer!.next (items.map(i => i.value))
-                // for (let item of items) this._observer![item.extra.observerAction!](item.value)
-            }
         }
         
         observer.complete = () => {
-            const items = this._window.consumeAll()
-            this._observer!.next (items.map(i => i.value))
-            // for (let item of items) this._observer![item.extra.observerAction!](item.value)
+            if (this._window._closeOnComplete) 
+                this._window.consume((newObserver as Observer<T[]> | Subject<T[]>))
+            newObserver.complete()
         }
         
         return observer
-    }
-
-    private openWindow(key: StorageKey) {
-        this._window.open(key, (items) => this._observer!.next (items.map(i => i.value)))
     }
 }
 

@@ -1,14 +1,25 @@
-import { Storage, StorageItemExta, StorageKey } from "./Storage";
+import { Observer } from "rxjs";
+import { Storage, StorageKey } from "./Storage";
 
+export type WindowOptions<T> = {
+    storage: Storage<T>,
+    closeOnError?: boolean,
+    closeOnComplete?: boolean
+}
 
 export abstract class Window<T> {
     readonly _storage: Storage<T>
+    readonly _closeOnError: boolean
+    readonly _closeOnComplete: boolean
 
-    constructor(storage: Storage<T>) {
-        this._storage = storage
+    constructor(options: WindowOptions<T>) {
+        this._storage = options.storage
+        this._closeOnError = options.closeOnError || false
+        this._closeOnComplete = options.closeOnComplete || false
     }
 
-    abstract open(key: StorageKey, callback: (items: ({ value: T, timestamp: number, extra: StorageItemExta })[]) => any): void
-    abstract consume(key: StorageKey): { value: T, timestamp: number, extra: StorageItemExta }[]
-    abstract consumeAll(): { value: T, timestamp: number, extra: StorageItemExta }[]
+    abstract open(observer: Observer<T[]>): void
+    abstract consume(observer: Observer<T[]>): void
 }
+
+//callback: (items: ({ value: T, timestamp: number, extra: StorageItemExta })[]

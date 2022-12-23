@@ -13,9 +13,9 @@ export type WindowOptions<T> = {
 export class WindowedObservable<T> extends Windowed<T>{
     private _internalWindowedObserver: WindowedObserver<T> 
 
-    constructor(options: WindowOptions<T>) {
+    constructor(window: Window<T>) {
         super()
-        this._internalWindowedObserver = new WindowedObserver<T>(options)
+        this._internalWindowedObserver = new WindowedObserver<T>(window)
     }
 
     from(observable: Observable<T>): Observable<T[]> {

@@ -1,2 +1,2 @@
+// export { TumblingWindow } from "./ExtraWindow"
 export { TumblingWindow } from "./TumblingWindow"
-export { } from "./SessionWindow"
