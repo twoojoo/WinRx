@@ -1,12 +1,19 @@
 {
-  "name": "wsr",
+  "name": "winrx",
   "version": "0.0.1",
   "description": "A Windowing System for RXJS",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "windowing",
+    "window",
+    "rxjs",
+    "tumbling",
+    "session",
+    "stream"
+  ],
+  "author": "twoojoo",
   "license": "ISC",
   "dependencies": {
     "delay": "^5.0.0",
