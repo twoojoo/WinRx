@@ -27,7 +27,7 @@ export class Memory<T> extends Storage<T> {
         this._memory[key] = {}
     }
 
-    clearAll(key: StorageKey): void {
+    clearAll(): void {
         this._memory = {}
     }
 

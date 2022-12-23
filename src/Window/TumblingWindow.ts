@@ -27,6 +27,7 @@ export class TumblingWindow<T> extends Window<T> {
     consume(observer: any): void {
         if (!this._interval) throw Error("missing interval")
         const storage = this._storage.retrieveAll()
+        this._storage.clearAll()
 
         for (let key in storage) {
             for (let action in storage[key]) {
