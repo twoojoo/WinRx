@@ -1,8 +1,6 @@
-import { Observable, Observer } from "rxjs"
+import { Observable } from "rxjs"
 import { Windowed } from "../models/Windowed"
 import { WindowedObserver } from "./WindowedObserver"
-import { EventEmitter } from "events"
-import Redis from "ioredis"
 import { Window } from "../models/Window"
 
 export type WindowOptions<T> = {
