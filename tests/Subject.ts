@@ -14,13 +14,13 @@ const observable = new Observable(subscriber => {
 
 const results: number[][] = []
 
-const windowedObserver = (new WindowedObserver({window: new TumblingWindow(new Storage.Memory(), 5000)})).from({
+const windowedSubject = (new WindowedObserver({window: new TumblingWindow(new Storage.Memory(), 5000)})).from({
     next: (x) => {console.log("next", x); results.push(x as number[])},
     error: (x) => console.log("error", x),
     complete: () => console.log("complete"),
 })
 
-observable.subscribe(windowedObserver);
+observable.subscribe(windowedSubject);
 
 (async function () {
     for (let i = 0; i < 10000; i++) {
