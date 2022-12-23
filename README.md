@@ -18,4 +18,4 @@
 
 ## Storage Types
 
-### Memoryx
+### Memory
