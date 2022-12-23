@@ -14,7 +14,7 @@ const observable = new Observable(subscriber => {
 
 const results: number[][] = []
 
-const windowedSubject = (new WindowedObserver({window: new TumblingWindow(new Storage.Memory(), 5000)})).from({
+const windowedSubject = (new WindowedObserver(new TumblingWindow({storage: new Storage.Memory(), size: 5000}))).from({
     next: (x) => {console.log("next", x); results.push(x as number[])},
     error: (x) => console.log("error", x),
     complete: () => console.log("complete"),
