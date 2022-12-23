@@ -1,4 +1,4 @@
-import { Observer } from "rxjs"
+import { Observer, Subject } from "rxjs"
 import { StorageKey } from "../models/Storage"
 import { Window } from "../models/Window"
 import { Windowed } from "../models/Windowed"
@@ -26,7 +26,7 @@ export class WindowedObserver<T> extends Windowed<T> {
     }
 
     /** Derive WindowedObserver from an RXJS Observable. */
-    from(observer: Observer<T>): Observer<T> {
+    from(observer: Observer<T> | Subject<T>): Observer<T> | Subject<T> {
         this._observer = Object.assign({}, observer)
         
         observer.next = (value: T) => {

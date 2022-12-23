@@ -14,7 +14,7 @@ const observable = new Observable<number>(subscriber => {
     })
 })
 
-const results = []
+const results: number[][] = []
 
 const windowedObservable = (new WindowedObservable<number>({
     window: new TumblingWindow(new Storage.Memory(), 5000)

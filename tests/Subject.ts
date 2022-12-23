@@ -6,9 +6,8 @@ import delay from "delay"
 
 const emitter = new EventEmitter()
 
-const observable = new Observable<number>(subscriber => {
+const observable = new Observable(subscriber => {
     emitter.on("test", (value) => {
-        // if (value == 300) subscriber.error(value)
         subscriber.next(value)
     })
 })
@@ -19,7 +18,7 @@ const windowedObserver = (new WindowedObserver({window: new TumblingWindow(new S
     next: (x) => {console.log("next", x); results.push(x as number[])},
     error: (x) => console.log("error", x),
     complete: () => console.log("complete"),
-});
+})
 
 observable.subscribe(windowedObserver);
 
