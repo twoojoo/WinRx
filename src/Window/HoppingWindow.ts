@@ -8,6 +8,8 @@ export class HoppingWindow<T> extends Window<T> {
     private _size: number
     private _hop: number
     private _overlapping: boolean
+
+    private _startingTimestamp: number
     private _lastWindowStartingTimestamp: number = 0
 
     constructor(options: HoppingWindowOptions<T>) {
@@ -20,6 +22,7 @@ export class HoppingWindow<T> extends Window<T> {
         this._size = options.size
         this._hop = options.hop
         this._overlapping = this._size > this._hop
+        this._startingTimestamp = Date.now()
     }
 
     onStart(observer: Observer<T[]>): void {
