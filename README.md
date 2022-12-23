@@ -2,7 +2,12 @@
 
 **WinRx** allows you to create RXJS *Observables*, *Observers* and *Subjects* that process streams of data in a windowed mode. Intstead of processing data from a streams one by one, you can process a window of array-collected data extracted from a stream according to the window type.
 ## Supported Window Types
-- **Tubling Window**
-- **Session Window**
+- [Tumbling Window](#tumbling-window)
+- [Session Window](#session-window)
+- [Hopping Window](#hopping-window)
 
 ## Tumbling Window
+
+## Session Window
+
+## Hopping Window
