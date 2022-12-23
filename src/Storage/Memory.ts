@@ -32,9 +32,7 @@ export class Memory<T> extends Storage<T> {
     }
     
     clearByTimeStamp(filter: (timestap: number) => boolean): void {
-        console.log("before delete:", this._memory.length)
         this._memory = this._memory.filter(i => !filter(i.timestamp))
-        console.log("after delete:", this._memory.length)
     }
 
     clearAll(): void {
