@@ -1,13 +1,21 @@
 # WinRx - A Windowing System for RXJS
 
 **WinRx** allows you to create RXJS *Observables*, *Observers* and *Subjects* that process streams of data in a windowed mode. Intstead of processing data from a streams one by one, you can process a window of array-collected data extracted from a stream according to the window type.
-## Supported Window Types
+### Supported Window Types
 - [Tumbling Window](#tumbling-window)
 - [Session Window](#session-window)
 - [Hopping Window](#hopping-window)
 
-## Tumbling Window
+### Supported Storage Types
+- [Memory](#memory)
 
-## Session Window
+## Window Types
+### Tumbling Window
 
-## Hopping Window
+### Session Window
+
+### Hopping Window
+
+## Storage Types
+
+### Memory
