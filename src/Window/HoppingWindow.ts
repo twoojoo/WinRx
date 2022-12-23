@@ -7,6 +7,7 @@ export type HoppingWindowOptions<T> = WindowOptions<T> & {size: number, hop: num
 export class HoppingWindow<T> extends Window<T> {
     private _size: number
     private _hop: number
+    private _overlapping: boolean
     private _lastWindowStartingTimestamp: number = 0
 
     constructor(options: HoppingWindowOptions<T>) {
@@ -18,12 +19,15 @@ export class HoppingWindow<T> extends Window<T> {
 
         this._size = options.size
         this._hop = options.hop
+        this._overlapping = this._size > this._hop
     }
 
     onStart(observer: Observer<T[]>): void {
+        this._lastWindowStartingTimestamp = Date.now()
         this.startWindow(observer)
 
         setInterval(() => {
+            this._lastWindowStartingTimestamp = Date.now()
             this.startWindow(observer)
         }, this._hop)
     }
@@ -39,11 +43,10 @@ export class HoppingWindow<T> extends Window<T> {
     }
 
     private startWindow(observer: any) {
-        this._lastWindowStartingTimestamp = Date.now()
-
         setTimeout(() => {
             const items = this._storage.retrieveAll()
-            this._storage.clearByTimeStamp(ts => ts < (() => this._lastWindowStartingTimestamp)())
+            if (this._overlapping) this._storage.clearByTimeStamp(ts => ts < (() => this._lastWindowStartingTimestamp)())
+            else this._storage.clearAll()
             this.consumeItems(observer, items)
         }, this._size)
     }
