@@ -1,5 +1,5 @@
 import { Observer } from "rxjs"
-import { StorageItem, StorageKey } from "../models/Storage"
+import { StorageItem } from "../models/Storage"
 import { Window, WindowOptions } from "../models/Window"
 
 export type HoppingWindowOptions<T> = WindowOptions<T> & {size: number, hop: number}
@@ -7,7 +7,7 @@ export type HoppingWindowOptions<T> = WindowOptions<T> & {size: number, hop: num
 export class HoppingWindow<T> extends Window<T> {
     private _size: number
     private _hop: number
-    private _lastHopTimestamp: number = 0
+    private _lastWindowStartingTimestamp: number = 0
 
     constructor(options: HoppingWindowOptions<T>) {
         super({
@@ -21,10 +21,10 @@ export class HoppingWindow<T> extends Window<T> {
     }
 
     onStart(observer: Observer<T[]>): void {
-        this._lastHopTimestamp = Date.now()
+        this.startWindow(observer)
+
         setInterval(() => {
             this.startWindow(observer)
-            this._lastHopTimestamp = Date.now()
         }, this._hop)
     }
 
@@ -39,10 +39,11 @@ export class HoppingWindow<T> extends Window<T> {
     }
 
     private startWindow(observer: any) {
+        this._lastWindowStartingTimestamp = Date.now()
+
         setTimeout(() => {
             const items = this._storage.retrieveAll()
-            console.log(this._lastHopTimestamp)
-            this._storage.clearByTimeStamp((ts) => ts < this._lastHopTimestamp)
+            this._storage.clearByTimeStamp(ts => ts < (() => this._lastWindowStartingTimestamp)())
             this.consumeItems(observer, items)
         }, this._size)
     }
