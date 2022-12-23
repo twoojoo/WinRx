@@ -28,4 +28,5 @@ export abstract class Storage<T> {
     abstract clearAll(): void
     abstract isEmptyByKey(key: StorageKey): boolean
     abstract isEmptyAll(): boolean
+    abstract retrieveKeys(): StorageKey[]
 }

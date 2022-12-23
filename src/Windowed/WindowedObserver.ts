@@ -16,14 +16,14 @@ export class WindowedObserver<T> extends Windowed<T> {
 
     /** Derive WindowedObserver from an RXJS Observable. */
     from(observer: Observer<T> | Subject<T>): Observer<T> | Subject<T> {
-        const newObserver = Object.assign({}, observer)
-        this._window.open(newObserver as Observer<T[]> | Subject<T[]>)
+        const newObserver = Object.assign({}, observer) as Observer<T[]> | Subject<T[]>
+        this._window.onStart(newObserver)
         
         observer.next = (value: T) => {
             const key = this.getEventKey(value)
             const timestamp = this.getEventTimestamp(value)
             
-            this._window._storage.storeItem({
+            this._window.onItem(newObserver, {
                 key,
                 timestamp,
                 value,
@@ -35,7 +35,7 @@ export class WindowedObserver<T> extends Windowed<T> {
             const key = this.getEventKey(value)
             const timestamp = this.getEventTimestamp(value)
             
-            this._window._storage.storeItem({
+            this._window.onItem(newObserver, {
                 key,
                 timestamp,
                 value,
@@ -45,7 +45,7 @@ export class WindowedObserver<T> extends Windowed<T> {
         
         observer.complete = () => {
             if (this._window._closeOnComplete) 
-                this._window.consume((newObserver as Observer<T[]> | Subject<T[]>))
+                this._window.consume(newObserver)
             newObserver.complete()
         }
         

@@ -7,6 +7,10 @@ export class Memory<T> extends Storage<T> {
         super()
     }
 
+    retrieveKeys(): StorageKey[] {
+        return Object.keys(this._memory)
+    }
+
     storeItem(item: ItemToStore<T>): void {
         const {key, timestamp, value, action} = item
         if (!this._memory[key]) this._memory[key] = {}

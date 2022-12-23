@@ -1,4 +1,5 @@
 import { Observer } from "rxjs"
+import { ItemToStore } from "../models/Storage"
 import { Window, WindowOptions } from "../models/Window"
 
 export type TumblingWindowOptions<T> = WindowOptions<T> & {size: number}
@@ -18,7 +19,7 @@ export class TumblingWindow<T> extends Window<T> {
         this._size = options.size
     }
 
-    open(observer:  Observer<T[]>): void {
+    onStart(observer:  Observer<T[]>): void {
         this._interval = setInterval(() => {
             this.consume(observer)
         }, this._size)
@@ -35,5 +36,9 @@ export class TumblingWindow<T> extends Window<T> {
                 observer[action](items)
             }
         }
+    }
+
+    onItem(observer: Observer<T[]>, item: ItemToStore<T>): void {
+        this._storage.storeItem(item)
     }
 }

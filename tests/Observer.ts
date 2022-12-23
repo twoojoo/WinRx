@@ -31,7 +31,7 @@ const windowedObserver = (new WindowedObserver(new TumblingWindow({
 observable.subscribe(windowedObserver);
 
 (async function () {
-    for (let i = 0; i < 10000; i++) {
+    for (let i = 0; i < 3000; i++) {
         await delay(10)
         emitter.emit("next", i)
     }

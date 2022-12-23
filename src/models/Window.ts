@@ -1,5 +1,5 @@
 import { Observer } from "rxjs";
-import { Storage, StorageKey } from "./Storage";
+import { ItemToStore, Storage, StorageKey } from "./Storage";
 
 export type WindowOptions<T> = {
     storage: Storage<T>,
@@ -18,7 +18,8 @@ export abstract class Window<T> {
         this._closeOnComplete = options.closeOnComplete || false
     }
 
-    abstract open(observer: Observer<T[]>): void
+    abstract onStart(observer: Observer<T[]>): void
+    abstract onItem(observer: Observer<T[]>, item: ItemToStore<T>): void
     abstract consume(observer: Observer<T[]>): void
 }
 
