@@ -13,9 +13,10 @@
 
 ## Window Types
 ### Tumbling Window
+Data windowing based on fixed-sized, contiguous and non-overlapping windows.
 
 ### Counting Window
-A very basic windowing that accumulates elements up to a fized size. When the size is reached it releases them.
+A very basic windowing system that accumulates elements up to a fized size. When the size is reached all stored elements are released and the storage gets cleaned. Specific paramether is the *size* of the window, namely the number of events. Uses the same counter for both errors and next events, but releases them in separated chunks, thus the output, whether it is an error or next output, can contain less events thant the window size, but never more.
 
 ### Session Window
 
