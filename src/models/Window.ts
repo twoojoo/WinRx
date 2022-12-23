@@ -6,17 +6,20 @@ export type WindowOptions<T> = {
     storage?: Storage<T>,
     closeOnError?: boolean,
     closeOnComplete?: boolean
+    persistData?: boolean
 }
 
 export abstract class Window<T> {
     readonly _storage: Storage<T>
     readonly _closeOnError: boolean
     readonly _closeOnComplete: boolean
+    readonly _persistData: boolean
 
     constructor(options: WindowOptions<T>) {
         this._storage = options.storage || new Memory()
         this._closeOnError = options.closeOnError || false
         this._closeOnComplete = options.closeOnComplete || false
+        this._persistData = options.persistData || false
     }
 
     abstract onStart(observer: Observer<T[]>): void
