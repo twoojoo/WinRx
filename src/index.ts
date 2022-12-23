@@ -3,5 +3,5 @@ export { WindowedObservable } from "./Windowed/WindowedObservable"
 
 export * as Storage from "./Storage"
 
-export { TumblingWindow } from "./Window"
+export { TumblingWindow, SessionWindow } from "./Window"
 

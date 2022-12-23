@@ -8,7 +8,12 @@ export class SessionWindow<T> extends Window<T> {
     private _maxDuration: number
     private _timeoutSize: number
 
-    private _timeouts: { [key: StorageKey]: NodeJS.Timeout }
+    private _timeouts: {
+        [key: StorageKey]: {
+            windowDuration: NodeJS.Timeout | undefined,
+            windowTimeout: NodeJS.Timeout | undefined
+        }
+    }
 
     constructor(options: SessionWindowOptions<T>) {
         super({
@@ -27,9 +32,30 @@ export class SessionWindow<T> extends Window<T> {
     }
 
     onItem(observer: Observer<T[]>, item: ItemToStore<T>): void {
-        this._timeouts[item.key] = setTimeout(() => {
-            this.consumeByKey(observer, item.key)
-        }, this._maxDuration)
+        const key = item.key
+        if (!this._timeouts[key]) this._timeouts[key] = {
+            windowDuration: undefined,
+            windowTimeout: undefined
+        }
+
+        //On new item, if duration timeout doesn't exist, start one
+        //After max window duration consumes all saved items and reset alk key timeouts
+        if (!this._timeouts[key].windowDuration) {
+            this._timeouts[key].windowDuration = setTimeout(() => {
+                if (this._timeouts[key].windowTimeout) clearTimeout(this._timeouts[key].windowTimeout)
+                this.consumeByKey(observer, key)
+                delete this._timeouts[key]
+            }, this._maxDuration)
+        }
+
+        //On any new item rest window timeout. 
+        //If timeout ends, consume all messages and reset all key timeouts
+        if (this._timeouts[key].windowTimeout) clearTimeout(this._timeouts[key].windowTimeout)
+        this._timeouts[key].windowTimeout = setTimeout(() => {
+            if (this._timeouts[key].windowDuration) clearTimeout(this._timeouts[key].windowDuration)
+            this.consumeByKey(observer, key)
+            delete this._timeouts[key]
+        }, this._timeoutSize)
 
         this._storage.storeItem(item)
     }
