@@ -19,8 +19,8 @@ const observable = new Observable<number>(subscriber => {
 const results: number[][] = []
 
 const windowedObserver = (new WindowedObserver(new SnapshotWindow({
-    timestamp: Date.now() + 5000,
-    tolerance: 22,
+    offset: 5000,
+    tolerance: 10,
     closeOnComplete: true
 }))).from({
     next: (x) => {console.log("next", x); results.push(x as number[])},

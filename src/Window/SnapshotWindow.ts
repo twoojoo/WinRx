@@ -2,14 +2,15 @@ import { Observer } from "rxjs"
 import { StorageItem } from "../models/Storage"
 import { Window, WindowOptions } from "../models/Window"
 
-export type SnapshotWindowOptions<T> = WindowOptions<T> & {timestamp: number, tolerance: number}
+export type SnapshotWindowOptions<T> = WindowOptions<T> & { offset: number, tolerance: number }
 
 export class SnapshotWindow<T> extends Window<T> {
+    private _tolerance: number
+    private _offset: number
+
     private _minThreshold: number
     private _maxThreshold: number
-    private _timestamp: number 
-    private _tolerance: number
-
+    
     constructor(options: SnapshotWindowOptions<T>) {
         super({
             storage: options.storage,
@@ -17,18 +18,16 @@ export class SnapshotWindow<T> extends Window<T> {
             closeOnError: options.closeOnError
         })
 
-        const {timestamp, tolerance} = options
+        this._offset = options.offset
+        this._tolerance = options.tolerance
 
-        this._minThreshold = timestamp - tolerance
-        this._maxThreshold = timestamp + tolerance
-        this._timestamp = timestamp
-        this._tolerance = tolerance
+        const timestamp = Date.now() + this._offset
+        this._minThreshold = timestamp - this._tolerance
+        this._maxThreshold = timestamp + this._tolerance
     }
 
-    onStart(observer:  Observer<T[]>): void {
-        const delay = this._timestamp - Date.now() 
-        if (delay < 1) throw Error("timestamp must be in the future")
-        setTimeout(() => this.release(observer), delay + this._tolerance)
+    onStart(observer: Observer<T[]>): void {
+        setTimeout(() => this.release(observer), this._offset + this._tolerance)
     }
 
     release(observer: any): void {
