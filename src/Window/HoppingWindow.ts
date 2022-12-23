@@ -32,10 +32,10 @@ export class HoppingWindow<T> extends Window<T> {
         }, this._hop)
     }
 
-    consume(observer: any): void {
+    release(observer: any): void {
         const items = this._storage.retrieveAll()
         this._storage.clearAll()
-        this.consumeItems(observer, items)
+        this.releaseItems(observer, items)
     }
 
     onItem(observer: Observer<T[]>, item: StorageItem<T>): void {
@@ -47,7 +47,7 @@ export class HoppingWindow<T> extends Window<T> {
             const items = this._storage.retrieveAll()
             if (this._overlapping) this._storage.clearByTimeStamp(ts => ts < (() => this._lastWindowStartingTimestamp)())
             else this._storage.clearAll()
-            this.consumeItems(observer, items)
+            this.releaseItems(observer, items)
         }, this._size)
     }
 }

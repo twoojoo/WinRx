@@ -14,6 +14,7 @@
 ### Tumbling Window
 
 ### Counting Window
+A very basic windowing that accumulates elements up to a fized size. When the size is reached it releases them.
 
 ### Session Window
 

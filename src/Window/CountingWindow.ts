@@ -22,10 +22,10 @@ export class CountingWindow<T> extends Window<T> {
         return
     }
 
-    consume(observer: any): void {
+    release(observer: any): void {
         const items = this._storage.retrieveAll()
         this._storage.clearAll()
-        this.consumeItems(observer, items)
+        this.releaseItems(observer, items)
     }
 
     onItem(observer: Observer<T[]>, item: StorageItem<T>): void {
@@ -33,7 +33,7 @@ export class CountingWindow<T> extends Window<T> {
         this._counter ++
     
         if (this._counter >= this._size) {
-            this.consume(observer)
+            this.release(observer)
             this._counter = 0
         }
     }

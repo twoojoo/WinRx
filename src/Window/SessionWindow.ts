@@ -43,7 +43,7 @@ export class SessionWindow<T> extends Window<T> {
         if (!this._timeouts[key].windowDuration) {
             this._timeouts[key].windowDuration = setTimeout(() => {
                 if (this._timeouts[key].windowTimeout) clearTimeout(this._timeouts[key].windowTimeout)
-                this.consumeByKey(observer, key)
+                this.releaseByKey(observer, key)
                 delete this._timeouts[key]
             }, this._maxDuration)
         }
@@ -53,14 +53,14 @@ export class SessionWindow<T> extends Window<T> {
         if (this._timeouts[key].windowTimeout) clearTimeout(this._timeouts[key].windowTimeout)
         this._timeouts[key].windowTimeout = setTimeout(() => {
             if (this._timeouts[key].windowDuration) clearTimeout(this._timeouts[key].windowDuration)
-            this.consumeByKey(observer, key)
+            this.releaseByKey(observer, key)
             delete this._timeouts[key]
         }, this._timeoutSize)
 
         this._storage.storeItem(item)
     }
 
-    consume(observer: any): void {
+    release(observer: any): void {
         const items = this._storage.retrieveAll()
         this._storage.clearAll()
 
@@ -71,13 +71,13 @@ export class SessionWindow<T> extends Window<T> {
         }
 
         for (let items of Object.values(itemsByKey)) {
-            this.consumeItems(observer, items)
+            this.releaseItems(observer, items)
         }
     }
 
-    private consumeByKey(observer: Observer<T[]>, key: StorageKey) {
+    private releaseByKey(observer: Observer<T[]>, key: StorageKey) {
         const items = this._storage.retrieveByKey(key)
         this._storage.clearByKey(key)
-        this.consumeItems(observer, items)
+        this.releaseItems(observer, items)
     }
 }

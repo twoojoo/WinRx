@@ -21,15 +21,15 @@ export class TumblingWindow<T> extends Window<T> {
 
     onStart(observer:  Observer<T[]>): void {
         this._interval = setInterval(() => {
-            this.consume(observer)
+            this.release(observer)
         }, this._size)
     }
 
-    consume(observer: any): void {
+    release(observer: any): void {
         if (!this._interval) throw Error("missing interval")
         const items = this._storage.retrieveAll()
         this._storage.clearAll()
-        this.consumeItems(observer, items)
+        this.releaseItems(observer, items)
     }
 
     onItem(observer: Observer<T[]>, item: StorageItem<T>): void {

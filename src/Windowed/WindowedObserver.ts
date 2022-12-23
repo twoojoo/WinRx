@@ -45,7 +45,7 @@ export class WindowedObserver<T> extends Windowed<T> {
         
         observer.complete = () => {
             if (this._window._closeOnComplete) 
-                this._window.consume(newObserver)
+                this._window.release(newObserver)
             newObserver.complete()
         }
         

@@ -24,9 +24,9 @@ export abstract class Window<T> {
 
     abstract onStart(observer: Observer<T[]>): void
     abstract onItem(observer: Observer<T[]>, item: StorageItem<T>): void
-    abstract consume(observer: Observer<T[]>): void
+    abstract release(observer: Observer<T[]>): void
 
-    protected consumeItems(observer: Observer<T[]>, items: StorageItem<T>[]) {
+    protected releaseItems(observer: Observer<T[]>, items: StorageItem<T>[]) {
         const itemsByKey: {[key: StorageKey]: StorageItem<T>[]} = {}
         for (let i of items) {
             if (!itemsByKey[i.key]) itemsByKey[i.key] = []
