@@ -6,6 +6,7 @@
 - [Counting Window](#counting-window)
 - [Session Window](#session-window)
 - [Hopping Window](#hopping-window)
+- [Snapshot Window](#snapshot-window)
 
 ### Supported Storage Types
 - [Memory](#memory)
@@ -19,6 +20,8 @@ A very basic windowing that accumulates elements up to a fized size. When the si
 ### Session Window
 
 ### Hopping Window
+
+### Snapshot Window
 
 ## Storage Types
 
