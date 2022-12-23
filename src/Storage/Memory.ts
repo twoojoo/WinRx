@@ -30,6 +30,10 @@ export class Memory<T> extends Storage<T> {
     clearByKey(key: StorageKey): void {
         this._memory[key] = {}
     }
+    
+    clearByTimeStamp(key: StorageKey): void {
+        
+    }
 
     clearAll(): void {
         this._memory = {}

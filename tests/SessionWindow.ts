@@ -19,7 +19,6 @@ const observable = new Observable<number>(subscriber => {
 const results: number[][] = []
 
 const windowedObserver = (new WindowedObserver(new SessionWindow({
-    storage: new Storage.Memory(),
     maxDuration: 5000,
     timeoutSize: 2000
 }))).from({

@@ -1,8 +1,9 @@
 import { Observer } from "rxjs";
-import { ItemToStore, Storage, StorageKey } from "./Storage";
+import { Memory } from "../Storage";
+import { ItemToStore, Storage } from "./Storage";
 
 export type WindowOptions<T> = {
-    storage: Storage<T>,
+    storage?: Storage<T>,
     closeOnError?: boolean,
     closeOnComplete?: boolean
 }
@@ -13,7 +14,7 @@ export abstract class Window<T> {
     readonly _closeOnComplete: boolean
 
     constructor(options: WindowOptions<T>) {
-        this._storage = options.storage
+        this._storage = options.storage || new Memory()
         this._closeOnError = options.closeOnError || false
         this._closeOnComplete = options.closeOnComplete || false
     }

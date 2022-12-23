@@ -25,6 +25,7 @@ export abstract class Storage<T> {
     abstract retrieveByKey(key: StorageKey): StorageStructureByAction<T>
     abstract retrieveAll(): StorageStructureByKey<T>
     abstract clearByKey(key: StorageKey): void
+    abstract clearByTimeStamp(key: StorageKey): void
     abstract clearAll(): void
     abstract isEmptyByKey(key: StorageKey): boolean
     abstract isEmptyAll(): boolean
