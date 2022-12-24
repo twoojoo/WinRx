@@ -27,5 +27,3 @@ export class WindowedObservable<T> extends Windowed<T>{
     }
 
 }
-
-const obs = (new Observable())
