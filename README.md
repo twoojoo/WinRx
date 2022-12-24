@@ -10,6 +10,7 @@
 
 ### Supported Storage Types
 - [Memory](#memory)
+- [Redis](#redis)
 
 ## Window Types
 ### Tumbling Window
@@ -27,3 +28,5 @@ A very basic windowing system that accumulates elements up to a fized size. When
 ## Storage Types
 
 ### Memory
+
+### Redis
