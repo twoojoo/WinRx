@@ -21,14 +21,14 @@ export type StorageItem<T> = {
 // }
 
 export abstract class Storage<T> {
-    abstract storeItem(item: StorageItem<T>): void
-    abstract retrieveByTimestamp(filter: (timestap: number) => boolean): StorageItem<T>[]
-    abstract retrieveByKey(key: StorageKey): StorageItem<T>[]
-    abstract retrieveAll(): StorageItem<T>[]
-    abstract clearByKey(key: StorageKey): void
-    abstract clearByTimeStamp(filter: (timestap: number) => boolean): void
-    abstract clearAll(): void
-    abstract isEmptyByKey(key: StorageKey): boolean
-    abstract isEmptyAll(): boolean
-    abstract retrieveKeys(): StorageKey[]
+    abstract storeItem(item: StorageItem<T>): Promise<void>
+    abstract retrieveByTimestamp(filter: (timestap: number) => boolean): Promise<StorageItem<T>[]>
+    abstract retrieveByKey(key: StorageKey): Promise<StorageItem<T>[]>
+    abstract retrieveAll(): Promise<StorageItem<T>[]>
+    abstract clearByKey(key: StorageKey): Promise<void>
+    abstract clearByTimeStamp(filter: (timestap: number) => boolean): Promise<void>
+    abstract clearAll(): Promise<void>
+    abstract isEmptyByKey(key: StorageKey): Promise<boolean>
+    abstract isEmptyAll(): Promise<boolean>
+    abstract retrieveKeys(): Promise<StorageKey[]>
 }

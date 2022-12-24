@@ -18,18 +18,18 @@ export class CountingWindow<T> extends Window<T> {
         this._size = options.size
     }
 
-    onStart(observer:  Observer<T[]>): void {
+    async onStart(observer:  Observer<T[]>): Promise<void> {
         return
     }
 
-    release(observer: any): void {
-        const items = this._storage.retrieveAll()
-        this._storage.clearAll()
+    async release(observer: any): Promise<void> {
+        const items = await this._storage.retrieveAll()
+        await this._storage.clearAll()
         this.releaseItems(observer, items)
     }
 
-    onItem(observer: Observer<T[]>, item: StorageItem<T>): void {
-        this._storage.storeItem(item)
+    async onItem(observer: Observer<T[]>, item: StorageItem<T>): Promise<void> {
+        await this._storage.storeItem(item)
         this._counter ++
     
         if (this._counter >= this._size) {

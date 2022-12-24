@@ -7,43 +7,43 @@ export class Memory<T> extends Storage<T> {
         super()
     }
 
-    retrieveKeys(): StorageKey[] {
+    async retrieveKeys(): Promise<StorageKey[]> {
         return Object.keys(this._memory)
     }
 
-    storeItem(item: StorageItem<T>): void {
+    async storeItem(item: StorageItem<T>): Promise<void> {
         this._memory.push(item)
     }
 
-    retrieveByKey(key: StorageKey): StorageItem<T>[] {
+    async retrieveByKey(key: StorageKey): Promise<StorageItem<T>[]> {
         return this._memory.filter(i => i.key == key)
     }
 
-    retrieveAll(): StorageItem<T>[] {
+    async retrieveAll(): Promise<StorageItem<T>[]> {
         return this._memory
     }
 
-    retrieveByTimestamp(filter: (timestap: number) => boolean): StorageItem<T>[] {
+    async retrieveByTimestamp(filter: (timestap: number) => boolean): Promise<StorageItem<T>[]> {
         return this._memory.filter(i => filter(i.timestamp))
     }
 
-    clearByKey(key: StorageKey): void {
+    async clearByKey(key: StorageKey): Promise<void> {
         this._memory = this._memory.filter(i => i.key != key)
     }
     
-    clearByTimeStamp(filter: (timestap: number) => boolean): void {
+    async clearByTimeStamp(filter: (timestap: number) => boolean): Promise<void> {
         this._memory = this._memory.filter(i => !filter(i.timestamp))
     }
 
-    clearAll(): void {
+    async clearAll(): Promise<void> {
         this._memory = []
     }
 
-    isEmptyByKey(key: StorageKey): boolean {
+    async isEmptyByKey(key: StorageKey): Promise<boolean> {
         return this._memory.filter(i => i.key == key).length == 0
     }
 
-    isEmptyAll(): boolean {
+    async isEmptyAll(): Promise<boolean> {
         return this._memory.length == 0
     }
 }

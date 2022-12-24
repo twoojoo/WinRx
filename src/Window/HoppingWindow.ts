@@ -1,6 +1,7 @@
 import { Observer } from "rxjs"
 import { StorageItem } from "../models/Storage"
 import { Window, WindowOptions } from "../models/Window"
+import delay from "delay"
 
 export type HoppingWindowOptions<T> = WindowOptions<T> & {size: number, hop: number}
 
@@ -25,7 +26,7 @@ export class HoppingWindow<T> extends Window<T> {
         this._startingTimestamp = Date.now()
     }
 
-    onStart(observer: Observer<T[]>): void {
+    async onStart(observer: Observer<T[]>): Promise<void> {
         this._lastWindowStartingTimestamp = Date.now()
         this.startWindow(observer)
 
@@ -35,22 +36,23 @@ export class HoppingWindow<T> extends Window<T> {
         }, this._hop)
     }
 
-    release(observer: any): void {
-        const items = this._storage.retrieveAll()
-        this._storage.clearAll()
+    async release(observer: any): Promise<void> {
+        const items = await this._storage.retrieveAll()
+        await this._storage.clearAll()
         this.releaseItems(observer, items)
     }
 
-    onItem(observer: Observer<T[]>, item: StorageItem<T>): void {
-        this._storage.storeItem(item)
+    async onItem(observer: Observer<T[]>, item: StorageItem<T>): Promise<void> {
+        await this._storage.storeItem(item)
     }
 
-    private startWindow(observer: any) {
-        setTimeout(() => {
-            const items = this._storage.retrieveAll()
-            if (this._overlapping) this._storage.clearByTimeStamp(ts => ts < (() => this._lastWindowStartingTimestamp)())
-            else this._storage.clearAll()
+    private async startWindow(observer: any) {
+        (async () => {
+            await delay(this._size)
+            const items = await this._storage.retrieveAll()
+            if (this._overlapping) await this._storage.clearByTimeStamp(ts => ts < (() => this._lastWindowStartingTimestamp)())
+            else await this._storage.clearAll()
             this.releaseItems(observer, items)
-        }, this._size)
+        })()
     }
 }

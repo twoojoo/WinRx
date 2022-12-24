@@ -27,11 +27,11 @@ export class SessionWindow<T> extends Window<T> {
             this._timeoutSize = options.timeoutSize
     }
 
-    onStart(observer: Observer<T[]>): void {
+    async onStart(observer: Observer<T[]>): Promise<void> {
         return
     }
 
-    onItem(observer: Observer<T[]>, item: StorageItem<T>): void {
+    async onItem(observer: Observer<T[]>, item: StorageItem<T>): Promise<void> {
         const key = item.key
         if (!this._timeouts[key]) this._timeouts[key] = {
             windowDuration: undefined,
@@ -57,12 +57,12 @@ export class SessionWindow<T> extends Window<T> {
             delete this._timeouts[key]
         }, this._timeoutSize)
 
-        this._storage.storeItem(item)
+        await this._storage.storeItem(item)
     }
 
-    release(observer: any): void {
-        const items = this._storage.retrieveAll()
-        this._storage.clearAll()
+    async release(observer: any): Promise<void> {
+        const items = await this._storage.retrieveAll()
+        await this._storage.clearAll()
 
         const itemsByKey: {[key: StorageKey]: StorageItem<T>[]} = {}
         for (let i of items) {
@@ -75,9 +75,9 @@ export class SessionWindow<T> extends Window<T> {
         }
     }
 
-    private releaseByKey(observer: Observer<T[]>, key: StorageKey) {
-        const items = this._storage.retrieveByKey(key)
-        this._storage.clearByKey(key)
+    private async releaseByKey(observer: Observer<T[]>, key: StorageKey) {
+        const items = await this._storage.retrieveByKey(key)
+        await this._storage.clearByKey(key)
         this.releaseItems(observer, items)
     }
 }

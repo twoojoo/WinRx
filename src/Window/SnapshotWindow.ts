@@ -26,17 +26,17 @@ export class SnapshotWindow<T> extends Window<T> {
         this._maxThreshold = timestamp + this._tolerance
     }
 
-    onStart(observer: Observer<T[]>): void {
+    async onStart(observer: Observer<T[]>): Promise<void> {
         setTimeout(() => this.release(observer), this._offset + this._tolerance)
     }
 
-    release(observer: any): void {
-        const items = this._storage.retrieveAll()
-        this._storage.clearAll()
+    async release(observer: any): Promise<void> {
+        const items = await this._storage.retrieveAll()
+        await this._storage.clearAll()
         this.releaseItems(observer, items)
     }
 
-    onItem(observer: Observer<T[]>, item: StorageItem<T>): void {
+    async onItem(observer: Observer<T[]>, item: StorageItem<T>): Promise<void> {
         if (item.timestamp > this._minThreshold && item.timestamp < this._maxThreshold) {
             this._storage.storeItem(item)
         }

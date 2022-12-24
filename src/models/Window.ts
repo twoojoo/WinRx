@@ -22,11 +22,11 @@ export abstract class Window<T> {
         // this._persistData = options.persistData || false
     }
 
-    abstract onStart(observer: Observer<T[]>): void
-    abstract onItem(observer: Observer<T[]>, item: StorageItem<T>): void
-    abstract release(observer: Observer<T[]>): void
+    abstract onStart(observer: Observer<T[]>): Promise<void>
+    abstract onItem(observer: Observer<T[]>, item: StorageItem<T>): Promise<void>
+    abstract release(observer: Observer<T[]>): Promise<void>
 
-    protected releaseItems(observer: Observer<T[]>, items: StorageItem<T>[]) {
+    protected releaseItems(observer: Observer<T[]>, items: StorageItem<T>[]): void {
         const itemsByKey: {[key: StorageKey]: StorageItem<T>[]} = {}
         for (let i of items) {
             if (!itemsByKey[i.key]) itemsByKey[i.key] = []
