@@ -1,32 +1,32 @@
 import * as win from "./Window"
 import { Observable, OperatorFunction, Subscriber } from "rxjs"
-import { Window } from "./models/Window"
+import { Window, WindowOptions } from "./models/Window"
 
 export * as Storage from "./Storage"
 
 type WindowOperator<T> = OperatorFunction<T, T[]>
 
 export const sessionWindow = <T>(opts: win.SessionWindowOptions<T>): WindowOperator<T> => {
-    return (source: Observable<T>) => buildOperator(source, new win.SessionWindow(opts))
+    return (source: Observable<T>) => buildOperator(source, opts, new win.SessionWindow(opts))
 }
 
 export const tumblingWindow = <T>(opts: win.TumblingWindowOptions<T>): WindowOperator<T> => {
-    return (source: Observable<T>) => buildOperator(source, new win.TumblingWindow(opts))
+    return (source: Observable<T>) => buildOperator(source, opts, new win.TumblingWindow(opts))
 }
 
 export const countingWindow = <T>(opts: win.CountingWindowOptions<T>): WindowOperator<T> => {
-    return (source: Observable<T>) => buildOperator(source, new win.CountingWindow(opts))
+    return (source: Observable<T>) => buildOperator(source, opts, new win.CountingWindow(opts))
 }
 
 export const hoppingWindow = <T>(opts: win.HoppingWindowOptions<T>): WindowOperator<T> => {
-    return (source: Observable<T>) => buildOperator(source, new win.HoppingWindow(opts))
+    return (source: Observable<T>) => buildOperator(source, opts, new win.HoppingWindow(opts))
 }
 
 export const snapshotWindow = <T>(opts: win.SnapshotWindowOptions<T>): WindowOperator<T> => {
-    return (source: Observable<T>) => buildOperator(source, new win.SnapshotWindow(opts))
+    return (source: Observable<T>) => buildOperator(source, opts, new win.SnapshotWindow(opts))
 }
 
-const buildOperator = <T>(source:  Observable<T>, window: Window<T>): Observable<T[]> => new Observable<T[]>(sub => {
+const buildOperator = <T>(source: Observable<T>, opts: WindowOptions<T>, window: Window<T>): Observable<T[]> => new Observable<T[]>(sub => {
     window.onStart(sub as Subscriber<T[]>)
 
     source.subscribe({
@@ -39,12 +39,14 @@ const buildOperator = <T>(source:  Observable<T>, window: Window<T>): Observable
         },
 
         async error(v: T) {
-            await window.release(sub as Subscriber<T[]>)
+            if (opts.closeOnError) await window.release(sub as Subscriber<T[]>)
+            await window._storage.clearAll()
             sub.error([v])
         },
 
         async complete() {
-            await window.release(sub as Subscriber<T[]>)
+            if (opts.closeOnComplete) await window.release(sub as Subscriber<T[]>)
+            await window._storage.clearAll()
             sub.complete()
         }
     })
