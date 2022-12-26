@@ -25,6 +25,8 @@ export const snapshotWindow = <T>(opts: win.SnapshotWindowOptions<T>) => {
 }
 
 const buildOperator = <T>(source:  Observable<T>, window: Window<T>) => new Observable(sub => {
+    window.onStart(sub)
+    
     source.subscribe({
         async next(v: T) {
             await window.onItem(sub, {
