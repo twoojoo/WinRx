@@ -1,4 +1,4 @@
-import { Observer } from "rxjs"
+import { Observer, Subscriber } from "rxjs"
 import { StorageItem, StorageKey } from "../models/Storage"
 import { Window, WindowOptions } from "../models/Window"
 
@@ -31,7 +31,7 @@ export class SessionWindow<T> extends Window<T> {
         return
     }
 
-    async onItem(observer: Observer<T[]>, item: StorageItem<T>): Promise<void> {
+    async onItem(subscriber: Subscriber<T[]>, item: StorageItem<T>): Promise<void> {
         const key = item.key
         if (!this._timeouts[key]) this._timeouts[key] = {
             windowDuration: undefined,
@@ -43,7 +43,7 @@ export class SessionWindow<T> extends Window<T> {
         if (!this._timeouts[key].windowDuration) {
             this._timeouts[key].windowDuration = setTimeout(() => {
                 if (this._timeouts[key].windowTimeout) clearTimeout(this._timeouts[key].windowTimeout)
-                this.releaseByKey(observer, key)
+                this.releaseByKey(subscriber, key)
                 delete this._timeouts[key]
             }, this._maxDuration)
         }
@@ -53,7 +53,7 @@ export class SessionWindow<T> extends Window<T> {
         if (this._timeouts[key].windowTimeout) clearTimeout(this._timeouts[key].windowTimeout)
         this._timeouts[key].windowTimeout = setTimeout(() => {
             if (this._timeouts[key].windowDuration) clearTimeout(this._timeouts[key].windowDuration)
-            this.releaseByKey(observer, key)
+            this.releaseByKey(subscriber, key)
             delete this._timeouts[key]
         }, this._timeoutSize)
 
@@ -75,9 +75,9 @@ export class SessionWindow<T> extends Window<T> {
         }
     }
 
-    private async releaseByKey(observer: Observer<T[]>, key: StorageKey) {
+    private async releaseByKey(subscriber: Subscriber<T[]>, key: StorageKey) {
         const items = await this._storage.retrieveByKey(key)
         await this._storage.clearByKey(key)
-        this.releaseItems(observer, items)
+        this.releaseItems(subscriber, items)
     }
 }

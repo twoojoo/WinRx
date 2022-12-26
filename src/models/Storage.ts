@@ -1,9 +1,7 @@
 export type StorageKey = number | string
-export type StorageAction = "next" | "error" | "complete"
 
 export type StorageItem<T> = {
     key: StorageKey,
-    action: StorageAction,
     timestamp: number,
     value: T
 }

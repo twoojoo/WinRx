@@ -1,4 +1,4 @@
-import { Observer } from "rxjs";
+import { Observer, Subscriber } from "rxjs";
 import { Memory } from "../Storage";
 import { StorageItem, Storage, StorageKey } from "./Storage";
 
@@ -22,11 +22,11 @@ export abstract class Window<T> {
         // this._persistData = options.persistData || false
     }
 
-    abstract onStart(observer: Observer<T[]>): Promise<void>
-    abstract onItem(observer: Observer<T[]>, item: StorageItem<T>): Promise<void>
-    abstract release(observer: Observer<T[]>): Promise<void>
+    abstract onStart(subscriber: Subscriber<T[]>): Promise<void>
+    abstract onItem(subscriber: Subscriber<T[]>, item: StorageItem<T>): Promise<void>
+    abstract release(subscriber: Subscriber<T[]>): Promise<void>
 
-    protected releaseItems(observer: Observer<T[]>, items: StorageItem<T>[]): void {
+    protected releaseItems(subscriber: Subscriber<T[]>, items: StorageItem<T>[]): void {
         const itemsByKey: {[key: StorageKey]: StorageItem<T>[]} = {}
         for (let i of items) {
             if (!itemsByKey[i.key]) itemsByKey[i.key] = []
@@ -34,18 +34,17 @@ export abstract class Window<T> {
         }
 
         for (let items of Object.values(itemsByKey)) {
-            const nextItems = []
-            const errorItems = []
+            // const nextItems = []
+            // const errorItems = []
     
-            while (items.length != 0) {
-                const item = items.shift()
-                if (item?.action == "next") nextItems.push(item.value)
-                else if (item?.action == "error") errorItems.push(item.value)
-                else throw Error("unknow action")
-            }
+            // while (items.length != 0) {
+            //     const item = items.shift()
+            //     if (item?.action == "next") nextItems.push(item.value)
+            //     else throw Error("unknow action")
+            // }
     
-            nextItems.length != 0 && observer.next(nextItems)
-            errorItems.length != 0 &&observer.error(errorItems)
+            items.length != 0 && subscriber.next(items.map(i => i.value))
+            // errorItems.length != 0 && subscriber.error(errorItems)
         }
     }
 }
