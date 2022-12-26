@@ -34,17 +34,7 @@ export abstract class Window<T> {
         }
 
         for (let items of Object.values(itemsByKey)) {
-            // const nextItems = []
-            // const errorItems = []
-    
-            // while (items.length != 0) {
-            //     const item = items.shift()
-            //     if (item?.action == "next") nextItems.push(item.value)
-            //     else throw Error("unknow action")
-            // }
-    
             items.length != 0 && subscriber.next(items.map(i => i.value))
-            // errorItems.length != 0 && subscriber.error(errorItems)
         }
     }
 }

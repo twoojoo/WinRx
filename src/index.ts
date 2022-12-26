@@ -26,28 +26,34 @@ export const snapshotWindow = <T>(opts: win.SnapshotWindowOptions<T>): WindowOpe
     return (source: Observable<T>) => buildOperator(source, opts, new win.SnapshotWindow(opts))
 }
 
-const buildOperator = <T>(source: Observable<T>, opts: WindowOptions<T>, window: Window<T>): Observable<T[]> => new Observable<T[]>(sub => {
-    window.onStart(sub as Subscriber<T[]>)
+const buildOperator = <T>(source: Observable<T>, opts: WindowOptions<T>, window: Window<T>): Observable<T[]> => {
+    const observable = new Observable<T[]>(sub => {
+        window.onStart(sub as Subscriber<T[]>)
 
-    source.subscribe({
-        async next(v: T) {
-            await window.onItem(sub as Subscriber<T[]>, {
-                key: "default",
-                timestamp: Date.now(),
-                value: v
-            })
-        },
+        source.subscribe({
+            async next(v: T) {
+                await window.onItem(sub as Subscriber<T[]>, {
+                    key: "default",
+                    timestamp: Date.now(),
+                    value: v
+                })
+            },
 
-        async error(v: T) {
-            if (opts.closeOnError) await window.release(sub as Subscriber<T[]>)
-            await window._storage.clearAll()
-            sub.error([v])
-        },
+            async error(v: T) {
+                if (opts.closeOnError) await window.release(sub as Subscriber<T[]>)
+                await window._storage.clearAll()
+                sub.error([v])
+            },
 
-        async complete() {
-            if (opts.closeOnComplete) await window.release(sub as Subscriber<T[]>)
-            await window._storage.clearAll()
-            sub.complete()
-        }
+            async complete() {
+                if (opts.closeOnComplete) await window.release(sub as Subscriber<T[]>)
+                await window._storage.clearAll()
+                sub.complete()
+            }
+        })
     })
-})
+
+    return Object.assign(observable, )
+}
+
+const
