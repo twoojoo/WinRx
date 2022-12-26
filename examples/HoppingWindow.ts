@@ -1,6 +1,5 @@
-
 import { EventEmitter } from "events"
-import { HoppingWindow, WindowedObserver } from "../src"
+import { hoppingWindow } from "../src"
 import { Observable } from "rxjs"
 import delay from "delay"
 
@@ -14,25 +13,22 @@ const observable = new Observable<number>(subscriber => {
     emitter.on("complete", (value) => {
         subscriber.complete()
     })
-})
+}).pipe(hoppingWindow({size: 5000, hop: 2000}))
 
 const results: number[][] = []
 
-const windowedObserver = (new WindowedObserver(new HoppingWindow({
-    size: 5000,
-    hop: 5000,
-    closeOnComplete: true
-}))).from({
-    next: (x) => {console.log("next", x); results.push(x as number[])},
-    error: (x) => console.log("error", x),
+const observer = {
+    next: (x: any) => { console.log("next", x); results.push(x as number[]) },
+    error: (x: any) => console.log("error", x),
     complete: () => console.log("complete"),
-});
+};
 
-observable.subscribe(windowedObserver);
+observable.subscribe(observer);
 
 (async function () {
     for (let i = 0; i < 3000; i++) {
-        await delay(10)
+        if (i == 500) await delay(3000)
+        else await delay(10)
         emitter.emit("next", i)
     }
     emitter.emit("complete")

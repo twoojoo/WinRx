@@ -1,6 +1,3 @@
-// import { interval, Observable } from "rxjs"
-import { SessionWindowOptions } from "./src/Window/SessionWindow"
-
 import { EventEmitter } from "events"
 import { sessionWindow } from "./src"
 import { Observable } from "rxjs"
