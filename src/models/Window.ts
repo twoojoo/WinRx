@@ -17,8 +17,8 @@ export abstract class Window<T> {
 
     constructor(options: WindowOptions<T>) {
         this._storage = options.storage || new Memory()
-        this._closeOnError = options.closeOnError || false
-        this._closeOnComplete = options.closeOnComplete || false
+        this._closeOnError = options.closeOnError || true
+        this._closeOnComplete = options.closeOnComplete || true
         // this._persistData = options.persistData || false
     }
 
