@@ -12,6 +12,9 @@ By introducing new operators, **WinRx** allows you to extend RXJS' windowing cap
 - [Memory](#memory)
 - [Redis](#redis)
 
+## General behaviour
+Every window operator receives single **T** value and outputs a **T[]** value each time a window is closed. Whenever an *error* or *complete* event is triggered, active windows gets forcibly closed, unless the **closeOnError** and **closeOnComplete** options are set to false (true if omitted).
+
 ## Window Types
 ### Tumbling Window
 
