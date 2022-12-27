@@ -1,5 +1,5 @@
-import { from, tap } from "rxjs"
-import { countingWindow, sessionWindow } from "./src"
+import { from, interval, tap } from "rxjs"
+import { countingWindow } from "./src"
 
 const events = [{
     key: 1,
@@ -18,14 +18,9 @@ const events = [{
     value: ""
 }];
 
-from(events).pipe(
-    tap(v => console.log(v)),
+interval(10).pipe(
     countingWindow({
         size: 2, 
-        // keyFrom: (e: any) => e.key
-    }),
-    tap(v => console.log(v))
-).subscribe((e: any) => {})
-
-
-setInterval(function() {}, 60000);
+        keyFrom: (e: any) => e.key
+    })
+).subscribe((e: any) => console.log(e))

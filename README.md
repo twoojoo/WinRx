@@ -13,7 +13,7 @@ By introducing new operators, **WinRx** allows you to extend RXJS' windowing cap
 
 ## General behaviour
 - Every window operator receives single **T** value and outputs a **T[]** value each time a window is closed. 
-- Whenever an *error* or *complete* event is triggered, active windows gets forcibly closed, unless the **closeOnError** and **closeOnComplete** options are set to false (true if omitted). If these options are set to false, all values that are not included in an already closed window will be lost.
+- Whenever an *error* or *complete* event is triggered, active windows gets forcibly closed, unless the **closeOnError** and **closeOnComplete** options are set to false (true if omitted). In this case all values that are not included in an already closed window will be lost.
 - In case of an **error** event, the value is still passed as an array of length 1 to maintain consistency with next events.
 
 ## Features

@@ -35,7 +35,7 @@ export class SessionWindow<T> extends Window<T> {
         }
 
         //On new item, if duration timeout doesn't exist, start one
-        //After max window duration consumes all saved items and reset alk key timeouts
+        //After max window duration consumes all saved items and reset all key timeouts
         if (!this._timeouts[key].windowDuration) {
             this._timeouts[key].windowDuration = setTimeout(() => {
                 if (this._timeouts[key].windowTimeout) clearTimeout(this._timeouts[key].windowTimeout)
