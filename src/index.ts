@@ -1,7 +1,6 @@
 import * as win from "./Window"
 import { Observable, OperatorFunction, Subscriber } from "rxjs"
 import { Window, WindowOptions } from "./models/Window"
-import { StorageKey } from "./models/Storage"
 
 export * as Storage from "./Storage"
 
@@ -15,9 +14,9 @@ export const tumblingWindow = <T>(opts: win.TumblingWindowOptions<T>): WindowOpe
     return (source: Observable<T>) => buildOperator(source, opts, new win.TumblingWindow(opts))
 }
 
-export const countingWindow = <T>(opts: win.CountingWindowOptions<T>): WindowOperator<T> => {
-    return (source: Observable<T>) => buildOperator(source, opts, new win.CountingWindow(opts))
-}
+// export const countingWindow = <T>(opts: win.CountingWindowOptions<T>): WindowOperator<T> => {
+//     return (source: Observable<T>) => buildOperator(source, opts, new win.CountingWindow(opts))
+// }
 
 export const hoppingWindow = <T>(opts: win.HoppingWindowOptions<T>): WindowOperator<T> => {
     return (source: Observable<T>) => buildOperator(source, opts, new win.HoppingWindow(opts))
