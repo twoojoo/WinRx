@@ -45,11 +45,11 @@ const buildOperator = <T>(source: Observable<T>, opts: WindowOptions<T>, window:
                 sub.error([v])
             },
 
-            async complete() {
-                if (opts.closeOnComplete) await window.release(sub as Subscriber<T[]>)
-                await window._storage.clearAll()
-                sub.complete()
-            }
+            // async complete() {
+            //     if (opts.closeOnComplete) await window.release(sub as Subscriber<T[]>)
+            //     await window._storage.clearAll()
+            //     sub.complete()
+            // }
         })
     })
 

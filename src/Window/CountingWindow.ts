@@ -34,10 +34,10 @@ export class CountingWindow<T> extends Window<T> {
         const lastItemTimestamp = item.timestamp
         await this._storage.storeItem(item)
         this._counter ++
-    
+
         if (this._counter >= this._size) {
-            this.releasePrevious(observer, lastItemTimestamp)
             this._counter = 0
+            await this.releasePrevious(observer, lastItemTimestamp)
         }
     }
 }
