@@ -16,12 +16,8 @@ export class SessionWindow<T> extends Window<T> {
     }
 
     constructor(options: SessionWindowOptions<T>) {
-        super({
-            storage: options.storage,
-            closeOnComplete: options.closeOnComplete,
-            closeOnError: options.closeOnError
-        })
-
+        super(options)
+        
         this._timeouts = {}
         this._maxDuration = options.maxDuration,
             this._timeoutSize = options.timeoutSize
@@ -64,7 +60,7 @@ export class SessionWindow<T> extends Window<T> {
         const items = await this._storage.retrieveAll()
         await this._storage.clearAll()
 
-        const itemsByKey: {[key: StorageKey]: StorageItem<T>[]} = {}
+        const itemsByKey: { [key: StorageKey]: StorageItem<T>[] } = {}
         for (let i of items) {
             if (!itemsByKey[i.key]) itemsByKey[i.key] = []
             itemsByKey[i.key].push(i)

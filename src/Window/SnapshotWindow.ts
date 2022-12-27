@@ -12,11 +12,7 @@ export class SnapshotWindow<T> extends Window<T> {
     private _maxThreshold: number
     
     constructor(options: SnapshotWindowOptions<T>) {
-        super({
-            storage: options.storage,
-            closeOnComplete: options.closeOnComplete,
-            closeOnError: options.closeOnError
-        })
+        super(options)
 
         this._offset = options.offset
         this._tolerance = options.tolerance

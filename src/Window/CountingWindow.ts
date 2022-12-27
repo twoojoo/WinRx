@@ -9,11 +9,7 @@ export class CountingWindow<T> extends Window<T> {
     private _counter: number = 0
 
     constructor(options: CountingWindowOptions<T>) {
-        super({
-            storage: options.storage,
-            closeOnComplete: options.closeOnComplete,
-            closeOnError: options.closeOnError
-        })
+        super(options)
 
         this._size = options.size
     }

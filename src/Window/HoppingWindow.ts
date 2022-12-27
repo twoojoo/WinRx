@@ -14,11 +14,7 @@ export class HoppingWindow<T> extends Window<T> {
     private _lastWindowStartingTimestamp: number = 0
 
     constructor(options: HoppingWindowOptions<T>) {
-        super({
-            storage: options.storage,
-            closeOnComplete: options.closeOnComplete,
-            closeOnError: options.closeOnError
-        })
+        super(options)
 
         this._size = options.size
         this._hop = options.hop

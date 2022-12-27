@@ -10,11 +10,7 @@ export class TumblingWindow<T> extends Window<T> {
     private _interval: NodeJS.Timer | undefined
 
     constructor(options: TumblingWindowOptions<T>) {
-        super({
-            storage: options.storage,
-            closeOnComplete: options.closeOnComplete,
-            closeOnError: options.closeOnError
-        })
+        super(options)
 
         this._size = options.size
     }

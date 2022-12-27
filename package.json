@@ -11,6 +11,10 @@
     "rxjs",
     "tumbling",
     "session",
+    "hopping",
+    "snapshot",
+    "counting",
+    "redis",
     "stream"
   ],
   "author": "twoojoo",
@@ -18,7 +22,6 @@
   "dependencies": {
     "delay": "^5.0.0",
     "ioredis": "^5.2.4",
-    "moment": "^2.29.4",
     "rxjs": "^7.8.0"
   },
   "devDependencies": {

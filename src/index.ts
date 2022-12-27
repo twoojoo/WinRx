@@ -1,6 +1,7 @@
 import * as win from "./Window"
 import { Observable, OperatorFunction, Subscriber } from "rxjs"
 import { Window, WindowOptions } from "./models/Window"
+import { StorageKey } from "./models/Storage"
 
 export * as Storage from "./Storage"
 
@@ -33,8 +34,8 @@ const buildOperator = <T>(source: Observable<T>, opts: WindowOptions<T>, window:
         source.subscribe({
             async next(v: T) {
                 await window.onItem(sub as Subscriber<T[]>, {
-                    key: "default",
-                    timestamp: Date.now(),
+                    key: window.getEventKey(v),
+                    timestamp: window.getEventTimestamp(v),
                     value: v
                 })
             },
@@ -53,7 +54,5 @@ const buildOperator = <T>(source: Observable<T>, opts: WindowOptions<T>, window:
         })
     })
 
-    return Object.assign(observable, )
+    return observable
 }
-
-const
