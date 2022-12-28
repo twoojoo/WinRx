@@ -33,11 +33,11 @@ the window type, while persisting data in a custom storage.
 
 ### Split Windows with Event Key
 
-Events streamed throught the same observable can be split in multiple separated
-windowing pipelines by providing a function to extract a key from the event
-itself (otherwise all events come with the "default" key). In this way, events
-with different keys will be treated as separated streams flowing through the
-same pipeline.
+Events streamed throught the same observable can be split into multiple
+separated windowing pipelines by providing a function to extract a key from the
+event itself (otherwise all events come with the "default" key). In this way,
+events with different keys will be treated as separated streams flowing through
+the same pipeline.
 
 ```typescript
 const events = [{
@@ -73,9 +73,8 @@ from(events).pipe(
 /**
  * output:
  * hola todo mundo
- * hello world 
- * 
- * */
+ * hello world
+ */
 ```
 
 ## Window Types
