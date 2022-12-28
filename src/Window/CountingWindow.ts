@@ -15,6 +15,7 @@ export class CountingWindow<T> extends Window<T> {
     }
 
     async onStart(observer:  Observer<T[]>): Promise<void> {
+        this._counter = 0
         return
     }
 
@@ -31,13 +32,14 @@ export class CountingWindow<T> extends Window<T> {
     }
 
     async onItem(observer: Observer<T[]>, item: StorageItem<T>): Promise<void> {
-        const lastItemTimestamp = item.timestamp
-        await this._storage.storeItem(item)
         this._counter ++
+        const lastItemTimestamp = item.timestamp
 
         if (this._counter >= this._size) {
             this._counter = 0
+            await this._storage.storeItem(item)
             await this.releasePrevious(observer, lastItemTimestamp)
-        }
+        } else await this._storage.storeItem(item)
+
     }
 }
