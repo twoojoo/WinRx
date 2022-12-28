@@ -31,7 +31,7 @@ the window type, while persisting data in a custom storage.
 
 ## Features
 
-### Custom Event Key and Timestamp
+### Split Windows with Event Key
 
 Events streamed throught the same observable can be split in multiple separated
 windowing pipelines by providing a function to extract a key from the event
