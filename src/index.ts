@@ -14,9 +14,9 @@ export const tumblingWindow = <T>(opts: win.TumblingWindowOptions<T>): WindowOpe
     return (source: Observable<T>) => buildOperator(source, opts, new win.TumblingWindow(opts))
 }
 
-// export const countingWindow = <T>(opts: win.CountingWindowOptions<T>): WindowOperator<T> => {
-//     return (source: Observable<T>) => buildOperator(source, opts, new win.CountingWindow(opts))
-// }
+export const countingWindow = <T>(opts: win.CountingWindowOptions<T>): WindowOperator<T> => {
+    return (source: Observable<T>) => buildOperator(source, opts, new win.CountingWindow(opts))
+}
 
 export const hoppingWindow = <T>(opts: win.HoppingWindowOptions<T>): WindowOperator<T> => {
     return (source: Observable<T>) => buildOperator(source, opts, new win.HoppingWindow(opts))
@@ -45,11 +45,11 @@ const buildOperator = <T>(source: Observable<T>, opts: WindowOptions<T>, window:
                 sub.error([v])
             },
 
-            // async complete() {
-            //     if (opts.closeOnComplete) await window.release(sub as Subscriber<T[]>)
-            //     await window._storage.clearAll()
-            //     sub.complete()
-            // }
+            async complete() {
+                if (opts.closeOnComplete) await window.release(sub as Subscriber<T[]>)
+                await window._storage.clearAll()
+                sub.complete()
+            }
         })
     })
 
