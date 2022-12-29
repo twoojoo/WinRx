@@ -12,11 +12,11 @@ the window type.
 - [Session Window](#session-window)
 - [Hopping Window](#hopping-window)
 - [Snapshot Window](#snapshot-window)
-
+<!-- 
 ### Supported Storage Types
 
 - [Memory](#memory)
-- [Redis](#redis)
+- [Redis](#redis) -->
 
 ## General behaviour
 
@@ -87,8 +87,8 @@ from(events).pipe(
 
 ### Snapshot Window
 
-## Storage Types
+<!-- ## Storage Types
 
 ### Memory
 
-### Redis
+### Redis -->
