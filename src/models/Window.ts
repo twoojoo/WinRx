@@ -32,8 +32,8 @@ export abstract class Window<T> {
 
         this._storage = options.storage || new Memory()
 
-        this._closeOnError = options.closeOnError || true
-        this._closeOnComplete = options.closeOnComplete || true
+        this._closeOnError = options.closeOnError || false
+        this._closeOnComplete = options.closeOnComplete || false
 
         this._keyFrom = options.keyFrom || null
         this._timestampFrom = options.timestampFrom || null

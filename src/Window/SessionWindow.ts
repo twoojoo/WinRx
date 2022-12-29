@@ -20,7 +20,7 @@ export class SessionWindow<T> extends Window<T> {
         
         this._timeouts = {}
         this._maxDuration = options.maxDuration,
-            this._timeoutSize = options.timeoutSize
+        this._timeoutSize = options.timeoutSize
     }
 
     async onStart(observer: Observer<T[]>): Promise<void> {

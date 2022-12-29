@@ -22,9 +22,9 @@ new Observable<number>(subscriber => {
 });
 
 (async function () {
-    for (let i = 0; i < 3000; i++) {
-        if (i == 500) await delay(3000)
-        else await delay(10)
+    for (let i = 0; i < 30000; i++) {
+        if (i == 5500) await delay(3000)
+        /*else*/ await delay(1)
         emitter.emit("next", i)
     }
     emitter.emit("complete")
