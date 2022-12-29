@@ -12,6 +12,8 @@ the window type.
 - [Session Window](#session-window)
 - [Hopping Window](#hopping-window)
 - [Snapshot Window](#snapshot-window)
+- [Counting Window](#counting-window)
+
 <!-- 
 ### Supported Storage Types
 
@@ -86,6 +88,8 @@ from(events).pipe(
 ### Hopping Window
 
 ### Snapshot Window
+
+### Counting Window
 
 <!-- ## Storage Types
 
