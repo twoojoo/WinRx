@@ -27,12 +27,20 @@ export class Memory<T> extends Storage<T> {
         return this._memory.filter(i => filter(i.timestamp))
     }
 
+    async retrieveByKeyAndTimestamp(key: StorageKey, filter: (timestap: number) => boolean): Promise<StorageItem<T>[]> {
+        return this._memory.filter(i => i.key == key && filter(i.timestamp))
+    }
+
     async clearByKey(key: StorageKey): Promise<void> {
         this._memory = this._memory.filter(i => i.key != key)
     }
     
     async clearByTimeStamp(filter: (timestap: number) => boolean): Promise<void> {
         this._memory = this._memory.filter(i => !filter(i.timestamp))
+    }
+
+    async clearByKeyAndTimeStamp(key: StorageKey, filter: (timestap: number) => boolean): Promise<void> {
+        this._memory = this._memory.filter(i => i.key != key && !filter(i.timestamp))
     }
 
     async clearAll(): Promise<void> {
