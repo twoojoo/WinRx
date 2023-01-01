@@ -13,7 +13,7 @@ new Observable<number>(subscriber => {
     emitter.on("complete", () => subscriber.complete())
 }).pipe(
     tap(_ => countBefore++),
-    sessionWindow({maxDuration: 5000, timeoutSize: 2000, watermark: 500}),
+    sessionWindow({size: 5000, timeout: 2000, watermark: 500}),
     tap((v: number[]) => console.log("window closed -", v.length, "items")),
     tap(v => countAfter += v.length)
 ).subscribe(() => {

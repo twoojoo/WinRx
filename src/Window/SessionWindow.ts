@@ -3,7 +3,7 @@ import { Event, EventKey } from "../models/Event"
 import { Window } from "../models/Window"
 import { WindowingSystem, WindowOptions } from "../models/WindowingSystem"
 
-export type SessionWindowOptions<T> = WindowOptions<T> & { maxDuration: number, timeoutSize: number }
+export type SessionWindowOptions<T> = WindowOptions<T> & { size: number, timeout: number }
 
 export class SessionWindow<T> extends WindowingSystem<T> {
     private maxDuration: number
@@ -20,8 +20,8 @@ export class SessionWindow<T> extends WindowingSystem<T> {
     constructor(options: SessionWindowOptions<T>) {
         super(options)
 
-        this.maxDuration = options.maxDuration
-        this.timeoutSize = options.timeoutSize
+        this.maxDuration = options.size
+        this.timeoutSize = options.timeout
     }
 
     async onStart(observer: Observer<T[]>): Promise<void> {

@@ -26,8 +26,8 @@ new Observable<Event>(subscriber => {
     tap(e => countBefore[e.key]++),
     sessionWindow({
         storage: new Storage.Redis(client),
-        maxDuration: 5000,
-        timeoutSize: 2000,
+        size: 5000,
+        timeout: 2000,
         withEventKey: v => v.key
     }),
     tap(e => {
