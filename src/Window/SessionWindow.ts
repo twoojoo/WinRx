@@ -1,79 +1,83 @@
 import { Observer, Subscriber } from "rxjs"
-import { StorageItem, StorageKey } from "../models/Storage"
-import { Window, WindowOptions } from "../models/Window"
+import { Event, EventKey } from "../models/Event"
+import { Window } from "../models/Window"
+import { WindowingSystem, WindowOptions } from "../models/WindowingSystem"
 
 export type SessionWindowOptions<T> = WindowOptions<T> & { maxDuration: number, timeoutSize: number }
 
-export class SessionWindow<T> extends Window<T> {
-    private _maxDuration: number
-    private _timeoutSize: number
+export class SessionWindow<T> extends WindowingSystem<T> {
+    private maxDuration: number
+    private timeoutSize: number
 
-    private _timeouts: {
-        [key: StorageKey]: {
-            windowDuration: NodeJS.Timeout | undefined,
-            windowTimeout: NodeJS.Timeout | undefined
-        }
-    }
+    private windows: {
+        [key: EventKey]: {
+            window: Window<T>
+            durationTimer: NodeJS.Timeout,
+            timeoutTimer: NodeJS.Timeout
+        }[]
+    } = {}
 
     constructor(options: SessionWindowOptions<T>) {
         super(options)
-        
-        this._timeouts = {}
-        this._maxDuration = options.maxDuration,
-        this._timeoutSize = options.timeoutSize
+
+        this.maxDuration = options.maxDuration
+        this.timeoutSize = options.timeoutSize
     }
 
     async onStart(observer: Observer<T[]>): Promise<void> {
         return
     }
 
-    async onItem(subscriber: Subscriber<T[]>, item: StorageItem<T>): Promise<void> {
-        const key = item.key
-        if (!this._timeouts[key]) this._timeouts[key] = {
-            windowDuration: undefined,
-            windowTimeout: undefined
-        }
-
-        //On new item, if duration timeout doesn't exist, start one
-        //After max window duration consumes all saved items and reset all key timeouts
-        if (!this._timeouts[key].windowDuration) {
-            this._timeouts[key].windowDuration = setTimeout(() => {
-                if (this._timeouts[key].windowTimeout) clearTimeout(this._timeouts[key].windowTimeout)
-                this.releaseByKey(subscriber, key)
-                delete this._timeouts[key]
-            }, this._maxDuration)
-        }
-
-        //On any new item reset window timeout. 
-        //If timeout ends, consume all messages and reset all key timeouts
-        if (this._timeouts[key].windowTimeout) clearTimeout(this._timeouts[key].windowTimeout)
-        this._timeouts[key].windowTimeout = setTimeout(() => {
-            if (this._timeouts[key].windowDuration) clearTimeout(this._timeouts[key].windowDuration)
-            this.releaseByKey(subscriber, key)
-            delete this._timeouts[key]
-        }, this._timeoutSize)
-
-        await this._storage.storeItem(item)
+    async onComplete(subscriber: Subscriber<T[]>): Promise<void> {
+        return
     }
 
-    async release(observer: any): Promise<void> {
-        const items = await this._storage.retrieveAll()
-        await this._storage.clearAll()
+    async onError(subscriber: Subscriber<T[]>): Promise<void> {
+        return
+    }
 
-        const itemsByKey: { [key: StorageKey]: StorageItem<T>[] } = {}
-        for (let i of items) {
-            if (!itemsByKey[i.key]) itemsByKey[i.key] = []
-            itemsByKey[i.key].push(i)
+    async onEvent(subscriber: Subscriber<T[]>, event: Event<T>): Promise<void> {
+        const eventKey = event.eventKey
+
+
+        if (!this.windows[eventKey] || !this.windows[eventKey][0]) {
+            const window = new Window(this.storage)
+
+            this.windows[eventKey] = []
+            this.windows[eventKey].push({
+                window,
+                durationTimer: setTimeout(async () => await this.closeWindow(subscriber, eventKey, window.id), this.maxDuration),
+                timeoutTimer: setTimeout(async () => await this.closeWindow(subscriber, eventKey, window.id), this.timeoutSize)
+            })
+
+            await this.windows[eventKey][0].window.push({ ...event, windowId: window.id })
         }
 
-        for (let items of Object.values(itemsByKey)) {
-            this.releaseItems(observer, items)
+        else {
+            const window = this.windows[eventKey].find(w => w.window.ownsEvent(event))
+            if (!window) throw Error("missing window")
+
+            clearTimeout(window.timeoutTimer)
+            window.timeoutTimer = setTimeout(async () => await this.closeWindow(subscriber, eventKey, window.window.id), this.timeoutSize)
+
+            await this.windows[eventKey][0].window.push({ ...event, windowId: window.window.id })
         }
     }
 
-    private async releaseByKey(subscriber: Subscriber<T[]>, key: StorageKey) {
-        const items = await this._storage.retrieveByKey(key)
-        await this._storage.clearByKey(key)
-        this.releaseItems(subscriber, items)
+    private async closeWindow(subscriber: Subscriber<T[]>, eventKey: EventKey, windowId: string) {
+        this.windows[eventKey] = this.windows[eventKey].filter(w => {
+            const isTarget = w.window.id == windowId
+
+            if (isTarget) {
+                w.window.close()
+
+                setTimeout(async () => {
+                    const events = await w.window.flush()
+                    this.release(subscriber, events)
+                }, this.watermark)
+            }
+
+            return !isTarget
+        })
     }
 }

@@ -17,12 +17,15 @@ type Event = {
     value: any
 }
 
+const client = new Redis("redis://localhost:6379")
+
 new Observable<Event>(subscriber => {
     emitter.on("next", (value) => subscriber.next(value))
     emitter.on("complete", () => subscriber.complete())
 }).pipe(
     tap(e => countBefore[e.key]++),
     sessionWindow({
+        storage: new Storage.Redis(client),
         maxDuration: 5000,
         timeoutSize: 2000,
         withEventKey: v => v.key
@@ -30,7 +33,6 @@ new Observable<Event>(subscriber => {
     tap(e => {
         const key = e[0].key
         countAfter[key] += e.length
-        // total += e.length
         receivedKeys[key] = true
     })
 ).subscribe(i => {

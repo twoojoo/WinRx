@@ -1,6 +1,6 @@
 import { Observer } from "rxjs"
 import { StorageItem } from "../models/Storage"
-import { Window, WindowOptions } from "../models/Window"
+import { Window, WindowOptions } from "../models/WindowingSystem"
 
 export type TumblingWindowOptions<T> = WindowOptions<T> & {size: number}
 
@@ -21,14 +21,14 @@ export class TumblingWindow<T> extends Window<T> {
         }, this._size)
     }
 
-    async release(observer: any): Promise<void> {
-        if (!this._interval) throw Error("missing interval")
-        const items = await this._storage.retrieveAll()
-        await this._storage.clearAll()
-        this.releaseItems(observer, items)
-    }
+    // async release(observer: any): Promise<void> {
+    //     if (!this._interval) throw Error("missing interval")
+    //     const items = await this._storage.retrieveAll()
+    //     await this._storage.clearAll()
+    //     this.releaseItems(observer, items)
+    // }
 
-    async onItem(observer: Observer<T[]>, item: StorageItem<T>): Promise<void> {
-        await this._storage.storeItem(item)
-    }
+    // async onItem(observer: Observer<T[]>, item: StorageItem<T>): Promise<void> {
+    //     await this._storage.storeItem(item)
+    // }
 }

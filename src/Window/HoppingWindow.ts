@@ -1,6 +1,6 @@
 import { Observer } from "rxjs"
 import { StorageItem } from "../models/Storage"
-import { Window, WindowOptions } from "../models/Window"
+import { Window, WindowOptions } from "../models/WindowingSystem"
 import delay from "delay"
 
 export type HoppingWindowOptions<T> = WindowOptions<T> & {size: number, hop: number}

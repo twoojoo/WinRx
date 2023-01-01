@@ -1,70 +1,39 @@
-import { Subscriber } from "rxjs";
-import { Memory } from "../Storage";
-import { StorageItem, Storage, StorageKey } from "./Storage";
 import { randomUUID } from "crypto"
+import { Event } from "./Event"
+import { Storage } from "./Storage"
 
-type TimestampEtractor<T> = (value: T) => number
-type KeyExtractor<T> = (value: T) => StorageKey
+export class Window<T> {
+    readonly id: string
+    readonly openedAt: number
 
-export type WindowOptions<T> = {
-    storage?: Storage<T>,
-    closeOnError?: boolean,
-    closeOnComplete?: boolean
-    timestampFrom?: TimestampEtractor<T>,
-    keyFrom?: KeyExtractor<T>
-    // persistData?: boolean
-}
+    private storage: Storage<T>
+    private closedAt: number | undefined
 
-export abstract class Window<T> {
-    readonly _windowId: string
-
-    readonly _storage: Storage<T>
-
-    readonly _closeOnError: boolean
-    readonly _closeOnComplete: boolean
-
-    protected _timestampFrom: TimestampEtractor<T> | null
-    protected _keyFrom: KeyExtractor<T> | null
-    // readonly _persistData: boolean
-
-    constructor(options: WindowOptions<T>) {
-        this._windowId = randomUUID()
-
-        this._storage = options.storage || new Memory()
-
-        this._closeOnError = options.closeOnError || false
-        this._closeOnComplete = options.closeOnComplete || false
-
-        this._keyFrom = options.keyFrom || null
-        this._timestampFrom = options.timestampFrom || null
-        // this._persistData = options.persistData || false
+    constructor(storage: Storage<T>) {
+        this.id = randomUUID()
+        this.openedAt = Date.now()
+        this.storage = storage
     }
 
-    getEventTimestamp(value: T): number {
-        return this._timestampFrom ?
-        this._timestampFrom(value) :
-        Date.now()
-    }
-    
-    getEventKey(value: T): StorageKey {
-        return this._keyFrom ?
-            this._keyFrom(value) :
-            "default"
+    ownsEvent(event: Event<T>): boolean {
+        if (this.closedAt) return event.eventTime > this.openedAt && event.eventTime <= this.closedAt
+        else return event.eventTime >= this.openedAt
     }
 
-    abstract onStart(subscriber: Subscriber<T[]>): Promise<void>
-    abstract onItem(subscriber: Subscriber<T[]>, item: StorageItem<T>): Promise<void>
-    abstract release(subscriber: Subscriber<T[]>): Promise<void>
+    async push(event: Required<Event<T>>): Promise<void> {
+        if (this.closedAt) throw Error("window is already closed")
+        await this.storage.push(event)
+    }
 
-    protected releaseItems(subscriber: Subscriber<T[]>, items: StorageItem<T>[]): void {
-        const itemsByKey: { [key: StorageKey]: StorageItem<T>[] } = {}
-        for (let i of items) {
-            if (!itemsByKey[i.key]) itemsByKey[i.key] = []
-            itemsByKey[i.key].push(i)
-        }
+    async flush(): Promise<Event<T>[]> {
+        return await this.storage.flush(this.id)
+    }
 
-        for (let items of Object.values(itemsByKey)) {
-            items.length != 0 && subscriber.next(items.map(i => i.value))
-        }
+    async get(): Promise<Event<T>[]> {
+        return await this.storage.flush(this.id)
+    }
+
+    async close() {
+        this.closedAt = Date.now()
     }
 }

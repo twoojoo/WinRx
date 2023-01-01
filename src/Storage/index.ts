@@ -1,2 +1,2 @@
 export { Memory } from "./Memory"
-// export { Redis } from "./Redis"
+export { Redis } from "./Redis"
