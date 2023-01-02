@@ -1,6 +1,6 @@
 import { Observer } from "rxjs"
 import { StorageItem } from "../models/Storage"
-import { Window, WindowOptions } from "../models/WindowingSystem"
+import { Window, WindowOptions } from "../models/Window"
 
 export type SnapshotWindowOptions<T> = WindowOptions<T> & { offset: number, tolerance: number }
 

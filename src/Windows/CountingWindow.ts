@@ -1,6 +1,6 @@
 import { Subscriber } from "rxjs"
 import { Event, EventKey } from "../models/Event"
-import { Window, WindowOptions } from "../models/WindowingSystem"
+import { Window, WindowOptions } from "../models/Window"
 import { randomUUID } from "crypto"
 
 export type CountingWindowOptions<T> = WindowOptions<T> & { size: number }

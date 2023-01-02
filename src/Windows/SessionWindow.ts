@@ -1,17 +1,17 @@
 import { Observer, Subscriber } from "rxjs"
 import { Event, EventKey } from "../models/Event"
-import { Window } from "../models/Window"
-import { WindowingSystem, WindowOptions } from "../models/WindowingSystem"
+import { Bucket } from "../models/Bucket"
+import { Window, WindowOptions } from "../models/Window"
 
 export type SessionWindowOptions<T> = WindowOptions<T> & { size: number, timeout: number }
 
-export class SessionWindow<T> extends WindowingSystem<T> {
+export class SessionWindow<T> extends Window<T> {
     private maxDuration: number
     private timeoutSize: number
 
-    private windows: {
+    private buckets: {
         [key: EventKey]: {
-            window: Window<T>
+            bucket: Bucket<T>
             durationTimer: NodeJS.Timeout,
             timeoutTimer: NodeJS.Timeout
         }[]
@@ -39,38 +39,38 @@ export class SessionWindow<T> extends WindowingSystem<T> {
     async onEvent(subscriber: Subscriber<T[]>, event: Event<T>): Promise<void> {
         const eventKey = event.eventKey
 
-        if (!this.windows[eventKey] || !this.windows[eventKey][0]) {
-            const window = new Window(this.storage)
+        if (!this.buckets[eventKey] || !this.buckets[eventKey][0]) {
+            const bucket = new Bucket(this.storage)
 
-            console.log(window.ownsEvent(event))
+            // console.log(bucket.ownsEvent(event))
 
-            this.windows[eventKey] = []
-            this.windows[eventKey].push({
-                window,
-                durationTimer: setTimeout(async () => await this.closeWindow(subscriber, eventKey, window.id), this.maxDuration),
-                timeoutTimer: setTimeout(async () => await this.closeWindow(subscriber, eventKey, window.id), this.timeoutSize)
+            this.buckets[eventKey] = []
+            this.buckets[eventKey].push({
+                bucket,
+                durationTimer: setTimeout(async () => await this.closeWindow(subscriber, eventKey, bucket.id), this.maxDuration),
+                timeoutTimer: setTimeout(async () => await this.closeWindow(subscriber, eventKey, bucket.id), this.timeoutSize)
             })
 
-            await this.windows[eventKey][0].window.push(event)
+            await this.buckets[eventKey][0].bucket.push(event)
         }
 
         else {
-            const owner = this.windows[eventKey].find(w => w.window.ownsEvent(event))
+            const owner = this.buckets[eventKey].find(b => b.bucket.ownsEvent(event))
             if (!owner) return
 
             clearTimeout(owner.timeoutTimer)
-            owner.timeoutTimer = setTimeout(async () => await this.closeWindow(subscriber, eventKey, owner.window.id), this.timeoutSize)
+            owner.timeoutTimer = setTimeout(async () => await this.closeWindow(subscriber, eventKey, owner.bucket.id), this.timeoutSize)
 
-            await owner.window.push(event)
+            await owner.bucket.push(event)
         }
     }
 
     private async closeWindow(subscriber: Subscriber<T[]>, eventKey: EventKey, windowId: string) {
-        this.windows[eventKey] = this.windows[eventKey].filter(w => {
-            const isTarget = w.window.id == windowId
+        this.buckets[eventKey] = this.buckets[eventKey].filter(b => {
+            const isTarget = b.bucket.id == windowId
 
             if (isTarget) {
-                w.window.close(
+                b.bucket.close(
                     this.watermark,
                     "flush",
                     events => this.release(subscriber, events)

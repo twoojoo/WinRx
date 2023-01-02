@@ -1,78 +1,50 @@
-import { randomUUID } from "crypto"
-import { Subscriber } from "rxjs"
-import { Event } from "./Event"
-import { Storage } from "./Storage"
+import { Subscriber } from "rxjs";
+import { Memory } from "../Storage";
+import { Storage } from "./Storage";
+import { Event, EventKey } from "./Event";
 
-/** A Window is a collection of events. It doesn't handle intervals and timeouts,
- * which are instead handled by the windowing system that created the window. */
-export class Window<T> {
-    readonly id: string
-    readonly openedAt: number
+type TimestampEtractor<T> = (value: T) => number
+type KeyExtractor<T> = (value: T) => EventKey
 
-    private storage: Storage<T>
-    private closedAt: number | undefined
-    private destroyedAt: number | undefined
+export type WindowOptions<T> = {
+    storage?: Storage<T>,
+    watermark?: number,
+    withEventTime?: TimestampEtractor<T>,
+    withEventKey?: KeyExtractor<T>
+}
 
-    constructor(storage: Storage<T>, timestamp: number = Date.now()) {
-        this.id = randomUUID()
-        this.openedAt = timestamp
-        this.storage = storage
+export abstract class Window<T> {
+    readonly storage: Storage<T>
+
+    protected watermark: number
+    protected timestampExtractor: TimestampEtractor<T> | null
+    protected keyExtractor: KeyExtractor<T> | null
+
+    constructor(options: WindowOptions<T>) {
+        this.watermark = options.watermark || 0
+        this.storage = options.storage || new Memory()
+        this.keyExtractor = options.withEventKey || null
+        this.timestampExtractor = options.withEventTime || null
     }
 
-    /** Determin if the window is closed and watermarked */
-    isDestroyed(): boolean {
-        return !!this.destroyedAt
+    getEventTimestamp(value: T): number {
+        return this.timestampExtractor ?
+            this.timestampExtractor(value) :
+            Date.now()
     }
 
-    /** Determin if the window is closed, but non necessarily watermarked */
-    isClosed(): boolean {
-        return !!this.closedAt
+    getEventKey(value: T): EventKey {
+        return this.keyExtractor ?
+            this.keyExtractor(value) :
+            "default"
     }
 
-    isAfterEvent(event: Event<T>) {
-        return this.openedAt > event.eventTime
-    }
+    abstract onStart(subscriber: Subscriber<T[]>): Promise<void>
+    abstract onEvent(subscriber: Subscriber<T[]>, event: Event<T>): Promise<void>
+    abstract onError(subscriber: Subscriber<T[]>): Promise<void>
+    abstract onComplete(subscriber: Subscriber<T[]>): Promise<void>
 
-    /** Determin if the event belongs to this window by comparing the event time with 
-     * the opening timestamp (and closing timestamp, if already closed) of the window */
-    ownsEvent(event: Event<T>): boolean {
-        if (this.isClosed()) return event.eventTime > this.openedAt && event.eventTime <= this.closedAt
-        else return event.eventTime >= this.openedAt
-    }
-
-    /** Insert a new window event in the storage */
-    async push(event: Event<T>): Promise<void> {
-        if (!event.windowId) event.windowId = this.id
-        await this.storage.push(event as Required<Event<T>>)
-    }
-
-    /** Retrieves the window events from the storage and clear them */
-    async flush(): Promise<Event<T>[]> {
-        return await this.storage.flush(this.id)
-    }
-
-    /** Retrieves the window events from the storage without deleting them */
-    async get(): Promise<Event<T>[]> {
-        return await this.storage.flush(this.id)
-    }
-
-    /** close the window getting or flushing the stored events belonging to it.
-     * Execute the passed callback to consume the events and destroy the winow. */
-    async close(watermark: number, mode: "flush" | "get", callback: (events: Event<T>[]) => void) {
-        if (this.closedAt) return
-        this.closedAt = Date.now()
-
-        setTimeout(async () => {
-            // "get" | "flush"
-            const events = await this[mode]()
-            callback(events)
-            this.destroy()
-        }, watermark)
-    }
-
-    /** Destroy = closed + watermarked */
-    private destroy() {
-        if (this.destroyedAt) return
-        this.destroyedAt = Date.now()
+    release(subscriber: Subscriber<T[]>, events: Event<T>[]) {
+        subscriber.next(events.map(e => e.value))
     }
 }

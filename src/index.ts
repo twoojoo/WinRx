@@ -1,6 +1,6 @@
-import * as win from "./Window"
+import * as win from "./Windows"
 import { Observable, OperatorFunction, Subscriber } from "rxjs"
-import { WindowingSystem, WindowOptions } from "./models/WindowingSystem"
+import { Window, WindowOptions } from "./models/Window"
 
 export * as Storage from "./Storage"
 
@@ -26,7 +26,7 @@ export const hoppingWindow = <T>(opts: win.HoppingWindowOptions<T>): WindowOpera
 //     return (source: Observable<T>) => buildOperator(source, opts, new win.SnapshotWindow(opts))
 // }
 
-const buildOperator = <T>(source: Observable<T>, opts: WindowOptions<T>, window: WindowingSystem<T>): Observable<T[]> => {
+const buildOperator = <T>(source: Observable<T>, opts: WindowOptions<T>, window: Window<T>): Observable<T[]> => {
     const observable = new Observable<T[]>(sub => {
         window.onStart(sub as Subscriber<T[]>)
 
