@@ -10,9 +10,9 @@ export const sessionWindow = <T>(opts: win.SessionWindowOptions<T>): WindowOpera
     return (source: Observable<T>) => buildOperator(source, opts, new win.SessionWindow(opts))
 }
 
-// export const tumblingWindow = <T>(opts: win.TumblingWindowOptions<T>): WindowOperator<T> => {
-//     return (source: Observable<T>) => buildOperator(source, opts, new win.TumblingWindow(opts))
-// }
+export const tumblingWindow = <T>(opts: win.TumblingWindowOptions<T>): WindowOperator<T> => {
+    return (source: Observable<T>) => buildOperator(source, opts, new win.TumblingWindow(opts))
+}
 
 // export const countingWindow = <T>(opts: win.CountingWindowOptions<T>): WindowOperator<T> => {
 //     return (source: Observable<T>) => buildOperator(source, opts, new win.CountingWindow(opts))

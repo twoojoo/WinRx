@@ -50,17 +50,17 @@ export class SessionWindow<T> extends WindowingSystem<T> {
                 timeoutTimer: setTimeout(async () => await this.closeWindow(subscriber, eventKey, window.id), this.timeoutSize)
             })
 
-            await this.windows[eventKey][0].window.push({ ...event, windowId: window.id })
+            await this.windows[eventKey][0].window.push(event)
         }
 
         else {
-            const window = this.windows[eventKey].find(w => w.window.ownsEvent(event))
-            if (!window) throw Error("missing window")
+            const owner = this.windows[eventKey].find(w => w.window.ownsEvent(event))
+            if (!owner) return
 
-            clearTimeout(window.timeoutTimer)
-            window.timeoutTimer = setTimeout(async () => await this.closeWindow(subscriber, eventKey, window.window.id), this.timeoutSize)
+            clearTimeout(owner.timeoutTimer)
+            owner.timeoutTimer = setTimeout(async () => await this.closeWindow(subscriber, eventKey, owner.window.id), this.timeoutSize)
 
-            await this.windows[eventKey][0].window.push({ ...event, windowId: window.window.id })
+            await owner.window.push(event)
         }
     }
 
@@ -74,6 +74,7 @@ export class SessionWindow<T> extends WindowingSystem<T> {
                 setTimeout(async () => {
                     const events = await w.window.flush()
                     this.release(subscriber, events)
+                    w.window.destroy()
                 }, this.watermark)
             }
 

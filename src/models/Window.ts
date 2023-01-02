@@ -8,6 +8,7 @@ export class Window<T> {
 
     private storage: Storage<T>
     private closedAt: number | undefined
+    private destroyedAt:number | undefined
 
     constructor(storage: Storage<T>) {
         this.id = randomUUID()
@@ -15,14 +16,23 @@ export class Window<T> {
         this.storage = storage
     }
 
+    isDestroyed(): boolean {
+        return !!this.destroyedAt
+    }
+
+    isClosed(): boolean {
+        return !!this.closedAt
+    }
+
     ownsEvent(event: Event<T>): boolean {
-        if (this.closedAt) return event.eventTime > this.openedAt && event.eventTime <= this.closedAt
+        if (this.isClosed()) return event.eventTime > this.openedAt && event.eventTime <= this.closedAt
         else return event.eventTime >= this.openedAt
     }
 
-    async push(event: Required<Event<T>>): Promise<void> {
-        if (this.closedAt) throw Error("window is already closed")
-        await this.storage.push(event)
+    async push(event: Event<T>): Promise<void> {
+        // if (this.closedAt) throw Error("window is already closed")
+        if (!event.windowId) event.windowId = this.id
+        await this.storage.push(event as Required<Event<T>>)
     }
 
     async flush(): Promise<Event<T>[]> {
@@ -34,6 +44,12 @@ export class Window<T> {
     }
 
     async close() {
+        if (this.closedAt) return
         this.closedAt = Date.now()
+    }
+
+    async destroy() {
+        if (this.destroyedAt) return
+        this.destroyedAt = Date.now()
     }
 }

@@ -1,4 +1,4 @@
-// export { TumblingWindow, TumblingWindowOptions } from "./TumblingWindow"
+export { TumblingWindow, TumblingWindowOptions } from "./TumblingWindow"
 export { SessionWindow, SessionWindowOptions } from "./SessionWindow"
 // export { CountingWindow, CountingWindowOptions } from "./CountingWindow"
 // export { HoppingWindow, HoppingWindowOptions } from "./HoppingWindow"

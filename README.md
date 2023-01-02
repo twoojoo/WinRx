@@ -2,9 +2,11 @@
 
 By introducing new operators, **WinRx** allows you to extend RXJS' windowing
 capablities to make it able to process windows of data from a stream in a more
-customized way. Intstead of processing data from a stream one by one, you can
+customized way. 
+<!-- 
+Intstead of processing data from a stream one by one, you can
 process a window of array-collected data extracted from a stream according to
-the window type.
+the window type, while persisting data in a choosen storage. -->
 
 ### Supported Window Types
 
@@ -14,29 +16,29 @@ the window type.
 - [Snapshot Window](#snapshot-window)
 - [Counting Window](#counting-window)
 
-<!-- 
 ### Supported Storage Types
 
 - [Memory](#memory)
-- [Redis](#redis) -->
+- [Redis](#redis)
 
 ## General behaviour
 
 - Every window operator receives single **T** value and outputs a **T[]** value
-  each time a window is closed.
+  each time a window gets closed.
 - Whenever an _error_ or _complete_ event is triggered, active windows gets
   forcibly closed, unless the **closeOnError** and **closeOnComplete** options
   are set to false (true if omitted). In this case all values that are not
   included in an already closed window will be lost.
 - In case of an **error** event, the value is still passed as an array of length
-  1 to maintain consistency with next events.
+  1 to keep consistency with next events.
 
 ## Features
 
+### Use Event Time instead of Processng Time
 ### Split Windows with Event Key
 
 Events streamed throught the same observable can be split into multiple
-separated windowing pipelines by providing a function to extract a key from the
+separated "windowing pipelines" by providing a callback to extract a key from the
 event itself (otherwise all events come with the "default" key). In this way,
 events with different keys will be treated as separated streams flowing through
 the same pipeline.
@@ -62,12 +64,12 @@ const events = [{
 from(events).pipe(
   tumblingWindow({
     size: 100,
-    keyFrom: (e: any) => e.key,
+    withEventKey: (e: any) => e.key,
   }),
-).subscribe((windowEvents: any[]) =>
+).subscribe((window: any[]) =>
   console.log(
-    windowEvents
-      .map((event) => event.value)
+    window
+      .map(event => event.value)
       .join(" "),
   )
 );
@@ -91,8 +93,8 @@ from(events).pipe(
 
 ### Counting Window
 
-<!-- ## Storage Types
+## Storage Types
 
 ### Memory
 
-### Redis -->
+### Redis
