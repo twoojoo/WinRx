@@ -16,25 +16,20 @@ export class TumblingWindow<T> extends WindowingSystem<T> {
 
     async onStart(subscriber: Subscriber<T[]>): Promise<void> {
         setInterval(() => {
-            Object.values(this.windows).forEach(windows =>
-                windows.forEach(win =>
-                    win.close()
-                )
-            )
+            for (let key in this.windows) {
 
-            setTimeout(async () => {
-                for (let windowsByKey of Object.values(this.windows)) {
-                    for (let win of windowsByKey) {
-                        if (!win.isClosed()) continue
-                        const events = await win.flush()
-                        this.release(subscriber, events)
-                        win.destroy()
-                    }
-
-                    windowsByKey = windowsByKey.filter(win => win.isDestroyed())
+                //close key windows
+                for (let win of this.windows[key]) {
+                    win.close(
+                        this.watermark, 
+                        "flush",
+                        events => this.release(subscriber, events)
+                    )
                 }
 
-            }, this.watermark)
+                //clear key windows
+                this.windows[key] = this.windows[key].filter(w => w.isDestroyed())
+            }
         }, this.size)
     }
 

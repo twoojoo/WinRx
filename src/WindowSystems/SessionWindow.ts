@@ -70,13 +70,11 @@ export class SessionWindow<T> extends WindowingSystem<T> {
             const isTarget = w.window.id == windowId
 
             if (isTarget) {
-                w.window.close()
-
-                setTimeout(async () => {
-                    const events = await w.window.flush()
-                    this.release(subscriber, events)
-                    w.window.destroy()
-                }, this.watermark)
+                w.window.close(
+                    this.watermark,
+                    "flush",
+                    events => this.release(subscriber, events)
+                )
             }
 
             return !isTarget
