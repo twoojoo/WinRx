@@ -42,8 +42,6 @@ export class SessionWindow<T> extends Window<T> {
         if (!this.buckets[eventKey] || !this.buckets[eventKey][0]) {
             const bucket = new Bucket(this.storage)
 
-            // console.log(bucket.ownsEvent(event))
-
             this.buckets[eventKey] = []
             this.buckets[eventKey].push({
                 bucket,

@@ -11,9 +11,7 @@ export class HoppingWindow<T> extends Window<T> {
 
     //window should be ordered by creation
     //index 0 always have the oldes alive window
-    private buckets: {
-        [key: EventKey]: Bucket<T>[]
-    } = {}
+    private buckets: { [key: EventKey]: Bucket<T>[] } = {}
 
     //every window uses this timestamp as starting timestamp
     private lastHopTimestamp: number

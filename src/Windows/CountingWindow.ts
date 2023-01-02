@@ -14,7 +14,6 @@ export class CountingWindow<T> extends Window<T> {
 
     constructor(options: CountingWindowOptions<T>) {
         super(options)
-
         this._size = options.size
     }
 
