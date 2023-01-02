@@ -18,12 +18,12 @@ export class Bucket<T> {
         this.storage = storage
     }
 
-    /** Determin if the window is closed and watermarked */
+    /** Determin if the bucket is closed and watermarked */
     isDestroyed(): boolean {
         return !!this.destroyedAt
     }
 
-    /** Determin if the window is closed, but non necessarily watermarked */
+    /** Determin if the bucket is closed, but non necessarily watermarked */
     isClosed(): boolean {
         return !!this.closedAt
     }
@@ -32,27 +32,27 @@ export class Bucket<T> {
         return this.openedAt > event.eventTime
     }
 
-    /** Determin if the event belongs to this window by comparing the event time with 
-     * the opening timestamp (and closing timestamp, if already closed) of the window.
-     * Always return false is the window is already destroyed (aka watermarked). */
+    /** Determin if the event belongs to this bucket by comparing the event time with 
+     * the opening timestamp (and closing timestamp, if already closed) of the bucket.
+     * Always return false is the bucket is already destroyed (aka watermarked). */
     ownsEvent(event: Event<T>): boolean {
         if (this.isDestroyed()) return false
         if (this.isClosed()) return event.eventTime > this.openedAt && event.eventTime <= this.closedAt
         else return event.eventTime >= this.openedAt
     }
 
-    /** Insert a new window event in the storage */
+    /** Insert a new event in the bucket storage */
     async push(event: Event<T>): Promise<void> {
         if (!event.windowId) event.windowId = this.id
         await this.storage.push(event as Required<Event<T>>)
     }
 
-    /** Retrieves the window events from the storage and clear them */
+    /** Retrieves the events from the bucket storage and clear them */
     async flush(): Promise<Event<T>[]> {
         return await this.storage.flush(this.id)
     }
 
-    /** Retrieves the window events from the storage without deleting them */
+    /** Retrieves the events from the bucket storage without deleting them */
     async get(): Promise<Event<T>[]> {
         return await this.storage.flush(this.id)
     }
