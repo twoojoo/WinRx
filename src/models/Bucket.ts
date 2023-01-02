@@ -3,7 +3,7 @@ import { Event } from "./Event"
 import { Storage } from "./Storage"
 
 /** A Bucket is a collection of events. It doesn't handle intervals and timeouts,
- * which are instead handled by the windowing system that created the window. */
+ * which are instead handled by the windowing system that created the bucket. */
 export class Bucket<T> {
     readonly id: string
     readonly openedAt: number
