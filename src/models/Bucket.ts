@@ -2,7 +2,7 @@ import { randomUUID } from "crypto"
 import { Event } from "./Event"
 import { Storage } from "./Storage"
 
-/** A Window is a collection of events. It doesn't handle intervals and timeouts,
+/** A Bucket is a collection of events. It doesn't handle intervals and timeouts,
  * which are instead handled by the windowing system that created the window. */
 export class Bucket<T> {
     readonly id: string
