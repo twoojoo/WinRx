@@ -39,9 +39,10 @@ export class SessionWindow<T> extends WindowingSystem<T> {
     async onEvent(subscriber: Subscriber<T[]>, event: Event<T>): Promise<void> {
         const eventKey = event.eventKey
 
-
         if (!this.windows[eventKey] || !this.windows[eventKey][0]) {
             const window = new Window(this.storage)
+
+            console.log(window.ownsEvent(event))
 
             this.windows[eventKey] = []
             this.windows[eventKey].push({

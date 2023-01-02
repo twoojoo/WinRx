@@ -10,9 +10,9 @@ export class Window<T> {
     private closedAt: number | undefined
     private destroyedAt:number | undefined
 
-    constructor(storage: Storage<T>) {
+    constructor(storage: Storage<T>, timestamp: number = Date.now()) {
         this.id = randomUUID()
-        this.openedAt = Date.now()
+        this.openedAt = timestamp
         this.storage = storage
     }
 

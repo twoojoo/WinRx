@@ -28,6 +28,7 @@ new Observable<Event>(subscriber => {
         storage: new Storage.Redis(client),
         size: 5000,
         timeout: 2000,
+        watermark: 500,
         withEventKey: v => v.key
     }),
     tap(e => {
@@ -51,7 +52,7 @@ new Observable<Event>(subscriber => {
 });
 
 (async function () {
-    for (let i = 0; i < 10000; i++) {
+    for (let i = 0; i < 50000; i++) {
         if (i == 5200) await delay(3000)
         else await delay(1)
         emitter.emit("next", {
