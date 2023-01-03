@@ -37,36 +37,40 @@ export class SlidingWindow<T> extends Window<T> {
 
     async onEvent(subscriber: Subscriber<T[]>, event: Event<T>): Promise<void> {
         const eventKey = event.eventKey
+        console.log("incoming event", event.value)
 
         //late data
         for (let bucket of (this.closedBuckets[eventKey] || [])) {
             if (bucket.ownsEvent(event)) {
-                console.log("event", event.value, "in closed bucket")
+                console.log("event", event.value, "in closed bucket", bucket.id)
                 await bucket.push(event)
             }
         }
 
-        const eventBucket = new Bucket(this.storage)
+        const eventBucket = new Bucket(this.storage, event.eventTime)
         setTimeout(() => this.closeBucket(subscriber, eventKey, eventBucket.id), this.size)
 
         if (!this.buckets[eventKey]) this.buckets[eventKey] = []
         this.buckets[eventKey].push(eventBucket)
 
+        console.log("buckets number", this.buckets[eventKey].length)
+
         for (let bucket of this.buckets[eventKey]) {
             if (bucket.ownsEvent(event)) {
-                console.log("event", event.value, "in opened bucket")
+                console.log("event", event.value, "in opened bucket", bucket.id)
                 await bucket.push(event)
             }
         }
     }
 
     closeBucket(subscriber: Subscriber<T[]>, eventKey: EventKey, bucketId: string) {
+        
         this.buckets[eventKey] = this.buckets[eventKey].filter(b => {
             const isTarget = b.id == bucketId
-
+            
             if (isTarget) {
+                console.log("closing bucket", bucketId)
 
-                watermark: [500, "ms"]
                 // move bucket to the closed buckets object
                 if (!this.closedBuckets[eventKey]) this.closedBuckets[eventKey] = []
                 this.closedBuckets[eventKey].push(b)
@@ -75,8 +79,9 @@ export class SlidingWindow<T> extends Window<T> {
                     this.watermark,
                     "flush",
                     events => {
+                        //check window output condition
                         if (this.condition(events.map(e => e.value))) this.release(subscriber, events)
-                        else console.log("skipping")
+
                         //remove bucket from the closed bukcet object
                         this.closedBuckets[eventKey] = this.closedBuckets[eventKey].filter(b => b.id != bucketId)
                     }
