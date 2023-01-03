@@ -1,4 +1,4 @@
-import { Event } from "../models/Event"
+import { Event } from "../types/Event"
 import { Storage } from "../models/Storage"
 
 export class Memory<T> extends Storage<T> {
@@ -8,18 +8,22 @@ export class Memory<T> extends Storage<T> {
         super()
     }
 
-    async get(windowId: string): Promise<Event<T>[]> {
-        return this.memory[windowId] || []
+    async get(bucketId: string): Promise<Event<T>[]> {
+        return this.memory[bucketId] || []
     }
 
     async push(item: Required<Event<T>>): Promise<void> {
-        if (!this.memory[item.windowId]) this.memory[item.windowId] = []
-        this.memory[item.windowId].push(item)
+        if (!this.memory[item.bucketId]) this.memory[item.bucketId] = []
+        this.memory[item.bucketId].push(item)
     }
 
-    async flush(windowId: string): Promise<Event<T>[]> {
-        const events = await this.get(windowId)
-        this.memory[windowId] = []
+    async flush(bucketId: string): Promise<Event<T>[]> {
+        const events = await this.get(bucketId)
+        await this.clear(bucketId)
         return events
+    }
+
+    async clear(bucketId: string): Promise<void> {
+        this.memory[bucketId] = []
     }
 }

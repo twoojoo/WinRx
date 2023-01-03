@@ -1,9 +1,10 @@
 import { Observer, Subscriber } from "rxjs"
-import { Event, EventKey } from "../models/Event"
+import { Event, EventKey } from "../types/Event"
 import { Bucket } from "../models/Bucket"
 import { Window, WindowOptions } from "../models/Window"
+import { Duration, toMs } from "../types/Duration"
 
-export type SessionWindowOptions<T> = WindowOptions<T> & { size: number, timeout: number }
+export type SessionWindowOptions<T> = WindowOptions<T> & { size: Duration, timeout: Duration }
 
 export class SessionWindow<T> extends Window<T> {
     private maxDuration: number
@@ -20,8 +21,8 @@ export class SessionWindow<T> extends Window<T> {
     constructor(options: SessionWindowOptions<T>) {
         super(options)
 
-        this.maxDuration = options.size
-        this.timeoutSize = options.timeout
+        this.maxDuration = toMs(options.size)
+        this.timeoutSize = toMs(options.timeout)
     }
 
     async onStart(observer: Observer<T[]>): Promise<void> {

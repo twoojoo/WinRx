@@ -1,5 +1,5 @@
 import { Subscriber } from "rxjs"
-import { Event, EventKey } from "../models/Event"
+import { Event, EventKey } from "../types/Event"
 import { Window, WindowOptions } from "../models/Window"
 import { randomUUID } from "crypto"
 

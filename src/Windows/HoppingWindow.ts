@@ -1,7 +1,7 @@
 import { Subscriber } from "rxjs"
 import { Window, WindowOptions } from "../models/Window"
 import { Bucket } from "../models/Bucket"
-import { EventKey, Event } from "../models/Event"
+import { EventKey, Event } from "../types/Event"
 
 export type HoppingWindowOptions<T> = WindowOptions<T> & { size: number, hop: number }
 
@@ -64,7 +64,7 @@ export class HoppingWindow<T> extends Window<T> {
             this.buckets[eventKey].push(new Bucket(this.storage, this.lastHopTimestamp))
         }
 
-        // get owners and insert event
+        // get owner buckets and insert event
         const owners = this.buckets[eventKey].filter(win => win.ownsEvent(event))
 
         for (let win of owners) {

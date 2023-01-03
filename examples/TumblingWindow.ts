@@ -13,7 +13,10 @@ new Observable<number>(subscriber => {
     emitter.on("complete", () => subscriber.complete())
 }).pipe(
     tap(_ => countBefore++),
-    tumblingWindow({size: 5000, watermark: 500}),
+    tumblingWindow({
+        size: [5, "s"], 
+        watermark: [500, "ms"]
+    }),
     tap((v: number[]) => console.log("window closed -", v.length, "items")),
     tap(v => countAfter += v.length)
 ).subscribe(() => {

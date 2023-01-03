@@ -23,8 +23,8 @@ new Observable<Event>(subscriber => {
 }).pipe(
     tap(e => countBefore[e.key]++),
     sessionWindow({
-        size: 5000,
-        timeout: 2000,
+        size: [5, "s"],
+        timeout: [2, "s"],
         withEventKey: v => v.key
     }),
     tap(e => {

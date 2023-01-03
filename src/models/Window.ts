@@ -1,14 +1,15 @@
 import { Subscriber } from "rxjs";
 import { Memory } from "../Storage";
 import { Storage } from "./Storage";
-import { Event, EventKey } from "./Event";
+import { Event, EventKey } from "../types/Event";
+import { Duration, toMs } from "../types/Duration";
 
 type TimestampEtractor<T> = (value: T) => number
 type KeyExtractor<T> = (value: T) => EventKey
 
 export type WindowOptions<T> = {
     storage?: Storage<T>,
-    watermark?: number,
+    watermark?: Duration,
     withEventTime?: TimestampEtractor<T>,
     withEventKey?: KeyExtractor<T>
 }
@@ -21,7 +22,7 @@ export abstract class Window<T> {
     protected keyExtractor: KeyExtractor<T> | null
 
     constructor(options: WindowOptions<T>) {
-        this.watermark = options.watermark || 0
+        this.watermark = options.watermark ? toMs(options.watermark) : 0
         this.storage = options.storage || new Memory()
         this.keyExtractor = options.withEventKey || null
         this.timestampExtractor = options.withEventTime || null

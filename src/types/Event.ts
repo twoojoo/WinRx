@@ -5,5 +5,5 @@ export type Event<T> = {
     eventKey: EventKey,
     eventTime: number,
     processingTime: number,
-    windowId?: string
+    bucketId?: string
 }

@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto"
-import { Event } from "./Event"
+import { Event } from "../types/Event"
 import { Storage } from "./Storage"
 
 /** A Bucket is a collection of events. It doesn't handle intervals and timeouts,
@@ -43,7 +43,7 @@ export class Bucket<T> {
 
     /** Insert a new event in the bucket storage */
     async push(event: Event<T>): Promise<void> {
-        if (!event.windowId) event.windowId = this.id
+        if (!event.bucketId) event.bucketId = this.id
         await this.storage.push(event as Required<Event<T>>)
     }
 
@@ -57,8 +57,12 @@ export class Bucket<T> {
         return await this.storage.flush(this.id)
     }
 
-    /** close the window getting or flushing the stored events belonging to it.
-     * Execute the passed callback to consume the events and destroy the winow. */
+    async clear(): Promise<void> {
+        await this.storage.clear(this.id)
+    }
+
+    /** close the bucket getting or flushing the stored events belonging to it.
+     * Execute the passed callback to consume the events and destroy the bucket. */
     async close(watermark: number, mode: "flush" | "get", callback: (events: Event<T>[]) => void) {
         if (this.closedAt) return
         this.closedAt = Date.now()

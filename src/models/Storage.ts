@@ -1,16 +1,17 @@
-import {Event, EventKey} from "./Event"
+import {Event, EventKey} from "../types/Event"
 
-type GetParams = {
-    windowId?: string,
-    eventKey?: EventKey,
-    eventTime?: (timestamp: number) => boolean,
-    processingTime?: (timestamp: number) => boolean
-}
+// type GetParams = {
+//     windowId?: string,
+//     eventKey?: EventKey,
+//     eventTime?: (timestamp: number) => boolean,
+//     processingTime?: (timestamp: number) => boolean
+// }
 
 export abstract class Storage<T> {
     abstract push(event: Required<Event<T>>): Promise<void>
-    abstract flush(windowId: string): Promise<Event<T>[]>
-    abstract get(windowId: string): Promise<Event<T>[]>
+    abstract flush(bucketId: string): Promise<Event<T>[]>
+    abstract get(bucketId: string): Promise<Event<T>[]>
+    abstract clear(bucketId: string): Promise<void>
     // abstract retrieveByKey(key: StorageKey): Promise<StorageItem<T>[]>
     // abstract retrieveByWindowId(winId: string): Promise<StorageItem<T>[]>
     // abstract retrieveByKeyAndWindowId(key: StorageKey, winId: string): Promise<StorageItem<T>[]>

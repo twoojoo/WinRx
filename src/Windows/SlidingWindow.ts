@@ -4,13 +4,13 @@ import { Bucket } from "../models/Bucket"
 import { Window, WindowOptions } from "../models/Window"
 import { Duration, toMs } from "../types/Duration"
 
-export type TumblingWindowOptions<T> = WindowOptions<T> & { size: Duration }
+export type SlidingWindowOptions<T> = WindowOptions<T> & { size: Duration }
 
-export class TumblingWindow<T> extends Window<T> {
+export class SlidingWindow<T> extends Window<T> {
     private size: number
     private buckets: { [key: EventKey]: Bucket<T>[] } = {}
 
-    constructor(options: TumblingWindowOptions<T>) {
+    constructor(options: SlidingWindowOptions<T>) {
         super(options)
 
         this.size = toMs(options.size)
