@@ -14,6 +14,11 @@ export const tumblingWindow = <T>(opts: win.TumblingWindowOptions<T>): WindowOpe
     return (source: Observable<T>) => buildOperator(source, opts, new win.TumblingWindow(opts))
 }
 
+export const slidingWindow = <T>(opts: win.SlidingWindowOptions<T>): WindowOperator<T> => {
+    return (source: Observable<T>) => buildOperator(source, opts, new win.SlidingWindow(opts))
+}
+
+
 // export const countingWindow = <T>(opts: win.CountingWindowOptions<T>): WindowOperator<T> => {
 //     return (source: Observable<T>) => buildOperator(source, opts, new win.CountingWindow(opts))
 // }

@@ -14,6 +14,7 @@ let total = 0
 
 type Event = {
     key: number,
+    timestamp: number,
     value: any
 }
 
@@ -29,7 +30,8 @@ new Observable<Event>(subscriber => {
         size: [5, "seconds"],
         timeout: [2, "seconds"],
         watermark: [500, "ms"],
-        withEventKey: v => v.key
+        withEventKey: v => v.key,
+        withEventTime: v => v.timestamp
     }),
     tap(e => {
         const key = e[0].key
@@ -52,11 +54,12 @@ new Observable<Event>(subscriber => {
 });
 
 (async function () {
-    for (let i = 0; i < 50000; i++) {
+    for (let i = 0; i < 10000; i++) {
         if (i == 5200) await delay(3000)
         else await delay(1)
         emitter.emit("next", {
             key: randomIntFromInterval(0, 2),
+            timestamp: Date.now(),
             value: i
         })
     }

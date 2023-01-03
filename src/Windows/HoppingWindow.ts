@@ -12,6 +12,7 @@ export class HoppingWindow<T> extends Window<T> {
     //window should be ordered by creation
     //index 0 always have the oldes alive window
     private buckets: { [key: EventKey]: Bucket<T>[] } = {}
+    private closedBuckets: { [key: EventKey]: Bucket<T>[] } = {}
 
     //every window uses this timestamp as starting timestamp
     private lastHopTimestamp: number
@@ -56,7 +57,7 @@ export class HoppingWindow<T> extends Window<T> {
 
         // create first window if missing
         if (!this.buckets[eventKey][0]) {
-            this.buckets[eventKey].push(new Bucket(this.storage, this.lastHopTimestamp))
+            this.buckets[eventKey] = [new Bucket(this.storage, this.lastHopTimestamp)]
         }
 
         // if event timestamp is greater than the last window creation date + hop then push a new window (but always max 2)
@@ -68,7 +69,7 @@ export class HoppingWindow<T> extends Window<T> {
         const owners = this.buckets[eventKey].filter(win => win.ownsEvent(event))
 
         for (let win of owners) {
-            win.push(event)
+            await win.push(event)
         }
     }
 
@@ -77,13 +78,11 @@ export class HoppingWindow<T> extends Window<T> {
             for (let key in this.buckets) {
                 if (!this.buckets[key][0]) continue
 
-                await this.buckets[key][0].close(
+                await this.buckets[key].shift().close(
                     this.watermark,
                     "flush",
                     events => this.release(subscriber, events)
                 )
-
-                this.buckets[key].shift()
             }
 
         }, this.size)

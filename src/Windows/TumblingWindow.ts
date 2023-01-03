@@ -8,7 +8,9 @@ export type TumblingWindowOptions<T> = WindowOptions<T> & { size: Duration }
 
 export class TumblingWindow<T> extends Window<T> {
     private size: number
+
     private buckets: { [key: EventKey]: Bucket<T>[] } = {}
+    private closedBuckets: { [key: EventKey]: Bucket<T>[] } = {}
 
     constructor(options: TumblingWindowOptions<T>) {
         super(options)
@@ -21,9 +23,9 @@ export class TumblingWindow<T> extends Window<T> {
             for (let key in this.buckets) {
 
                 //close key windows
-                for (let win of this.buckets[key]) {
-                    win.close(
-                        this.watermark, 
+                for (let bucket of this.buckets[key]) {
+                    bucket.close(
+                        this.watermark,
                         "flush",
                         events => this.release(subscriber, events)
                     )
@@ -46,14 +48,18 @@ export class TumblingWindow<T> extends Window<T> {
     async onEvent(subscriber: Subscriber<T[]>, event: Event<T>): Promise<void> {
         const eventKey = event.eventKey
 
+        for (let bucket of (this.closedBuckets[eventKey] || [])) {
+            if (bucket.ownsEvent(event)) await bucket.push(event)
+        }
+
         if (!this.buckets[eventKey]) {
             this.buckets[eventKey] = [new Bucket(this.storage)]
             this.buckets[eventKey][0].push(event)
         } else {
             const openedWindow = this.buckets[eventKey].find(b => !b.isClosed())
             if (!openedWindow) this.buckets[eventKey].push(new Bucket(this.storage))
-    
-            const lastWinIndex = this.buckets[eventKey].length -1
+
+            const lastWinIndex = this.buckets[eventKey].length - 1
             await this.buckets[eventKey][lastWinIndex].push(event)
         }
     }

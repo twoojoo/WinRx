@@ -18,6 +18,8 @@ export class SessionWindow<T> extends Window<T> {
         }[]
     } = {}
 
+    private closedBuckets: { [key: EventKey]: Bucket<T>[] } = {}
+
     constructor(options: SessionWindowOptions<T>) {
         super(options)
 
@@ -40,14 +42,18 @@ export class SessionWindow<T> extends Window<T> {
     async onEvent(subscriber: Subscriber<T[]>, event: Event<T>): Promise<void> {
         const eventKey = event.eventKey
 
+        for (let bucket of (this.closedBuckets[eventKey] || [])) {
+            if (bucket.ownsEvent(event)) await bucket.push(event)
+        }
+
         if (!this.buckets[eventKey] || !this.buckets[eventKey][0]) {
             const bucket = new Bucket(this.storage)
 
             this.buckets[eventKey] = []
             this.buckets[eventKey].push({
                 bucket,
-                durationTimer: setTimeout(async () => await this.closeWindow(subscriber, eventKey, bucket.id), this.maxDuration),
-                timeoutTimer: setTimeout(async () => await this.closeWindow(subscriber, eventKey, bucket.id), this.timeoutSize)
+                durationTimer: setTimeout(async () => await this.closeBucket(subscriber, eventKey, bucket.id), this.maxDuration),
+                timeoutTimer: setTimeout(async () => await this.closeBucket(subscriber, eventKey, bucket.id), this.timeoutSize)
             })
 
             await this.buckets[eventKey][0].bucket.push(event)
@@ -58,21 +64,32 @@ export class SessionWindow<T> extends Window<T> {
             if (!owner) return
 
             clearTimeout(owner.timeoutTimer)
-            owner.timeoutTimer = setTimeout(async () => await this.closeWindow(subscriber, eventKey, owner.bucket.id), this.timeoutSize)
+            owner.timeoutTimer = setTimeout(async () => await this.closeBucket(subscriber, eventKey, owner.bucket.id), this.timeoutSize)
 
             await owner.bucket.push(event)
         }
     }
 
-    private async closeWindow(subscriber: Subscriber<T[]>, eventKey: EventKey, windowId: string) {
+    private async closeBucket(subscriber: Subscriber<T[]>, eventKey: EventKey, bucketId: string) {
+
         this.buckets[eventKey] = this.buckets[eventKey].filter(b => {
-            const isTarget = b.bucket.id == windowId
+            const isTarget = b.bucket.id == bucketId
 
             if (isTarget) {
+
+                // move bucket to the closed buckets object
+                if (!this.closedBuckets[eventKey]) this.closedBuckets[eventKey] = []
+                this.closedBuckets[eventKey].push(b.bucket)
+
                 b.bucket.close(
                     this.watermark,
                     "flush",
-                    events => this.release(subscriber, events)
+                    events => {
+                        this.release(subscriber, events)
+
+                        //remove bucket from the closed bukcet object
+                        this.closedBuckets[eventKey] = this.closedBuckets[eventKey].filter(b => b.id != bucketId)
+                    }
                 )
             }
 

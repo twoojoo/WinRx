@@ -37,7 +37,7 @@ export class Bucket<T> {
      * Always return false is the bucket is already destroyed (aka watermarked). */
     ownsEvent(event: Event<T>): boolean {
         if (this.isDestroyed()) return false
-        if (this.isClosed()) return event.eventTime > this.openedAt && event.eventTime <= this.closedAt
+        if (this.isClosed()) return event.eventTime >= this.openedAt && event.eventTime < this.closedAt
         else return event.eventTime >= this.openedAt
     }
 

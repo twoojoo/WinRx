@@ -1,5 +1,5 @@
 import { EventEmitter } from "events"
-import { hoppingWindow } from "../src"
+import { slidingWindow } from "../src"
 import { Observable, tap } from "rxjs"
 import delay from "delay"
 
@@ -13,11 +13,15 @@ new Observable<number>(subscriber => {
     emitter.on("complete", () => subscriber.complete())
 }).pipe(
     tap(_ => countBefore++),
-    hoppingWindow({size: 5000, hop: 4999}),
+    slidingWindow({
+        size: [10, "s"], 
+        watermark: [500, "ms"],
+        condition: (events => events.length >= 3)
+    }),
     tap((v: number[]) => console.log("window closed -", v.length, "items")),
     tap(v => countAfter += v.length)
-).subscribe(() => {
-    console.log("count:", countAfter, "/", countBefore)
+).subscribe((e) => {
+    console.log(e.join(", "))
     // if (countAfter != countBefore) throw Error("count mismatch!")
 });
 
@@ -25,7 +29,7 @@ new Observable<number>(subscriber => {
     for (let i = 0; i < 20000; i++) {
         // if (i == 5500) await delay(3000)
         // else 
-        await delay(1)
+        await delay(3333)
         emitter.emit("next", i)
     }
     // emitter.emit("complete")
