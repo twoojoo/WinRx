@@ -13,7 +13,7 @@ new Observable<number>(subscriber => {
     emitter.on("complete", () => subscriber.complete())
 }).pipe(
     tap(_ => countBefore++),
-    hoppingWindow({size: 5000, hop: 4999}),
+    hoppingWindow({size: 5000, hop: 5000}),
     tap((v: number[]) => console.log("window closed -", v.length, "items")),
     tap(v => countAfter += v.length)
 ).subscribe(() => {

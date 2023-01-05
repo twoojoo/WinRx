@@ -18,14 +18,13 @@ export const tumblingWindow = <T>(opts: win.TumblingWindowOptions<T>): WindowOpe
 //     return (source: Observable<T>) => buildOperator(source, opts, new win.SlidingWindow(opts))
 // }
 
-
 // export const countingWindow = <T>(opts: win.CountingWindowOptions<T>): WindowOperator<T> => {
 //     return (source: Observable<T>) => buildOperator(source, opts, new win.CountingWindow(opts))
 // }
 
-// export const hoppingWindow = <T>(opts: win.HoppingWindowOptions<T>): WindowOperator<T> => {
-//     return (source: Observable<T>) => buildOperator(source, opts, new win.HoppingWindow(opts))
-// }
+export const hoppingWindow = <T>(opts: win.HoppingWindowOptions<T>): WindowOperator<T> => {
+    return (source: Observable<T>) => buildOperator(source, opts, new win.HoppingWindow(opts))
+}
 
 // export const snapshotWindow = <T>(opts: win.SnapshotWindowOptions<T>): WindowOperator<T> => {
 //     return (source: Observable<T>) => buildOperator(source, opts, new win.SnapshotWindow(opts))

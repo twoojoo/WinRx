@@ -21,10 +21,10 @@ new Observable<number>(subscriber => {
         size: [5, "s"], 
         watermark: [500, "ms"]
     }),
-    tap((v: number[]) => console.log("window closed -", v.length, "items")),
+    // tap((v: number[]) => console.log("window closed -", v.length, "items")),
     tap(v => countAfter += v.length)
 ).subscribe(() => {
-    console.log("count:", countAfter, "/", countBefore)
+    // console.log("count:", countAfter, "/", countBefore)
     // if (countAfter != countBefore) throw Error("count mismatch!")
 });
 

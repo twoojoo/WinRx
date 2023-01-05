@@ -3,6 +3,7 @@ import { Memory } from "../Storage";
 import { Storage } from "./Storage";
 import { Event, EventKey } from "../types/Event";
 import { Duration, toMs } from "../types/Duration";
+import { WinRxlogger } from "../utils/Logger"
 
 type TimestampEtractor<T> = (value: T) => number
 type KeyExtractor<T> = (value: T) => EventKey
@@ -22,6 +23,10 @@ export abstract class Window<T> {
     protected keyExtractor: KeyExtractor<T> | null
 
     isLooping: boolean = false
+
+    logger = new WinRxlogger({
+        toConsole: true
+    })
 
     constructor(options: WindowOptions<T>) {
         this.watermark = options.watermark ? toMs(options.watermark) : 0
@@ -43,6 +48,11 @@ export abstract class Window<T> {
     }
 
     formatEvent(event: T): Event<T> {
+        const eventKey = this.getEventKey(event)
+        const eventTime = this.getEventTimestamp(event)
+
+        this.logger.info("[enqueued event] :: key", this.logger.yellow(eventKey), "- timestamp", this.logger.yellow(eventTime))
+
         return {
             eventKey: this.getEventKey(event),
             eventTime: this.getEventTimestamp(event),
@@ -52,7 +62,7 @@ export abstract class Window<T> {
     }
 
     release(subscriber: Subscriber<T[]>, events: Event<T>[]) {
-        console.log(events.length)
+        this.logger.info(`[window released] :: key: ${this.logger.yellow(events[0].eventKey)} - count: ${this.logger.yellow(events.length)}`)
         subscriber.next(events.map(e => e.value))
     }
 
