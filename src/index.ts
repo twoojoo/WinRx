@@ -47,6 +47,9 @@ const buildOperator = <T>(source: Observable<T>, opts: WindowOptions<T>, window:
     return observable
 }
 
+
+/** Loop on window's storage queue and dequeue event in order to process them one by one.
+ * If called while there is another loop runnin, just returns leaving the queue untouched. */
 async function startDequeueloop<T>(subsrciber: Subscriber<T[]>, window: Window<T>) {
     if (window.isLooping) return
     window.isLooping = true
