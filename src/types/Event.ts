@@ -1,9 +1,11 @@
 export type EventKey = string | number
 
-export type Event<T> = {
+export type IncomingEvent<T> = {
     value: T,
     eventKey: EventKey,
     eventTime: number,
-    processingTime: number,
-    bucketId?: string
 }
+
+export type DequeuedEvent<T> = IncomingEvent<T> & { processingTime: number }
+
+export type AssignedEvent<T> = DequeuedEvent<T> & { bucketId: number }

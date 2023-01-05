@@ -54,9 +54,8 @@ export abstract class Window<T> {
         this.logger.info("[enqueued event] :: key", this.logger.yellow(eventKey), "- timestamp", this.logger.yellow(eventTime))
 
         return {
-            eventKey: this.getEventKey(event),
-            eventTime: this.getEventTimestamp(event),
-            processingTime: Date.now(),
+            eventKey,
+            eventTime,
             value: event
         }
     }
