@@ -66,8 +66,6 @@ export class SessionWindow<T> extends Window<T> {
         else {
             const owner = this.buckets[eventKey].find(b => b.bucket.ownsEvent(event))
             if (!owner) {
-                console.log(event.processingTime, this.buckets[eventKey][0].bucket.openedAt)
-                console.log("NO OWNERS")
                 return
             }
 
