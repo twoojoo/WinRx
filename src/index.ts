@@ -14,18 +14,18 @@ export const tumblingWindow = <T>(opts: win.TumblingWindowOptions<T>): WindowOpe
     return (source: Observable<T>) => buildOperator(source, opts, new win.TumblingWindow(opts))
 }
 
-export const slidingWindow = <T>(opts: win.SlidingWindowOptions<T>): WindowOperator<T> => {
-    return (source: Observable<T>) => buildOperator(source, opts, new win.SlidingWindow(opts))
-}
+// export const slidingWindow = <T>(opts: win.SlidingWindowOptions<T>): WindowOperator<T> => {
+//     return (source: Observable<T>) => buildOperator(source, opts, new win.SlidingWindow(opts))
+// }
 
 
 // export const countingWindow = <T>(opts: win.CountingWindowOptions<T>): WindowOperator<T> => {
 //     return (source: Observable<T>) => buildOperator(source, opts, new win.CountingWindow(opts))
 // }
 
-export const hoppingWindow = <T>(opts: win.HoppingWindowOptions<T>): WindowOperator<T> => {
-    return (source: Observable<T>) => buildOperator(source, opts, new win.HoppingWindow(opts))
-}
+// export const hoppingWindow = <T>(opts: win.HoppingWindowOptions<T>): WindowOperator<T> => {
+//     return (source: Observable<T>) => buildOperator(source, opts, new win.HoppingWindow(opts))
+// }
 
 // export const snapshotWindow = <T>(opts: win.SnapshotWindowOptions<T>): WindowOperator<T> => {
 //     return (source: Observable<T>) => buildOperator(source, opts, new win.SnapshotWindow(opts))
@@ -36,26 +36,25 @@ const buildOperator = <T>(source: Observable<T>, opts: WindowOptions<T>, window:
         window.onStart(sub as Subscriber<T[]>)
 
         source.subscribe({
-            async next(v: T) {
-                await window.onEvent(sub as Subscriber<T[]>, {
-                    eventKey: window.getEventKey(v),
-                    eventTime: window.getEventTimestamp(v),
-                    processingTime: Date.now(),
-                    value: v
-                })
-            },
-
-            async error(v: T) {
-                await window.onError(sub as Subscriber<T[]>)
-                sub.error([v])
-            },
-
-            async complete() {
-                await window.onComplete(sub as Subscriber<T[]>)
-                sub.complete()
+            async next(event: T) {
+                const formattedEvent = window.formatEvent(event)
+                await window.storage.enqueue(formattedEvent)
+                startDequeueloop(sub, window)
             }
         })
     })
 
     return observable
+}
+
+async function startDequeueloop<T>(subsrciber: Subscriber<T[]>, window: Window<T>) {
+    if (window.isLooping) return
+    window.isLooping = true
+
+    while (!await window.storage.isQueueEmpty()) {
+        const event = await window.storage.dequeue()
+        await window.onDequeuedEvent(subsrciber, event)
+    }
+
+    window.isLooping = false
 }

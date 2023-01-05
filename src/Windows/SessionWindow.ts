@@ -39,7 +39,7 @@ export class SessionWindow<T> extends Window<T> {
         return
     }
 
-    async onEvent(subscriber: Subscriber<T[]>, event: Event<T>): Promise<void> {
+    async onDequeuedEvent(subscriber: Subscriber<T[]>, event: Event<T>): Promise<void> {
         const eventKey = event.eventKey
 
         for (let bucket of (this.closedBuckets[eventKey] || [])) {

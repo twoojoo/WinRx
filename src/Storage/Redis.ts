@@ -1,16 +1,40 @@
 import { Storage } from "../models/Storage"
 import { default as RedisClient } from "ioredis"
 import { Event, EventKey } from "../types/Event"
+import { randomUUID } from "crypto"
 
 export class Redis<T> extends Storage<T> {
     private redisClient: RedisClient
     private counters: { [winId: string]: number } = {}
-    private TTL: number | undefined
+    private queueKey: string
 
-    constructor(client: RedisClient, TTLms?: number) {
+    constructor(client: RedisClient) {
         super()
         this.redisClient = client
-        this.TTL = TTLms || undefined
+        this.queueKey = "winrx-queue-" + randomUUID()
+    }
+
+    async enqueue(event: Event<T>): Promise<void> {
+        await this.redisClient.xadd(this.queueKey, '*', "message", JSON.stringify(event))
+    }
+
+    async dequeue(): Promise<Event<T>> {
+        const value = await this.redisClient.xread("COUNT", 1, "STREAMS", this.queueKey, "0")
+        const redisId = value[0][1][0][0]
+        const event: Event<T> = JSON.parse(value[0][1][0][1][1])
+        await this.redisClient.xdel(this.queueKey, redisId)
+        return event
+    }
+
+    async isQueueEmpty(): Promise<boolean> {
+        try {
+            const info: any[] = (await this.redisClient.xinfo("STREAM", this.queueKey) as any[])
+            const length = info[info.indexOf("length") + 1]
+            return length == 0
+        } catch (err) {
+            if (err.message == "ERR no such key") return true
+            else throw err
+        }
     }
 
     async push(event: Required<Event<T>>): Promise<void> {

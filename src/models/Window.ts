@@ -21,6 +21,8 @@ export abstract class Window<T> {
     protected timestampExtractor: TimestampEtractor<T> | null
     protected keyExtractor: KeyExtractor<T> | null
 
+    isLooping: boolean = false
+
     constructor(options: WindowOptions<T>) {
         this.watermark = options.watermark ? toMs(options.watermark) : 0
         this.storage = options.storage || new Memory()
@@ -40,12 +42,21 @@ export abstract class Window<T> {
             "default"
     }
 
-    abstract onStart(subscriber: Subscriber<T[]>): Promise<void>
-    abstract onEvent(subscriber: Subscriber<T[]>, event: Event<T>): Promise<void>
-    abstract onError(subscriber: Subscriber<T[]>): Promise<void>
-    abstract onComplete(subscriber: Subscriber<T[]>): Promise<void>
+    formatEvent(event: T): Event<T> {
+        return {
+            eventKey: this.getEventKey(event),
+            eventTime: this.getEventTimestamp(event),
+            processingTime: Date.now(),
+            value: event
+        }
+    }
 
     release(subscriber: Subscriber<T[]>, events: Event<T>[]) {
         subscriber.next(events.map(e => e.value))
     }
+
+    abstract onStart(subscriber: Subscriber<T[]>): Promise<void>
+    abstract onDequeuedEvent(subscriber: Subscriber<T[]>, event: Event<T>): Promise<void>
+    abstract onError(subscriber: Subscriber<T[]>): Promise<void>
+    abstract onComplete(subscriber: Subscriber<T[]>): Promise<void>
 }
