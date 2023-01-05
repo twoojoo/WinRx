@@ -42,12 +42,16 @@ export class SessionWindow<T> extends Window<T> {
     async onDequeuedEvent(subscriber: Subscriber<T[]>, event: Event<T>): Promise<void> {
         const eventKey = event.eventKey
 
+        //late data
         for (let bucket of (this.closedBuckets[eventKey] || [])) {
-            if (bucket.ownsEvent(event)) await bucket.push(event)
+            if (bucket.ownsEvent(event)) {
+                await bucket.push(event)
+                return
+            }
         }
 
         if (!this.buckets[eventKey] || !this.buckets[eventKey][0]) {
-            const bucket = new Bucket(this.storage)
+            const bucket = new Bucket(this.storage, event.eventTime)
 
             this.buckets[eventKey] = []
             this.buckets[eventKey].push({
@@ -61,7 +65,11 @@ export class SessionWindow<T> extends Window<T> {
 
         else {
             const owner = this.buckets[eventKey].find(b => b.bucket.ownsEvent(event))
-            if (!owner) return
+            if (!owner) {
+                console.log(event.processingTime, this.buckets[eventKey][0].bucket.openedAt)
+                console.log("NO OWNERS")
+                return
+            }
 
             clearTimeout(owner.timeoutTimer)
             owner.timeoutTimer = setTimeout(async () => await this.closeBucket(subscriber, eventKey, owner.bucket.id), this.timeoutSize)

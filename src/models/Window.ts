@@ -52,6 +52,7 @@ export abstract class Window<T> {
     }
 
     release(subscriber: Subscriber<T[]>, events: Event<T>[]) {
+        console.log(events.length)
         subscriber.next(events.map(e => e.value))
     }
 

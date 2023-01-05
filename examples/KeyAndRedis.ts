@@ -71,7 +71,7 @@ new Observable<Event>(subscriber => {
         if (final > total) mark = ">"
         else if (final < total) mark = "<"
         console.log("total :", final, total, mark)
-    }, 5100)
+    }, 20000)
 })()
 
 function randomIntFromInterval(min: number, max: number) { // min and max included 
