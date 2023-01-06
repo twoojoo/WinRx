@@ -29,7 +29,7 @@ export class TumblingWindow<T> extends WindowingSystem<T> {
             this.lastBucketTimestamp = this.lastBucketTimestamp + this.size 
         
             this.closedBuckets.push(this.currentBucket)
-            
+
             this.currentBucket.close(
                 this.watermark,
                 "flush",
@@ -49,7 +49,6 @@ export class TumblingWindow<T> extends WindowingSystem<T> {
 
         for (let bucket of this.closedBuckets) {
             if (bucket.ownsEvent(event)) {
-                console.log("late")
                 await bucket.push(event)
                 assigned = true
                 return

@@ -21,8 +21,8 @@ export abstract class WindowingSystem<T> {
     readonly logger: WinRxlogger
 
     protected watermark: number
-    protected timestampExtractor: TimestampEtractor<T> | null
-    protected keyExtractor: KeyExtractor<T> | null
+    protected timestampExtractor: TimestampEtractor<T> 
+    protected keyExtractor: KeyExtractor<T> 
 
     isLooping: boolean = false
 
@@ -30,6 +30,7 @@ export abstract class WindowingSystem<T> {
         this.watermark = toMs(options.watermark) > 1 ? toMs(options.watermark) : 1 //min 1 ms
         this.logger = new WinRxlogger(options.logger)
         this.stateManager = (options.stateManager || new Memory()).setlogger(this.logger)
+        this.timestampExtractor = options.withEventTime
     }
 
     getEventTimestamp(value: T): number {

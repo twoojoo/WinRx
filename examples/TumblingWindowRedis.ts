@@ -23,16 +23,22 @@ subj.pipe(
     console.log("count:", countAfter, "/", countBefore)
 });
 
-(async function () {   
-    console.log(Date.now()) 
+(async function () {
     for (let i = 0; i < 20000; i++) {
         await delay(1)
-        if (i == 5000) console.log(Date.now())
         subj.next({
             ts: Date.now(),
             i
         })
     }
+
+    //late data test
+    subj.next({
+        mark: "mark",
+        ts: Date.now() - 7001,
+    })
+
+
 
     // setInterval(() =>{
     //     subj.next({

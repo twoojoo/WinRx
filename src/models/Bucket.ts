@@ -12,8 +12,8 @@ export class Bucket<T> {
     readonly openedAt: number
 
     private stateManager: StateMananger<T>
-    private closedAt: number | undefined
-    private destroyedAt: number | undefined
+    private closedAt: number | undefined = undefined
+    private destroyedAt: number | undefined = undefined
     private logger: WinRxlogger
 
     private eventCounter = 0
@@ -90,7 +90,6 @@ export class Bucket<T> {
 
     /** Destroy = closed + watermarked */
     private destroy() {
-        if (this.destroyedAt) return
         this.destroyedAt = Date.now()
     }
 }

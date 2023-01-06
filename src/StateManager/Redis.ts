@@ -23,6 +23,7 @@ export class Redis<T> extends StateMananger<T> {
         const redisId = value[0][1][0][0]
         const event: DequeuedEvent<T> = JSON.parse(value[0][1][0][1][1])
         await this.redisClient.xdel(this.queueKey, redisId)
+        event.processingTime = Date.now()
         return event
     }
 
