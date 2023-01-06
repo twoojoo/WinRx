@@ -17,6 +17,7 @@ export class HoppingWindow<T> extends WindowingSystem<T> {
 
     //every window uses this timestamp as starting timestamp
     private lastHopTimestamp: number
+    private startupTimestamp: number
 
     constructor(options: HoppingWindowOptions<T>) {
         super(options)
@@ -28,6 +29,7 @@ export class HoppingWindow<T> extends WindowingSystem<T> {
     }
 
     async onStart(subscriber: Subscriber<T[]>): Promise<void> {
+        this.startupTimestamp = Date.now()
         this.setOpeningInterval()
         this.setClosingInterval(subscriber)
     }
@@ -40,18 +42,20 @@ export class HoppingWindow<T> extends WindowingSystem<T> {
             this.buckets[eventKey] = []
         }
         if (!this.buckets[eventKey][0]) {
-            // if (event.eventTime < this.lastHopTimestamp) return
             this.buckets[eventKey] = [new Bucket(this.stateManager, this.logger, this.lastHopTimestamp)]
         }
 
-        // if event timestamp is greater than the last window creation date + hop then push a new window (but always max 2)
-        if (this.buckets[eventKey].length == 1 && event.eventTime >= this.buckets[eventKey][0].openedAt + this.hop) {
-            this.buckets[eventKey].push(new Bucket(this.stateManager, this.logger, this.lastHopTimestamp))
+        // if event timestamp is greater than the last bucket creation ts, then push a new window (but always max 2)
+        if (this.buckets[eventKey].length == 1 && event.eventTime >= this.lastHopTimestamp) {
+            if (this.lastHopTimestamp > this.startupTimestamp) { // but only if it's not the first one
+                this.buckets[eventKey].push(new Bucket(this.stateManager, this.logger, this.lastHopTimestamp))
+            }
         }
 
         // get owner buckets and insert event
         const owners = this.buckets[eventKey].filter(win => win.ownsEvent(event))
-
+        // console.log(owners.length)
+        // if (owners.length == 2 ) process.exit()
         for (let bucket of owners) {
             await bucket.push(event)
         }
@@ -74,7 +78,8 @@ export class HoppingWindow<T> extends WindowingSystem<T> {
     }
 
     setOpeningInterval() {
-        setInterval(() => this.lastHopTimestamp = Date.now(), this.hop)
+        this.lastHopTimestamp = Date.now()
+        setInterval(() => this.lastHopTimestamp = this.lastHopTimestamp + this.hop, this.hop)
     }
 
     setClosingInterval(subscriber: Subscriber<T[]>) {

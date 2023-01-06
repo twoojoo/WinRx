@@ -1,6 +1,6 @@
 import { EventEmitter } from "events"
 import { hoppingWindow } from "../src"
-import { Observable, tap } from "rxjs"
+import { Observable, Subject, tap } from "rxjs"
 import delay from "delay"
 
 const emitter = new EventEmitter()
@@ -11,15 +11,13 @@ let countBefore = [0, 0, 0]
 let countAfter = [0, 0, 0]
 let total = 0
 
-new Observable<any>(subscriber => {
-    emitter.on("next", (value) => subscriber.next(value))
-    emitter.on("complete", () => subscriber.complete())
-}).pipe(
+const subj = new Subject<any>()
+subj.pipe(
     tap(e => countBefore[e.key]++),
     hoppingWindow({
-        size: [5, "s"], 
-        hop: [2500, "ms"],
-        watermark: [500, "ms"],
+        size: 5000, 
+        hop: 2500,
+        watermark: 200,
         // withEventKey: (e) => e.key,
         logger: {toConsole: true}
     }),
@@ -32,9 +30,9 @@ new Observable<any>(subscriber => {
 
 (async function () {
     for (let i = 0; i < 20000; i++) {
-        // if (i == 5200) await delay(3000)
+
         await delay(1)
-        emitter.emit("next", {
+        subj.next({
             key: randomIntFromInterval(0, 2),
             timestamp: Date.now(),
             value: i
