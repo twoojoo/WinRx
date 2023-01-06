@@ -2,11 +2,15 @@
 
 By introducing new operators, **WinRx** allows you to extend RXJS' windowing
 capablities to make it able to process windows of data from a stream in a more
-customized way. 
-<!-- 
-Intstead of processing data from a stream one by one, you can
-process a window of array-collected data extracted from a stream according to
-the window type, while persisting data in a choosen storage. -->
+customized way.
+
+### Architecture
+
+In order to prevent data races, all events are stored into a queue as soon as
+they are ingested. A loop keeps dequeueing them so that they can be actually
+processed one by one by the windowing system.
+
+![schema](./winrx.png)
 
 ### Supported Window Types
 
@@ -35,13 +39,14 @@ the window type, while persisting data in a choosen storage. -->
 ## Features
 
 ### Use Event Time instead of Processng Time
+
 ### Split Windows with Event Key
 
 Events streamed throught the same observable can be split into multiple
-separated "windowing pipelines" by providing a callback to extract a key from the
-event itself (otherwise all events come with the "default" key). In this way,
-events with different keys will be treated as separated streams flowing through
-the same pipeline.
+separated "windowing pipelines" by providing a callback to extract a key from
+the event itself (otherwise all events come with the "default" key). In this
+way, events with different keys will be treated as separated streams flowing
+through the same pipeline.
 
 ```typescript
 const events = [{
@@ -69,7 +74,7 @@ from(events).pipe(
 ).subscribe((window: any[]) =>
   console.log(
     window
-      .map(event => event.value)
+      .map((event) => event.value)
       .join(" "),
   )
 );
