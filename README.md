@@ -17,6 +17,8 @@ close an existing one to release a **window of events**.
 
 ![schema](./winrx.png)
 
+<br>
+
 ### Supported Window Types
 
 - [Tumbling Window](#tumbling-window)
