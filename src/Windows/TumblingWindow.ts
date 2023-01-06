@@ -1,5 +1,5 @@
 import { Subscriber } from "rxjs"
-import { Event, EventKey } from "../types/Event"
+import { DequeuedEvent, EventKey } from "../types/Event"
 import { Bucket } from "../models/Bucket"
 import { Window, WindowOptions } from "../models/Window"
 import { Duration, toMs } from "../types/Duration"
@@ -45,7 +45,7 @@ export class TumblingWindow<T> extends Window<T> {
         return
     }
 
-    async onDequeuedEvent(subscriber: Subscriber<T[]>, event: Event<T>): Promise<void> {
+    async onDequeuedEvent(subscriber: Subscriber<T[]>, event: DequeuedEvent<T>): Promise<void> {
         const eventKey = event.eventKey
 
         for (let bucket of (this.closedBuckets[eventKey] || [])) {
@@ -53,11 +53,11 @@ export class TumblingWindow<T> extends Window<T> {
         }
 
         if (!this.buckets[eventKey]) {
-            this.buckets[eventKey] = [new Bucket(this.storage)]
+            this.buckets[eventKey] = [new Bucket(this.storage, this.logger)]
             this.buckets[eventKey][0].push(event)
         } else {
             const openedWindow = this.buckets[eventKey].find(b => !b.isClosed())
-            if (!openedWindow) this.buckets[eventKey].push(new Bucket(this.storage))
+            if (!openedWindow) this.buckets[eventKey].push(new Bucket(this.storage, this.logger))
 
             const lastWinIndex = this.buckets[eventKey].length - 1
             await this.buckets[eventKey][lastWinIndex].push(event)

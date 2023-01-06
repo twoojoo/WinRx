@@ -27,34 +27,22 @@ new Observable<Event>(subscriber => {
     tap(e => countBefore[e.key]++),
     sessionWindow({
         storage: new Storage.Redis(client),
-        size: [5, "seconds"],
-        timeout: [2, "seconds"],
-        watermark: [500, "ms"],
+        size: [1, "s"],
+        timeout: [500, "ms"],
+        watermark: [200, "ms"],
         withEventKey: v => v.key,
-        withEventTime: v => v.timestamp
+        withEventTime: v => v.timestamp,
+        logger: {toConsole: true}
     }),
     tap(e => {
         const key = e[0].key
         countAfter[key] += e.length
         receivedKeys[key] = true
     })
-).subscribe(i => {
-    if (!receivedKeys.includes(false)) {
-        receivedKeys = [false, false, false]
-        windowCount++
-        countBefore.forEach((_, i) => {
-            const before = countBefore[i]
-            const after = countAfter[i]
-            let mark = "="
-            if (after > before) mark = ">"
-            else if (after < before) mark = "<"
-            console.log("win", windowCount, "| key", i, ":", after, "/", before, "|", mark)
-        })
-    }
-});
+).subscribe(i => {});
 
 (async function () {
-    for (let i = 0; i < 10000; i++) {
+    for (let i = 0; i < 100000; i++) {
         if (i == 5200) await delay(3000)
         else await delay(1)
         emitter.emit("next", {

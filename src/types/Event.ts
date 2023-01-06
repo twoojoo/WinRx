@@ -8,4 +8,4 @@ export type IncomingEvent<T> = {
 
 export type DequeuedEvent<T> = IncomingEvent<T> & { processingTime: number }
 
-export type AssignedEvent<T> = DequeuedEvent<T> & { bucketId: number }
+export type AssignedEvent<T> = DequeuedEvent<T> & { bucketId: string }

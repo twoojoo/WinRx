@@ -1,9 +1,10 @@
 import { Subscriber } from "rxjs"
 import { Window, WindowOptions } from "../models/Window"
 import { Bucket } from "../models/Bucket"
-import { EventKey, Event } from "../types/Event"
+import { DequeuedEvent, EventKey } from "../types/Event"
+import { Duration, toMs } from "../types/Duration"
 
-export type HoppingWindowOptions<T> = WindowOptions<T> & { size: number, hop: number }
+export type HoppingWindowOptions<T> = WindowOptions<T> & { size: Duration, hop: Duration }
 
 export class HoppingWindow<T> extends Window<T> {
     private size: number
@@ -19,11 +20,11 @@ export class HoppingWindow<T> extends Window<T> {
 
     constructor(options: HoppingWindowOptions<T>) {
         super(options)
-        this.size = options.size
+        this.size = toMs(options.size)
 
         //if hop = size force next window to start after previous
-        if (options.size == options.hop) this.hop = options.hop + 2
-        else this.hop = options.hop
+        if (options.size == options.hop) this.hop = toMs(options.hop) + 1
+        else this.hop = toMs(options.hop)
     }
 
     async onStart(subscriber: Subscriber<T[]>): Promise<void> {
@@ -39,7 +40,7 @@ export class HoppingWindow<T> extends Window<T> {
         return
     }
 
-    async onDequeuedEvent(subscriber: Subscriber<T[]>, event: Event<T>): Promise<void> {
+    async onDequeuedEvent(subscriber: Subscriber<T[]>, event: DequeuedEvent<T>): Promise<void> {
         const eventKey = event.eventKey
 
         // create first bucket if missing
@@ -47,13 +48,13 @@ export class HoppingWindow<T> extends Window<T> {
             this.buckets[eventKey] = []
         }
         if (!this.buckets[eventKey][0]) {
-            if (event.eventTime < this.lastHopTimestamp) return
-            this.buckets[eventKey] = [new Bucket(this.storage, this.lastHopTimestamp)]
+            // if (event.eventTime < this.lastHopTimestamp) return
+            this.buckets[eventKey] = [new Bucket(this.storage, this.logger, this.lastHopTimestamp)]
         }
 
         // if event timestamp is greater than the last window creation date + hop then push a new window (but always max 2)
         if (this.buckets[eventKey].length == 1 && event.eventTime >= this.buckets[eventKey][0].openedAt + this.hop) {
-            this.buckets[eventKey].push(new Bucket(this.storage, this.lastHopTimestamp))
+            this.buckets[eventKey].push(new Bucket(this.storage, this.logger, this.lastHopTimestamp))
         }
 
         // get owner buckets and insert event
@@ -64,14 +65,18 @@ export class HoppingWindow<T> extends Window<T> {
         }
     }
 
-    async closeBuckets(subscriber: Subscriber<T[]>){
+    async closeBuckets(subscriber: Subscriber<T[]>) {
         for (let key in this.buckets) {
             if (!this.buckets[key][0]) continue
 
-            await this.buckets[key].shift().close(
+            const bucketToClose = await this.buckets[key].shift()
+            bucketToClose.close(
                 this.watermark,
                 "flush",
-                events => this.release(subscriber, events)
+                events => {
+                    this.release(subscriber, events)
+                    this.closedBuckets[key] = this.closedBuckets[key]?.filter(b => b.id != bucketToClose.id) || []
+                }
             )
         }
     }
@@ -83,12 +88,16 @@ export class HoppingWindow<T> extends Window<T> {
     setClosingInterval(subscriber: Subscriber<T[]>) {
         let closeIntervalSize = this.hop
         let firstCloseTiemout = Math.abs(this.hop - this.size)
-        
+
+        console.log()
+
         setTimeout(async () => {
             await this.closeBuckets(subscriber)
+
             setInterval(async () => {
                 await this.closeBuckets(subscriber)
             }, closeIntervalSize)
+            
         }, firstCloseTiemout)
     }
 }

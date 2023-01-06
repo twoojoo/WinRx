@@ -1,6 +1,6 @@
 import { appendFileSync, writeFileSync } from "fs"
 
-type LoggerOptions = {
+export type LoggerOptions = {
     toConsole?: boolean,
     toFile?: string
 }
@@ -10,8 +10,8 @@ export class WinRxlogger {
     private toFile: string = undefined
 
     constructor(options: LoggerOptions) {
-        this.toConsole = options.toConsole || false
-        this.toFile = options.toFile || undefined
+        this.toConsole = options?.toConsole || false
+        this.toFile = options?.toFile || undefined
         this.toFile && writeFileSync(this.toFile, "")
     }
 

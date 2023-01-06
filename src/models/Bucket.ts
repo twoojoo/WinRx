@@ -1,5 +1,6 @@
 import { randomUUID } from "crypto"
-import { Event } from "../types/Event"
+import { AssignedEvent, DequeuedEvent, IncomingEvent } from "../types/Event"
+import { WinRxlogger } from "../utils/Logger"
 import { Storage } from "./Storage"
 
 /** A Bucket is a collection of events. It doesn't handle intervals and timeouts,
@@ -13,11 +14,14 @@ export class Bucket<T> {
     private storage: Storage<T>
     private closedAt: number | undefined
     private destroyedAt: number | undefined
+    private logger: WinRxlogger
 
-    constructor(storage: Storage<T>, timestamp: number = Date.now()) {
+    constructor(storage: Storage<T>, logger: WinRxlogger, timestamp: number = Date.now()) {
         this.id = randomUUID()
+        this.logger = logger
         this.openedAt = timestamp
         this.storage = storage
+        this.logger.info(`[bucket opened]   :: id: ${this.logger.yellow(this.id)} - time: ${this.logger.yellow(this.openedAt)}`)
     }
 
     /** Determin if the bucket is closed and watermarked */
@@ -30,32 +34,33 @@ export class Bucket<T> {
         return !!this.closedAt
     }
 
-    isAfterEvent(event: Event<T>) {
+    isAfterEvent(event: IncomingEvent<T>) {
         return this.openedAt > event.eventTime
     }
 
     /** Determin if the event belongs to this bucket by comparing the event time with 
      * the opening timestamp (and closing timestamp, if already closed) of the bucket.
      * Always return false is the bucket is already destroyed (aka watermarked). */
-    ownsEvent(event: Event<T>): boolean {
+    ownsEvent(event: IncomingEvent<T>): boolean {
         if (this.isDestroyed()) return false
         if (this.isClosed()) return event.eventTime >= this.openedAt && event.eventTime < this.closedAt
         else return event.eventTime >= this.openedAt
     }
 
     /** Insert a new event in the bucket storage */
-    async push(event: Event<T>): Promise<void> {
-        if (!event.bucketId) event.bucketId = this.id
-        await this.storage.push(event as Required<Event<T>>)
+    async push(event: DequeuedEvent<T>): Promise<void> {
+        const assignedEvent: AssignedEvent<T> = {...event, bucketId: this.id}
+        if (!assignedEvent.bucketId) assignedEvent.bucketId = this.id
+        await this.storage.push(assignedEvent)
     }
 
     /** Retrieves the events from the bucket storage and clear them */
-    async flush(): Promise<Event<T>[]> {
+    async flush(): Promise<AssignedEvent<T>[]> {
         return await this.storage.flush(this.id)
     }
 
     /** Retrieves the events from the bucket storage without deleting them */
-    async get(): Promise<Event<T>[]> {
+    async get(): Promise<AssignedEvent<T>[]> {
         return await this.storage.flush(this.id)
     }
 
@@ -65,13 +70,16 @@ export class Bucket<T> {
 
     /** close the bucket getting or flushing the stored events belonging to it.
      * Execute the passed callback to consume the events and destroy the bucket. */
-    async close(watermark: number, mode: "flush" | "get", callback: (events: Event<T>[]) => void) {
+    async close(watermark: number, mode: "flush" | "get", callback: (events: AssignedEvent<T>[]) => void) {
         if (this.closedAt) return
         this.closedAt = Date.now()
+
+        this.logger.info(`[bucket closed]   :: id: ${this.logger.yellow(this.id)} - time: ${this.logger.yellow(this.closedAt)}`)
 
         setTimeout(async () => {
             // "get" | "flush"
             const events = await this[mode]()
+            this.logger.info(`[bucket released] :: id: ${this.logger.yellow(this.id)} - key: ${this.logger.yellow(events[0].eventKey)} - items: ${this.logger.yellow(events.length)}`)
             callback(events)
             this.destroy()
         }, watermark)

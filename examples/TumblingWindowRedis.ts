@@ -19,7 +19,8 @@ new Observable<number>(subscriber => {
     tumblingWindow({
         storage: new Storage.Redis(client),
         size: [5, "s"], 
-        watermark: [500, "ms"]
+        watermark: [500, "ms"],
+        logger: {toConsole: true}
     }),
     // tap((v: number[]) => console.log("window closed -", v.length, "items")),
     tap(v => countAfter += v.length)

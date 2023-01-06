@@ -1,5 +1,5 @@
 import { Observer, Subscriber } from "rxjs"
-import { Event, EventKey } from "../types/Event"
+import { DequeuedEvent, EventKey } from "../types/Event"
 import { Bucket } from "../models/Bucket"
 import { Window, WindowOptions } from "../models/Window"
 import { Duration, toMs } from "../types/Duration"
@@ -39,7 +39,7 @@ export class SessionWindow<T> extends Window<T> {
         return
     }
 
-    async onDequeuedEvent(subscriber: Subscriber<T[]>, event: Event<T>): Promise<void> {
+    async onDequeuedEvent(subscriber: Subscriber<T[]>, event: DequeuedEvent<T>): Promise<void> {
         const eventKey = event.eventKey
 
         //late data
@@ -51,7 +51,7 @@ export class SessionWindow<T> extends Window<T> {
         }
 
         if (!this.buckets[eventKey] || !this.buckets[eventKey][0]) {
-            const bucket = new Bucket(this.storage, event.eventTime)
+            const bucket = new Bucket(this.storage, this.logger, event.eventTime)
 
             this.buckets[eventKey] = []
             this.buckets[eventKey].push({

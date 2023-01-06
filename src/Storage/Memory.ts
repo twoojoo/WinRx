@@ -1,36 +1,37 @@
-import { Event } from "../types/Event"
+import { AssignedEvent, DequeuedEvent, IncomingEvent } from "../types/Event"
 import { Storage } from "../models/Storage"
 
 export class Memory<T> extends Storage<T> {
-    private queue: Event<T>[] = []
-    private memory: {[winId: string]: Event<T>[]} = {}
+    private queue: IncomingEvent<T>[] = []
+    private memory: {[winId: string]: AssignedEvent<T>[]} = {}
 
     constructor() {
         super()
     }
 
-    async enqueue(event: Event<T>): Promise<void> {
+    async enqueue(event: IncomingEvent<T>): Promise<void> {
         this.queue.push(event)   
     }
 
-    async dequeue(): Promise<Event<T>> {
-        return this.queue.shift()
+    async dequeue(): Promise<DequeuedEvent<T>> {
+        const event = this.queue.shift()
+        return {...event, processingTime: Date.now()}
     }
 
     async isQueueEmpty(): Promise<boolean> {
         return this.queue.length == 0
     }
 
-    async get(bucketId: string): Promise<Event<T>[]> {
+    async get(bucketId: string): Promise<AssignedEvent<T>[]> {
         return this.memory[bucketId] || []
     }
 
-    async push(item: Required<Event<T>>): Promise<void> {
+    async push(item: AssignedEvent<T>): Promise<void> {
         if (!this.memory[item.bucketId]) this.memory[item.bucketId] = []
         this.memory[item.bucketId].push(item)
     }
 
-    async flush(bucketId: string): Promise<Event<T>[]> {
+    async flush(bucketId: string): Promise<AssignedEvent<T>[]> {
         const events = await this.get(bucketId)
         await this.clear(bucketId)
         return events
