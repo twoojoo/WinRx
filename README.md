@@ -19,7 +19,7 @@ close an existing one to release a **window of events**.
 
 <br>
 
-### Supported Window Types
+### Supported Windowing Systems
 
 - [Tumbling Window](#tumbling-window)
 - [Session Window](#session-window)
@@ -45,7 +45,7 @@ close an existing one to release a **window of events**.
 
 ## Features
 
-### Use Event Time instead of Processng Time
+<!-- ### Use Event Time instead of Processng Time
 
 ### Split Windows with Event Key
 
@@ -91,9 +91,9 @@ from(events).pipe(
  * hola todo mundo
  * hello world
  */
-```
+``` -->
 
-## Window Types
+## Windowing Systems
 
 ### Tumbling Window
 
