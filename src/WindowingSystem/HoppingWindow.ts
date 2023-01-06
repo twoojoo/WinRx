@@ -80,7 +80,7 @@ export class HoppingWindow<T> extends WindowingSystem<T> {
     setClosingInterval(subscriber: Subscriber<T[]>) {
         let closeIntervalSize = this.hop
         let firstCloseTiemout = Math.abs(this.hop - this.size)
-        if (this.hop > this.size) firstCloseTiemout = this.size
+        if (this.hop >= this.size) firstCloseTiemout = this.size
 
         setTimeout(async () => {
             await this.closeBuckets(subscriber)
