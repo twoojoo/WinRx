@@ -49,7 +49,11 @@ export class TumblingWindow<T> extends Window<T> {
         const eventKey = event.eventKey
 
         for (let bucket of (this.closedBuckets[eventKey] || [])) {
-            if (bucket.ownsEvent(event)) await bucket.push(event)
+            //if an event belongs to a closed bucket, then it can't belog to anoter bucket
+            if (bucket.ownsEvent(event)) {
+                await bucket.push(event)
+                return
+            }
         }
 
         if (!this.buckets[eventKey]) {
