@@ -32,7 +32,7 @@ close an existing one to release a **window of events**.
 - [Memory](#memory)
 - [Redis](#redis)
 
-## General behaviour
+<!-- ## General behaviour
 
 - Every window operator receives single **T** value and outputs a **T[]** value
   each time a window gets closed.
@@ -41,7 +41,7 @@ close an existing one to release a **window of events**.
   are set to false (true if omitted). In this case all values that are not
   included in an already closed window will be lost.
 - In case of an **error** event, the value is still passed as an array of length
-  1 to keep consistency with next events.
+  1 to keep consistency with next events. -->
 
 ## Features
 
