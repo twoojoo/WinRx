@@ -1,12 +1,12 @@
 import { Observer, Subscriber } from "rxjs"
 import { DequeuedEvent, EventKey } from "../types/Event"
 import { Bucket } from "../models/Bucket"
-import { WindowingSystem, WindowingOptions } from "../models/WindowingSystem"
 import { Duration, toMs } from "../types/Duration"
+import { KeyedWindowingOptions, KeyedWindowingSystem } from "../models/KeyedWindowingSystem"
 
-export type SessionWindowOptions<T> = WindowingOptions<T> & { size: Duration, timeout: Duration }
+export type SessionWindowOptions<T> = KeyedWindowingOptions<T> & { size: Duration, timeout: Duration }
 
-export class SessionWindow<T> extends WindowingSystem<T> {
+export class SessionWindow<T> extends KeyedWindowingSystem<T> {
     private maxDuration: number
     private timeoutSize: number
 

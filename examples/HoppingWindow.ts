@@ -30,7 +30,7 @@ subj.pipe(
 
 (async function () {
     for (let i = 0; i < 20000; i++) {
-
+        if (i == 2500) console.log("---------------------2500-------------------")
         await delay(1)
         subj.next({
             key: randomIntFromInterval(0, 2),

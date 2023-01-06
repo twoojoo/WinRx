@@ -16,6 +16,8 @@ export class Bucket<T> {
     private destroyedAt: number | undefined
     private logger: WinRxlogger
 
+    private eventCounter = 0
+
     constructor(stateManager: StateMananger<T>, logger: WinRxlogger, timestamp: number = Date.now()) {
         this.id = randomUUID()
         this.logger = logger
@@ -49,6 +51,7 @@ export class Bucket<T> {
 
     /** Insert a new event in the bucket stateManager */
     async push(event: DequeuedEvent<T>): Promise<void> {
+        this.eventCounter++
         const assignedEvent: AssignedEvent<T> = {...event, bucketId: this.id}
         if (!assignedEvent.bucketId) assignedEvent.bucketId = this.id
         await this.stateManager.push(assignedEvent)
@@ -74,12 +77,12 @@ export class Bucket<T> {
         if (this.closedAt) return
         this.closedAt = timestamp
 
-        this.logger.info(`[bucket closed]   :: id: ${this.logger.yellow(this.id)} - time: ${this.logger.yellow(this.closedAt)}`)
+        this.logger.info(`[bucket closed]   :: id: ${this.logger.yellow(this.id)} - time: ${this.logger.yellow(this.closedAt)} - items: ${this.eventCounter}`)
 
         setTimeout(async () => {
             // "get" | "flush"
             const events = await this[mode]()
-            this.logger.info(`[bucket released] :: id: ${this.logger.yellow(this.id)} - key: ${this.logger.yellow(events[0].eventKey)} - items: ${this.logger.yellow(events.length)}`)
+            this.logger.info(`[bucket released] :: id: ${this.logger.yellow(this.id)} - key: ${this.logger.yellow(events[0]?.eventKey) || "default"} - items: ${this.logger.yellow(events.length)}`)
             callback(events)
             this.destroy()
         }, watermark)

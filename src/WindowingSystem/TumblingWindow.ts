@@ -9,8 +9,8 @@ export type TumblingWindowOptions<T> = WindowingOptions<T> & { size: Duration }
 export class TumblingWindow<T> extends WindowingSystem<T> {
     private size: number
 
-    private buckets: { [key: EventKey]: Bucket<T>[] } = {}
-    private closedBuckets: { [key: EventKey]: Bucket<T>[] } = {}
+    private currentBucket: Bucket<T>
+    private closedBuckets: Bucket<T>[] = []
 
     private lastBucketTimestamp: number
 
@@ -20,49 +20,49 @@ export class TumblingWindow<T> extends WindowingSystem<T> {
     }
 
     async onStart(subscriber: Subscriber<T[]>): Promise<void> {
+        this.logWindowStart("tumbling")
+
         this.lastBucketTimestamp = Date.now()
+        this.currentBucket = new Bucket(this.stateManager, this.logger, this.lastBucketTimestamp)
 
         setInterval(() => {
-            for (let key in this.buckets) {
+            this.lastBucketTimestamp = this.lastBucketTimestamp + this.size 
+        
+            this.closedBuckets.push(this.currentBucket)
+            
+            this.currentBucket.close(
+                this.watermark,
+                "flush",
+                events => {
+                    this.release(subscriber, events)
+                    this.closedBuckets = this.closedBuckets.filter(b => b.isDestroyed())
+                },
+                this.lastBucketTimestamp
+            )
 
-                //close key windows
-                for (let bucket of this.buckets[key]) {
-                    this.lastBucketTimestamp = Date.now() +1
-
-                    bucket.close(
-                        this.watermark,
-                        "flush",
-                        events => this.release(subscriber, events),
-                        this.lastBucketTimestamp
-                    )
-                }
-
-                //clear key windows
-                this.buckets[key] = this.buckets[key].filter(b => b.isDestroyed())
-            }
+            this.currentBucket = new Bucket(this.stateManager, this.logger, this.lastBucketTimestamp)
         }, this.size)
     }
 
     async onDequeuedEvent(subscriber: Subscriber<T[]>, event: DequeuedEvent<T>): Promise<void> {
-        const eventKey = event.eventKey
+        let assigned = false
 
-        for (let bucket of (this.closedBuckets[eventKey] || [])) {
-            //if an event belongs to a closed bucket, then it can't belog to anoter bucket
+        for (let bucket of this.closedBuckets) {
             if (bucket.ownsEvent(event)) {
+                console.log("late")
                 await bucket.push(event)
+                assigned = true
                 return
             }
         }
 
-        if (!this.buckets[eventKey]) {
-            this.buckets[eventKey] = [new Bucket(this.stateManager, this.logger, this.lastBucketTimestamp)]
-            this.buckets[eventKey][0].push(event)
-        } else {
-            const openedWindow = this.buckets[eventKey].find(b => !b.isClosed())
-            if (!openedWindow) this.buckets[eventKey].push(new Bucket(this.stateManager, this.logger, this.lastBucketTimestamp))
+        if (this.currentBucket.ownsEvent(event)) {
+            this.currentBucket.push(event)
+            assigned = true
+        }
 
-            const lastWinIndex = this.buckets[eventKey].length - 1
-            await this.buckets[eventKey][lastWinIndex].push(event)
+        if (!assigned) {
+            this.logger.warning(`[event lost]   :: key: ${this.logger.yellow(event.eventKey)} - time ${this.logger.yellow(event.eventTime)}`)
         }
     }
 }
