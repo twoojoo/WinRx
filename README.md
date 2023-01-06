@@ -7,11 +7,11 @@ customized way.
 ### Architecture
 
 In order to prevent data races, all events are stored into a **queue** as soon
-as they are ingested. A loop keeps dequeueing them so that they can be actually
-processed one by one by the windowing system. The windowing systems handles the
-assignment of each event to a specific bucket, basing on event timestamp (event
+as they are ingested. A **loop** keeps dequeueing them so that they can be actually
+processed one by one by the **windowing system**. The windowing systems handles the
+assignment of each event to a specific **bucket**, basing on event timestamp (event
 time or processing time) and key. It also decides when to open a new bucket, or
-close an existing one to release a window of events.
+close an existing one to release a **window of events**.
 
 <br>
 
