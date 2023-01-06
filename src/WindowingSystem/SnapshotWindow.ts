@@ -1,10 +1,10 @@
 import { Observer } from "rxjs"
-import { Storage } from "../models/Storage"
-import { Window, WindowOptions } from "../models/Window"
+import { StateMananger } from "../models/StateManager"
+import { WindowingSystem, WindowingOptions } from "../models/WindowingSystem"
 
-export type SnapshotWindowOptions<T> = WindowOptions<T> & { offset: number, tolerance: number }
+export type SnapshotWindowOptions<T> = WindowingOptions<T> & { offset: number, tolerance: number }
 
-export class SnapshotWindow<T> extends Window<T> {
+export class SnapshotWindow<T> extends WindowingSystem<T> {
     private _tolerance: number
     private _offset: number
 
@@ -27,14 +27,14 @@ export class SnapshotWindow<T> extends Window<T> {
     }
 
     async release(observer: any): Promise<void> {
-        const items = await this._storage.retrieveAll()
-        await this._storage.clearAll()
+        const items = await this.stateManager.retrieveAll()
+        await this.stateManager.clearAll()
         this.releaseItems(observer, items)
     }
 
     async onItem(observer: Observer<T[]>, item: StorageItem<T>): Promise<void> {
         if (item.timestamp > this._minThreshold && item.timestamp < this._maxThreshold) {
-            this._storage.storeItem(item)
+            this.stateManager.storeItem(item)
         }
     }
 }

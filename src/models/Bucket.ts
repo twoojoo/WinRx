@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto"
 import { AssignedEvent, DequeuedEvent, IncomingEvent } from "../types/Event"
 import { WinRxlogger } from "../utils/Logger"
-import { Storage } from "./Storage"
+import { StateMananger } from "./StateManager"
 
 /** A Bucket is a collection of events. It doesn't handle intervals and timeouts,
  * which are instead handled by the windowing system that created the bucket. But it 
@@ -11,16 +11,16 @@ export class Bucket<T> {
     readonly id: string
     readonly openedAt: number
 
-    private storage: Storage<T>
+    private stateManager: StateMananger<T>
     private closedAt: number | undefined
     private destroyedAt: number | undefined
     private logger: WinRxlogger
 
-    constructor(storage: Storage<T>, logger: WinRxlogger, timestamp: number = Date.now()) {
+    constructor(stateManager: StateMananger<T>, logger: WinRxlogger, timestamp: number = Date.now()) {
         this.id = randomUUID()
         this.logger = logger
         this.openedAt = timestamp
-        this.storage = storage
+        this.stateManager = stateManager
         this.logger.info(`[bucket opened]   :: id: ${this.logger.yellow(this.id)} - time: ${this.logger.yellow(this.openedAt)}`)
     }
 
@@ -47,25 +47,25 @@ export class Bucket<T> {
         else return event.eventTime >= this.openedAt
     }
 
-    /** Insert a new event in the bucket storage */
+    /** Insert a new event in the bucket stateManager */
     async push(event: DequeuedEvent<T>): Promise<void> {
         const assignedEvent: AssignedEvent<T> = {...event, bucketId: this.id}
         if (!assignedEvent.bucketId) assignedEvent.bucketId = this.id
-        await this.storage.push(assignedEvent)
+        await this.stateManager.push(assignedEvent)
     }
 
-    /** Retrieves the events from the bucket storage and clear them */
+    /** Retrieves the events from the bucket stateManager and clear them */
     async flush(): Promise<AssignedEvent<T>[]> {
-        return await this.storage.flush(this.id)
+        return await this.stateManager.flush(this.id)
     }
 
-    /** Retrieves the events from the bucket storage without deleting them */
+    /** Retrieves the events from the bucket stateManager without deleting them */
     async get(): Promise<AssignedEvent<T>[]> {
-        return await this.storage.flush(this.id)
+        return await this.stateManager.flush(this.id)
     }
 
     async clear(): Promise<void> {
-        await this.storage.clear(this.id)
+        await this.stateManager.clear(this.id)
     }
 
     /** close the bucket getting or flushing the stored events belonging to it.

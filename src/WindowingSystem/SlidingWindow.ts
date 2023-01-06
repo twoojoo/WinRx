@@ -1,15 +1,15 @@
 import { Subscriber } from "rxjs"
 import { Event, EventKey } from "../types/Event"
 import { Bucket } from "../models/Bucket"
-import { Window, WindowOptions } from "../models/Window"
+import { WindowingSystem, WindowingOptions } from "../models/WindowingSystem"
 import { Duration, toMs } from "../types/Duration"
 
-export type SlidingWindowOptions<T> = WindowOptions<T> & {
+export type SlidingWindowOptions<T> = WindowingOptions<T> & {
     size: Duration,
     condition: (events: T[]) => boolean
 }
 
-export class SlidingWindow<T> extends Window<T> {
+export class SlidingWindow<T> extends WindowingSystem<T> {
     private size: number
     private condition: (events: T[]) => boolean
 
@@ -47,7 +47,7 @@ export class SlidingWindow<T> extends Window<T> {
             }
         }
 
-        const eventBucket = new Bucket(this.storage, event.eventTime)
+        const eventBucket = new Bucket(this.stateManager, event.eventTime)
         setTimeout(() => this.closeBucket(subscriber, eventKey, eventBucket.id), this.size)
 
         if (!this.buckets[eventKey]) this.buckets[eventKey] = []

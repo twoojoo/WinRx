@@ -1,11 +1,11 @@
 import { Subscriber } from "rxjs"
 import { Event, EventKey } from "../types/Event"
-import { Window, WindowOptions } from "../models/Window"
+import { WindowingSystem, WindowingOptions } from "../models/WindowingSystem"
 import { randomUUID } from "crypto"
 
-export type CountingWindowOptions<T> = WindowOptions<T> & { size: number }
+export type CountingWindowOptions<T> = WindowingOptions<T> & { size: number }
 
-export class CountingWindow<T> extends Window<T> {
+export class CountingWindow<T> extends WindowingSystem<T> {
     private _size: number
     private _windows: {[key: EventKey]: {
         id: string,
@@ -31,6 +31,6 @@ export class CountingWindow<T> extends Window<T> {
 
         this._counters[key] ++
 
-        await this._storage.push(event)
+        await this._stateManager.push(event)
     }
 }

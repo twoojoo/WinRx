@@ -1,7 +1,7 @@
 import { AssignedEvent, DequeuedEvent, IncomingEvent } from "../types/Event"
-import { Storage } from "../models/Storage"
+import { StateMananger } from "../models/StateManager"
 
-export class Memory<T> extends Storage<T> {
+export class Memory<T> extends StateMananger<T> {
     private queue: IncomingEvent<T>[] = []
     private memory: {[winId: string]: AssignedEvent<T>[]} = {}
 

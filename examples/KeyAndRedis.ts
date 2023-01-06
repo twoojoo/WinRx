@@ -26,7 +26,7 @@ new Observable<Event>(subscriber => {
 }).pipe(
     tap(e => countBefore[e.key]++),
     sessionWindow({
-        storage: new Storage.Redis(client),
+        stateManager: new Storage.Redis(client),
         size: [1, "s"],
         timeout: [500, "ms"],
         watermark: [200, "ms"],

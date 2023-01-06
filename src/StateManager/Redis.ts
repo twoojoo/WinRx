@@ -1,9 +1,9 @@
-import { Storage } from "../models/Storage"
+import { StateMananger } from "../models/StateManager"
 import { default as RedisClient } from "ioredis"
 import { AssignedEvent, DequeuedEvent, IncomingEvent } from "../types/Event"
 import { randomUUID } from "crypto"
 
-export class Redis<T> extends Storage<T> {
+export class Redis<T> extends StateMananger<T> {
     private redisClient: RedisClient
     private counters: { [winId: string]: number } = {}
     private queueKey: string

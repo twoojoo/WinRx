@@ -1,17 +1,23 @@
-import * as win from "./Windows"
-import { Observable, OperatorFunction, Subscriber } from "rxjs"
-import { Window, WindowOptions } from "./models/Window"
+import * as ws from "./WindowingSystem"
+import * as sm from "./StateManager"
 
-export * as Storage from "./Storage"
+import { Observable, OperatorFunction, Subscriber } from "rxjs"
+import { WindowingSystem, WindowingOptions } from "./models/WindowingSystem"
+import { Redis } from "ioredis"
+
+
+export const memory = () => new sm.Memory()
+export const redis = (client: Redis) => new sm.Redis(client)
+
 
 type WindowOperator<T> = OperatorFunction<T, T[]>
 
-export const sessionWindow = <T>(opts: win.SessionWindowOptions<T>): WindowOperator<T> => {
-    return (source: Observable<T>) => buildOperator(source, opts, new win.SessionWindow(opts))
+export const sessionWindow = <T>(opts: ws.SessionWindowOptions<T>): WindowOperator<T> => {
+    return (source: Observable<T>) => buildOperator(source, opts, new ws.SessionWindow(opts))
 }
 
-export const tumblingWindow = <T>(opts: win.TumblingWindowOptions<T>): WindowOperator<T> => {
-    return (source: Observable<T>) => buildOperator(source, opts, new win.TumblingWindow(opts))
+export const tumblingWindow = <T>(opts: ws.TumblingWindowOptions<T>): WindowOperator<T> => {
+    return (source: Observable<T>) => buildOperator(source, opts, new ws.TumblingWindow(opts))
 }
 
 // export const slidingWindow = <T>(opts: win.SlidingWindowOptions<T>): WindowOperator<T> => {
@@ -22,23 +28,23 @@ export const tumblingWindow = <T>(opts: win.TumblingWindowOptions<T>): WindowOpe
 //     return (source: Observable<T>) => buildOperator(source, opts, new win.CountingWindow(opts))
 // }
 
-export const hoppingWindow = <T>(opts: win.HoppingWindowOptions<T>): WindowOperator<T> => {
-    return (source: Observable<T>) => buildOperator(source, opts, new win.HoppingWindow(opts))
+export const hoppingWindow = <T>(opts: ws.HoppingWindowOptions<T>): WindowOperator<T> => {
+    return (source: Observable<T>) => buildOperator(source, opts, new ws.HoppingWindow(opts))
 }
 
 // export const snapshotWindow = <T>(opts: win.SnapshotWindowOptions<T>): WindowOperator<T> => {
 //     return (source: Observable<T>) => buildOperator(source, opts, new win.SnapshotWindow(opts))
 // }
 
-const buildOperator = <T>(source: Observable<T>, opts: WindowOptions<T>, window: Window<T>): Observable<T[]> => {
+const buildOperator = <T>(source: Observable<T>, opts: WindowingOptions<T>, winSys: WindowingSystem<T>): Observable<T[]> => {
     const observable = new Observable<T[]>(sub => {
-        window.onStart(sub as Subscriber<T[]>)
+        winSys.onStart(sub as Subscriber<T[]>)
 
         source.subscribe({
             async next(event: T) {
-                const formattedEvent = window.formatEvent(event)
-                await window.storage.enqueue(formattedEvent)
-                startDequeueloop(sub, window)
+                const formattedEvent = winSys.formatEvent(event)
+                await winSys.stateManager.enqueue(formattedEvent)
+                startDequeueloop(sub, winSys)
             }
         })
     })
@@ -47,16 +53,16 @@ const buildOperator = <T>(source: Observable<T>, opts: WindowOptions<T>, window:
 }
 
 
-/** Loop on window's storage queue and dequeue event in order to process them one by one.
+/** Loop on stateManager's queue and dequeue event in order to process them one by one.
  * If called while there is another loop runnin, just returns leaving the queue untouched. */
-async function startDequeueloop<T>(subsrciber: Subscriber<T[]>, window: Window<T>) {
-    if (window.isLooping) return
-    window.isLooping = true
+async function startDequeueloop<T>(subsrciber: Subscriber<T[]>, winSys: WindowingSystem<T>) {
+    if (winSys.isLooping) return
+    winSys.isLooping = true
 
-    while (!await window.storage.isQueueEmpty()) {
-        const event = await window.storage.dequeue()
-        await window.onDequeuedEvent(subsrciber, event)
+    while (!await winSys.stateManager.isQueueEmpty()) {
+        const event = await winSys.stateManager.dequeue()
+        await winSys.onDequeuedEvent(subsrciber, event)
     }
 
-    window.isLooping = false
+    winSys.isLooping = false
 }

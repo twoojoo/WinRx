@@ -1,12 +1,12 @@
 import { Subscriber } from "rxjs"
-import { Window, WindowOptions } from "../models/Window"
+import { WindowingSystem, WindowingOptions } from "../models/WindowingSystem"
 import { Bucket } from "../models/Bucket"
 import { DequeuedEvent, EventKey } from "../types/Event"
 import { Duration, toMs } from "../types/Duration"
 
-export type HoppingWindowOptions<T> = WindowOptions<T> & { size: Duration, hop: Duration }
+export type HoppingWindowOptions<T> = WindowingOptions<T> & { size: Duration, hop: Duration }
 
-export class HoppingWindow<T> extends Window<T> {
+export class HoppingWindow<T> extends WindowingSystem<T> {
     private size: number
     private hop: number
 
@@ -32,14 +32,6 @@ export class HoppingWindow<T> extends Window<T> {
         this.setClosingInterval(subscriber)
     }
 
-    async onComplete(subscriber: Subscriber<T[]>): Promise<void> {
-        return
-    }
-
-    async onError(subscriber: Subscriber<T[]>): Promise<void> {
-        return
-    }
-
     async onDequeuedEvent(subscriber: Subscriber<T[]>, event: DequeuedEvent<T>): Promise<void> {
         const eventKey = event.eventKey
 
@@ -49,12 +41,12 @@ export class HoppingWindow<T> extends Window<T> {
         }
         if (!this.buckets[eventKey][0]) {
             // if (event.eventTime < this.lastHopTimestamp) return
-            this.buckets[eventKey] = [new Bucket(this.storage, this.logger, this.lastHopTimestamp)]
+            this.buckets[eventKey] = [new Bucket(this.stateManager, this.logger, this.lastHopTimestamp)]
         }
 
         // if event timestamp is greater than the last window creation date + hop then push a new window (but always max 2)
         if (this.buckets[eventKey].length == 1 && event.eventTime >= this.buckets[eventKey][0].openedAt + this.hop) {
-            this.buckets[eventKey].push(new Bucket(this.storage, this.logger, this.lastHopTimestamp))
+            this.buckets[eventKey].push(new Bucket(this.stateManager, this.logger, this.lastHopTimestamp))
         }
 
         // get owner buckets and insert event

@@ -3,10 +3,10 @@ import { WinRxlogger } from "../utils/Logger"
 
 /** The Storage class handles both the queue (where events are put as soon as they reach
  * the window) and the window's buckets (where events are stored upon each bucket's release).*/
-export abstract class Storage<T> {
+export abstract class StateMananger<T> {
     private logger: WinRxlogger
 
-    setlogger(logger: WinRxlogger): Storage<T> {
+    setlogger(logger: WinRxlogger): StateMananger<T> {
         this.logger = logger
         return this
     }

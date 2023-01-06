@@ -1,12 +1,12 @@
 import { Observer, Subscriber } from "rxjs"
 import { DequeuedEvent, EventKey } from "../types/Event"
 import { Bucket } from "../models/Bucket"
-import { Window, WindowOptions } from "../models/Window"
+import { WindowingSystem, WindowingOptions } from "../models/WindowingSystem"
 import { Duration, toMs } from "../types/Duration"
 
-export type SessionWindowOptions<T> = WindowOptions<T> & { size: Duration, timeout: Duration }
+export type SessionWindowOptions<T> = WindowingOptions<T> & { size: Duration, timeout: Duration }
 
-export class SessionWindow<T> extends Window<T> {
+export class SessionWindow<T> extends WindowingSystem<T> {
     private maxDuration: number
     private timeoutSize: number
 
@@ -31,14 +31,6 @@ export class SessionWindow<T> extends Window<T> {
         return
     }
 
-    async onComplete(subscriber: Subscriber<T[]>): Promise<void> {
-        return
-    }
-
-    async onError(subscriber: Subscriber<T[]>): Promise<void> {
-        return
-    }
-
     async onDequeuedEvent(subscriber: Subscriber<T[]>, event: DequeuedEvent<T>): Promise<void> {
         const eventKey = event.eventKey
 
@@ -51,7 +43,7 @@ export class SessionWindow<T> extends Window<T> {
         }
 
         if (!this.buckets[eventKey] || !this.buckets[eventKey][0]) {
-            const bucket = new Bucket(this.storage, this.logger, event.eventTime)
+            const bucket = new Bucket(this.stateManager, this.logger, event.eventTime)
 
             this.buckets[eventKey] = []
             this.buckets[eventKey].push({

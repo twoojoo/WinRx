@@ -1,33 +1,39 @@
 import { Subscriber } from "rxjs"
 import { DequeuedEvent, EventKey } from "../types/Event"
 import { Bucket } from "../models/Bucket"
-import { Window, WindowOptions } from "../models/Window"
+import { WindowingSystem, WindowingOptions } from "../models/WindowingSystem"
 import { Duration, toMs } from "../types/Duration"
 
-export type TumblingWindowOptions<T> = WindowOptions<T> & { size: Duration }
+export type TumblingWindowOptions<T> = WindowingOptions<T> & { size: Duration }
 
-export class TumblingWindow<T> extends Window<T> {
+export class TumblingWindow<T> extends WindowingSystem<T> {
     private size: number
 
     private buckets: { [key: EventKey]: Bucket<T>[] } = {}
     private closedBuckets: { [key: EventKey]: Bucket<T>[] } = {}
 
+    private lastBucketTimestamp: number
+
     constructor(options: TumblingWindowOptions<T>) {
         super(options)
-
         this.size = toMs(options.size)
     }
 
     async onStart(subscriber: Subscriber<T[]>): Promise<void> {
+        this.lastBucketTimestamp = Date.now()
+
         setInterval(() => {
             for (let key in this.buckets) {
 
                 //close key windows
                 for (let bucket of this.buckets[key]) {
+                    this.lastBucketTimestamp = Date.now() +1
+
                     bucket.close(
                         this.watermark,
                         "flush",
-                        events => this.release(subscriber, events)
+                        events => this.release(subscriber, events),
+                        this.lastBucketTimestamp
                     )
                 }
 
@@ -35,14 +41,6 @@ export class TumblingWindow<T> extends Window<T> {
                 this.buckets[key] = this.buckets[key].filter(b => b.isDestroyed())
             }
         }, this.size)
-    }
-
-    async onComplete(subscriber: Subscriber<T[]>): Promise<void> {
-        return
-    }
-
-    async onError(subscriber: Subscriber<T[]>): Promise<void> {
-        return
     }
 
     async onDequeuedEvent(subscriber: Subscriber<T[]>, event: DequeuedEvent<T>): Promise<void> {
@@ -57,11 +55,11 @@ export class TumblingWindow<T> extends Window<T> {
         }
 
         if (!this.buckets[eventKey]) {
-            this.buckets[eventKey] = [new Bucket(this.storage, this.logger)]
+            this.buckets[eventKey] = [new Bucket(this.stateManager, this.logger, this.lastBucketTimestamp)]
             this.buckets[eventKey][0].push(event)
         } else {
             const openedWindow = this.buckets[eventKey].find(b => !b.isClosed())
-            if (!openedWindow) this.buckets[eventKey].push(new Bucket(this.storage, this.logger))
+            if (!openedWindow) this.buckets[eventKey].push(new Bucket(this.stateManager, this.logger, this.lastBucketTimestamp))
 
             const lastWinIndex = this.buckets[eventKey].length - 1
             await this.buckets[eventKey][lastWinIndex].push(event)

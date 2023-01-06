@@ -1,6 +1,6 @@
 import { Subscriber } from "rxjs";
-import { Memory } from "../Storage";
-import { Storage } from "./Storage";
+import { Memory } from "../StateManager";
+import { StateMananger } from "./StateManager";
 import { IncomingEvent, EventKey, AssignedEvent, DequeuedEvent } from "../types/Event";
 import { Duration, toMs } from "../types/Duration";
 import { LoggerOptions, WinRxlogger } from "../utils/Logger"
@@ -8,16 +8,16 @@ import { LoggerOptions, WinRxlogger } from "../utils/Logger"
 type TimestampEtractor<T> = (value: T) => number
 type KeyExtractor<T> = (value: T) => EventKey
 
-export type WindowOptions<T> = {
-    storage?: Storage<T>,
+export type WindowingOptions<T> = {
+    stateManager?: StateMananger<T>,
     watermark?: Duration,
     withEventTime?: TimestampEtractor<T>,
     withEventKey?: KeyExtractor<T>,
     logger?: LoggerOptions
 }
 
-export abstract class Window<T> {
-    readonly storage: Storage<T>
+export abstract class WindowingSystem<T> {
+    readonly stateManager: StateMananger<T>
     readonly logger: WinRxlogger
 
     protected watermark: number
@@ -26,10 +26,10 @@ export abstract class Window<T> {
 
     isLooping: boolean = false
 
-    constructor(options: WindowOptions<T>) {
+    constructor(options: WindowingOptions<T>) {
         this.watermark = toMs(options.watermark) > 1 ? toMs(options.watermark) : 1 //min 1 ms
         this.logger = new WinRxlogger(options.logger)
-        this.storage = (options.storage || new Memory()).setlogger(this.logger)
+        this.stateManager = (options.stateManager || new Memory()).setlogger(this.logger)
         this.keyExtractor = options.withEventKey || null
         this.timestampExtractor = options.withEventTime || null
     }
@@ -65,6 +65,4 @@ export abstract class Window<T> {
 
     abstract onStart(subscriber: Subscriber<T[]>): Promise<void>
     abstract onDequeuedEvent(subscriber: Subscriber<T[]>, event: DequeuedEvent<T>): Promise<void>
-    abstract onError(subscriber: Subscriber<T[]>): Promise<void>
-    abstract onComplete(subscriber: Subscriber<T[]>): Promise<void>
 }
