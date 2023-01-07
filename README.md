@@ -103,7 +103,7 @@ from(events).pipe(
 
 ### Sliding Window
 
-> **Alert**: when using siliding windows along with an external storage such as
+> **Note**: when using siliding windows along with an external storage such as
 > Redis, if the dequeue loop frequency is lower than the incoming events average
 > rate, a data loss can periodically occurr because some events are dequeued
 > after their window's watermark is expired. Dequeuing is slower with sliding
