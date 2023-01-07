@@ -6,8 +6,7 @@ import { Duration, toMs } from "../types/Duration"
 import { KeyedWindowingSystem, KeyedWindowingOptions } from "../models/KeyedWindowingSystem"
 
 export type SlidingWindowOptions<T> = KeyedWindowingOptions<T> & {
-    size: Duration,
-    // condition: (events: T[]) => boolean
+    size: Duration
 }
 
 export class SlidingWindow<T> extends KeyedWindowingSystem<T> {
@@ -21,7 +20,6 @@ export class SlidingWindow<T> extends KeyedWindowingSystem<T> {
         super(options)
 
         this.size = toMs(options.size)
-        // this.condition = options.condition
     }
 
     async onStart(subscriber: Subscriber<T[]>): Promise<void> {
@@ -78,7 +76,6 @@ export class SlidingWindow<T> extends KeyedWindowingSystem<T> {
                     this.watermark,
                     "flush",
                     events => {
-                        // if (this.condition(events.map(e => e.value))) 
                         this.release(subscriber, events)
                         this.closedBuckets[eventKey] = this.closedBuckets[eventKey].filter(b => b.id != bucketId)
                     },
