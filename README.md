@@ -5,9 +5,12 @@ capablities to make it able to process windows of data from a stream in a more
 customized way.
 
 - [Basic Architecture](#basic-architecture)
+- [Features](#features)
+  - [Event Time vs. Processing Time](#event-time-vs.-processing-time)
+  - [Events Keys](#evetns-keys)
 - [Windowing Systems](#windowing-systems)
-  - [Session Window](#session-window) (supports events keys)
-  - [Sliding Window](#sliding-window) (supports events keys)
+  - [Session Window](#session-window)
+  - [Sliding Window](#sliding-window)
   - [Tumbling Window](#tumbling-window)
   - [Hopping Window](#hopping-window)
   - [Counting Window](#counting-window)
@@ -30,10 +33,7 @@ a new bucket, or close an existing one to release a **window of events**.
 
 <br>
 
-
 ### Supported Storage Types
-
-
 
 <!-- ## General behaviour
 
@@ -50,7 +50,7 @@ a new bucket, or close an existing one to release a **window of events**.
 
 ### Event Time vs. Processing Time
 
-### Event Keys
+### Events Keys
 
 <!-- ### Use Event Time instead of Processng Time
 
@@ -99,6 +99,7 @@ from(events).pipe(
  * hello world
  */
 ``` -->
+
 ## Windowing Systems
 
 ### Tumbling Window
