@@ -28,7 +28,7 @@ export class SessionWindow<T> extends KeyedWindowingSystem<T> {
     }
 
     async onStart(observer: Observer<T[]>): Promise<void> {
-        return
+        this.logWindowStart("session")
     }
 
     async onDequeuedEvent(subscriber: Subscriber<T[]>, event: DequeuedEvent<T>): Promise<void> {

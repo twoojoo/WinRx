@@ -53,8 +53,8 @@ export abstract class WindowingSystem<T> {
         subscriber.next(events.map(e => e.value))
     }
 
-    logWindowStart(kind: "session" | "tumbling" | "hopping") {
-        this.logger.info(`[window started]  :: kind: ${this.logger.yellow(kind + " window")}`)
+    logWindowStart(kind: "session" | "tumbling" | "hopping" | "sliding") {
+        this.logger.info(`[window started]  :: kind: ${this.logger.cyan(kind + " window")}`)
     }
 
     abstract onStart(subscriber: Subscriber<T[]>): Promise<void>

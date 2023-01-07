@@ -20,9 +20,9 @@ export const tumblingWindow = <T>(opts: ws.TumblingWindowOptions<T>): WindowOper
     return (source: Observable<T>) => buildOperator(source, opts, new ws.TumblingWindow(opts))
 }
 
-// export const slidingWindow = <T>(opts: win.SlidingWindowOptions<T>): WindowOperator<T> => {
-//     return (source: Observable<T>) => buildOperator(source, opts, new win.SlidingWindow(opts))
-// }
+export const slidingWindow = <T>(opts: ws.SlidingWindowOptions<T>): WindowOperator<T> => {
+    return (source: Observable<T>) => buildOperator(source, opts, new ws.SlidingWindow(opts))
+}
 
 // export const countingWindow = <T>(opts: win.CountingWindowOptions<T>): WindowOperator<T> => {
 //     return (source: Observable<T>) => buildOperator(source, opts, new win.CountingWindow(opts))

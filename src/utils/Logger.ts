@@ -51,8 +51,6 @@ export class WinRxlogger {
         return "\x1b[36m" + args.join(" ") + "\x1b[0m"
     }
 
-    "\x1b[36m"
-
     private print(prefix: string, ...args: any[]) {
         const date = new Date().toISOString()
         if (this.toFile) appendFileSync(this.toFile, `${date} :: ` + prefix + " :: " + args.join(" ") + "\n")

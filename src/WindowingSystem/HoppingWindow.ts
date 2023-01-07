@@ -28,7 +28,7 @@ export class HoppingWindow<T> extends WindowingSystem<T> {
     }
 
     async onStart(subscriber: Subscriber<T[]>): Promise<void> {
-        // this.startupTimestamp = Date.now()
+        this.logWindowStart("hopping")
         this.setOpeningInterval()
         this.setClosingInterval(subscriber)
     }

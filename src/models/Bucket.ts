@@ -83,7 +83,7 @@ export class Bucket<T> {
             this.logger.info(`[bucket released] :: id: ${this.logger.cyan(this.id)} - key: ${this.logger.cyan(events[0]?.eventKey) || "default"} - items: ${this.logger.yellow(events.length)}`)
         }, watermark)
 
-        this.logger.info(`[bucket closed]   :: id: ${this.logger.cyan(this.id)} - time: ${this.logger.cyan(this.closedAt)} - items: ${this.eventCounter}`)
+        this.logger.info(`[bucket closed]   :: id: ${this.logger.cyan(this.id)} - time: ${this.logger.cyan(this.closedAt)} - items: ${this.logger.yellow(this.eventCounter)}`)
     }
 
     /** Destroy = closed + watermarked */

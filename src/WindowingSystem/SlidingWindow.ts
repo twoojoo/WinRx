@@ -1,15 +1,16 @@
 import { Subscriber } from "rxjs"
-import { Event, EventKey } from "../types/Event"
+import { DequeuedEvent, EventKey } from "../types/Event"
 import { Bucket } from "../models/Bucket"
-import { WindowingSystem, WindowingOptions } from "../models/WindowingSystem"
+import { WindowingOptions } from "../models/WindowingSystem"
 import { Duration, toMs } from "../types/Duration"
+import { KeyedWindowingSystem, KeyedWindowingOptions } from "../models/KeyedWindowingSystem"
 
-export type SlidingWindowOptions<T> = WindowingOptions<T> & {
+export type SlidingWindowOptions<T> = KeyedWindowingOptions<T> & {
     size: Duration,
-    condition: (events: T[]) => boolean
+    // condition: (events: T[]) => boolean
 }
 
-export class SlidingWindow<T> extends WindowingSystem<T> {
+export class SlidingWindow<T> extends KeyedWindowingSystem<T> {
     private size: number
     private condition: (events: T[]) => boolean
 
@@ -20,58 +21,56 @@ export class SlidingWindow<T> extends WindowingSystem<T> {
         super(options)
 
         this.size = toMs(options.size)
-        this.condition = options.condition
+        // this.condition = options.condition
     }
 
     async onStart(subscriber: Subscriber<T[]>): Promise<void> {
-        return
+        this.logWindowStart("sliding")
     }
 
-    async onComplete(subscriber: Subscriber<T[]>): Promise<void> {
-        return
-    }
-
-    async onError(subscriber: Subscriber<T[]>): Promise<void> {
-        return
-    }
-
-    async onEvent(subscriber: Subscriber<T[]>, event: Event<T>): Promise<void> {
+    async onDequeuedEvent(subscriber: Subscriber<T[]>, event: DequeuedEvent<T>): Promise<void> {
         const eventKey = event.eventKey
-        console.log("incoming event", event.value)
+        let assigned = false
 
         //late data
         for (let bucket of (this.closedBuckets[eventKey] || [])) {
             if (bucket.ownsEvent(event)) {
-                console.log("event", event.value, "in closed bucket", bucket.id)
+                assigned = true
                 await bucket.push(event)
             }
         }
 
-        const eventBucket = new Bucket(this.stateManager, event.eventTime)
-        setTimeout(() => this.closeBucket(subscriber, eventKey, eventBucket.id), this.size)
+        const eventBucket = new Bucket(this.stateManager, this.logger, event.eventTime)
+        const delay = Date.now() - event.eventTime
 
-        if (!this.buckets[eventKey]) this.buckets[eventKey] = []
-        this.buckets[eventKey].push(eventBucket)
+        if (delay < this.size) {
+            assigned = true
 
-        console.log("buckets number", this.buckets[eventKey].length)
+            setTimeout(() => {
+                this.closeBucket(subscriber, eventKey, eventBucket.id)
+            }, this.size - delay)
+
+            if (!this.buckets[eventKey]) this.buckets[eventKey] = []
+            this.buckets[eventKey].push(eventBucket)
+        }
 
         for (let bucket of this.buckets[eventKey]) {
             if (bucket.ownsEvent(event)) {
-                console.log("event", event.value, "in opened bucket", bucket.id)
+                assigned = true
                 await bucket.push(event)
             }
+        }
+
+        if (!assigned) {
+            this.logger.warning(`[event lost]   :: key: ${this.logger.cyan(event.eventKey)} - time ${this.logger.cyan(event.eventTime)}`)
         }
     }
 
     closeBucket(subscriber: Subscriber<T[]>, eventKey: EventKey, bucketId: string) {
-        
         this.buckets[eventKey] = this.buckets[eventKey].filter(b => {
             const isTarget = b.id == bucketId
-            
-            if (isTarget) {
-                console.log("closing bucket", bucketId)
 
-                // move bucket to the closed buckets object
+            if (isTarget) {
                 if (!this.closedBuckets[eventKey]) this.closedBuckets[eventKey] = []
                 this.closedBuckets[eventKey].push(b)
 
@@ -79,12 +78,11 @@ export class SlidingWindow<T> extends WindowingSystem<T> {
                     this.watermark,
                     "flush",
                     events => {
-                        //check window output condition
-                        if (this.condition(events.map(e => e.value))) this.release(subscriber, events)
-
-                        //remove bucket from the closed bukcet object
+                        // if (this.condition(events.map(e => e.value))) 
+                        this.release(subscriber, events)
                         this.closedBuckets[eventKey] = this.closedBuckets[eventKey].filter(b => b.id != bucketId)
-                    }
+                    },
+                    b.openedAt + this.size
                 )
             }
 
