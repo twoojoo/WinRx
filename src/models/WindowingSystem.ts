@@ -53,7 +53,7 @@ export abstract class WindowingSystem<T> {
         subscriber.next(events.map(e => e.value))
     }
 
-    logWindowStart(kind: "session" | "tumbling" | "hopping" | "sliding") {
+    logWindowStart(kind: "session" | "tumbling" | "hopping" | "sliding" | "counting") {
         this.logger.printHeader()
         this.logger.info(`[window started]  | kind: ${this.logger.cyan(kind + " window")}`)
     }

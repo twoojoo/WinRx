@@ -37,70 +37,11 @@ a new bucket, or close an existing one to release a **window of events**.
 
 <br>
 
-<!-- ## General behaviour
-
-- Every window operator receives single **T** value and outputs a **T[]** value
-  each time a window gets closed.
-- Whenever an _error_ or _complete_ event is triggered, active windows gets
-  forcibly closed, unless the **closeOnError** and **closeOnComplete** options
-  are set to false (true if omitted). In this case all values that are not
-  included in an already closed window will be lost.
-- In case of an **error** event, the value is still passed as an array of length
-  1 to keep consistency with next events. -->
-
 ## Features
 
 ### Event Time vs. Processing Time
 
 ### Events Keys
-
-<!-- ### Use Event Time instead of Processng Time
-
-### Split Windows with Event Key
-
-Events streamed throught the same observable can be split into multiple
-separated "windowing pipelines" by providing a callback to extract a key from
-the event itself (otherwise all events come with the "default" key). In this
-way, events with different keys will be treated as separated streams flowing
-through the same pipeline.
-
-```typescript
-const events = [{
-  key: 1,
-  value: "hola",
-}, {
-  key: 1,
-  value: "todo",
-}, {
-  key: 2,
-  value: "hello",
-}, {
-  key: 1,
-  value: "mundo",
-}, {
-  key: 2,
-  value: "world",
-}];
-
-from(events).pipe(
-  tumblingWindow({
-    size: 100,
-    withEventKey: (e: any) => e.key,
-  }),
-).subscribe((window: any[]) =>
-  console.log(
-    window
-      .map((event) => event.value)
-      .join(" "),
-  )
-);
-
-/**
- * output:
- * hola todo mundo
- * hello world
- */
-``` -->
 
 ## Windowing Systems
 
