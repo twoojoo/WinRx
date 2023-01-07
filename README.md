@@ -4,6 +4,8 @@ By introducing new operators, **WinRx** allows you to extend RXJS' windowing
 capablities to make it able to process windows of data from a stream in a more
 customized way.
 
+## Summary
+
 - [Basic Architecture](#basic-architecture)
 - [Features](#features)
   - [Event Time vs. Processing Time](#event-time-vs.-processing-time)
@@ -18,7 +20,7 @@ customized way.
   - [Memory](#memory)
   - [Redis](#redis)
 
-### Basic Architecture
+## Basic Architecture
 
 In order to avoid back pressure, all events are stored into a **queue** as soon
 as they are ingested. A **loop** keeps dequeueing them so that they can be
