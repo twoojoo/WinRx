@@ -24,7 +24,7 @@ close an existing one to release a **window of events**.
 - [Tumbling Window](#tumbling-window)
 - [Session Window](#session-window)
 - [Hopping Window](#hopping-window)
-- [Snapshot Window](#snapshot-window)
+- [Sliding Window](#sliding-window)
 - [Counting Window](#counting-window)
 
 ### Supported Storage Types
@@ -101,7 +101,7 @@ from(events).pipe(
 
 ### Hopping Window
 
-### Snapshot Window
+### Sliding Window
 
 ### Counting Window
 
