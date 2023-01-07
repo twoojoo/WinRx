@@ -6,10 +6,12 @@ export type LoggerOptions = {
 }
 
 export class WinRxlogger {
+    private windowId: string | number
     private toConsole: boolean = false
     private toFile: string = undefined
 
-    constructor(options: LoggerOptions) {
+    constructor(options: LoggerOptions, windowId: string | number) {
+        this.windowId = windowId
         this.toConsole = options?.toConsole || false
         this.toFile = options?.toFile || undefined
         this.toFile && writeFileSync(this.toFile, "")
@@ -53,12 +55,42 @@ export class WinRxlogger {
 
     private print(prefix: string, ...args: any[]) {
         const date = new Date().toISOString()
-        if (this.toFile) appendFileSync(this.toFile, `${date} :: ` + prefix + " :: " + args.join(" ") + "\n")
+
+        if (this.toFile) appendFileSync(this.toFile, `${date} :: ` + prefix + " :: " + this.windowId + " :: " + args.join(" ") + "\n")
+
         if (this.toConsole) {
             const coloredPrefix = prefix == "[info]" ? this.green(prefix) :
                 prefix == "[error]" ? this.red(prefix) : this.yellow(prefix)
-            const consoleText = this.purple(date) + this.white(` :: `) + coloredPrefix + this.white(" :: ") + this.white(args.join(" ") + "\n")
+
+            const consoleText =
+                this.purple(date) +
+                this.white(` | `) +
+                coloredPrefix +
+                this.white(" | [win: ") +
+                this.cyan(this.windowId) +
+                this.white("] | ") +
+                this.white(args.join(" ") + "\n")
+
             process.stdout.write(consoleText)
         }
     }
+
+    printHeader() {
+        const consoleText = this.white(
+            "datetime                ",
+            "|",
+            "kind  ",
+            "|",
+            "window  ",
+            "|",
+            "action           ",
+            "|",
+            "spec",
+            "\n"
+        )
+
+        process.stdout.write("\n")
+        process.stdout.write(consoleText)
+        process.stdout.write(this.white("---------------------------------------------------------------------------------------------------------------------------------------------\n"))
+    }                                                                                                                                                                                 
 }

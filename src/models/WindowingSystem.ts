@@ -1,22 +1,23 @@
-import { Subscriber } from "rxjs";
-import { Memory } from "../StateManager";
-import { StateMananger } from "./StateManager";
 import { IncomingEvent, EventKey, AssignedEvent, DequeuedEvent } from "../types/Event";
-import { Duration, toMs } from "../types/Duration";
 import { LoggerOptions, WinRxlogger } from "../utils/Logger"
+import { Duration, toMs } from "../types/Duration";
+import { StateMananger } from "./StateManager";
+import { Memory } from "../StateManager";
+import { Subscriber } from "rxjs";
 
 type TimestampEtractor<T> = (value: T) => number
 type KeyExtractor<T> = (value: T) => EventKey
 
 export type WindowingOptions<T> = {
+    id?: string | number
     stateManager?: StateMananger<T>,
     watermark?: Duration,
     withEventTime?: TimestampEtractor<T>,
-    // withEventKey?: KeyExtractor<T>,
     logger?: LoggerOptions
 }
 
 export abstract class WindowingSystem<T> {
+    readonly id: string | number
     readonly stateManager: StateMananger<T>
     readonly logger: WinRxlogger
 
@@ -28,9 +29,10 @@ export abstract class WindowingSystem<T> {
 
     constructor(options: WindowingOptions<T>) {
         this.watermark = toMs(options.watermark) > 1 ? toMs(options.watermark) : 1 //min 1 ms
-        this.logger = new WinRxlogger(options.logger)
         this.stateManager = (options.stateManager || new Memory()).setlogger(this.logger)
         this.timestampExtractor = options.withEventTime
+        this.id = options.id || "0"
+        this.logger = new WinRxlogger(options.logger, this.id)
     }
 
     getEventTimestamp(value: T): number {
@@ -40,11 +42,9 @@ export abstract class WindowingSystem<T> {
     }
 
     formatEvent(event: T): IncomingEvent<T> {
-        const eventTime = this.getEventTimestamp(event)
-
         return {
             eventKey: "default",
-            eventTime,
+            eventTime: this.getEventTimestamp(event),
             value: event
         }
     }
@@ -54,7 +54,8 @@ export abstract class WindowingSystem<T> {
     }
 
     logWindowStart(kind: "session" | "tumbling" | "hopping" | "sliding") {
-        this.logger.info(`[window started]  :: kind: ${this.logger.cyan(kind + " window")}`)
+        this.logger.printHeader()
+        this.logger.info(`[window started]  | kind: ${this.logger.cyan(kind + " window")}`)
     }
 
     abstract onStart(subscriber: Subscriber<T[]>): Promise<void>
