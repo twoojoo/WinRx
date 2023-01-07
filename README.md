@@ -1,5 +1,7 @@
 # WinRx - A Windowing System for RXJS
 
+> **Note**: this project is for learning purpose only
+
 By introducing new operators, **WinRx** allows you to extend RXJS' windowing
 capablities to make it able to process windows of data from a stream in a more
 customized way.
