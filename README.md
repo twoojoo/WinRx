@@ -102,6 +102,7 @@ from(events).pipe(
 ### Hopping Window
 
 ### Sliding Window
+> **Note**: when using siliding window along with an external storage such as Redis, if the dequeue loop frequenct is lower than the incoming events average rate, a data loss can periodically occurr because some events are dequeued after their window's watermark is expired. Dequeuing is slower with sliding windows because they involves a lot more timeouts than the other windowing system, easily ending in a Nodejs overhead.
 
 ### Counting Window
 

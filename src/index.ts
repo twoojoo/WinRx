@@ -52,6 +52,8 @@ const buildOperator = <T>(source: Observable<T>, opts: WindowingOptions<T>, winS
     return observable
 }
 
+// let lastDequeuedTs: number = undefined
+// const dqTimes: number[] = []
 
 /** Loop on stateManager's queue and dequeue event in order to process them one by one.
  * If called while there is another loop runnin, just returns leaving the queue untouched. */
@@ -60,6 +62,15 @@ async function startDequeueloop<T>(subsrciber: Subscriber<T[]>, winSys: Windowin
     winSys.isLooping = true
 
     while (!await winSys.stateManager.isQueueEmpty()) {
+        // if (lastDequeuedTs) {
+        //     const DqTime = Date.now() - lastDequeuedTs
+        //     console.log(DqTime)
+        //     dqTimes.push(DqTime)
+        //     const sum = dqTimes.reduce((a, b) => a + b, 0)
+        //     console.log(sum / dqTimes.length, dqTimes[dqTimes.length - 1])
+        // }
+
+        // lastDequeuedTs = Date.now()
         const event = await winSys.stateManager.dequeue()
         await winSys.onDequeuedEvent(subsrciber, event)
     }

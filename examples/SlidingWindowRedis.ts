@@ -8,8 +8,8 @@ const client = new Redis("redis://localhost:6379")
 const subj = new Subject()
 subj.pipe(
     slidingWindow<any>({
-        size: [2, "s"], 
-        watermark: [1000, "ms"],
+        size: [5, "s"], 
+        watermark: [5, "s"],
         logger: {toConsole: true},
         withEventTime: e => e.ts,
         stateManager: redis(client)
@@ -20,7 +20,7 @@ subj.pipe(
 
 (async function () {
     for (let i = 0; i < 20000; i++) {
-        await delay(200)
+        // await delay(300)
         subj.next({
             i,
             ts: Date.now()

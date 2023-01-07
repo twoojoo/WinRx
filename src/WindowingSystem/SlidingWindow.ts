@@ -1,7 +1,6 @@
 import { Subscriber } from "rxjs"
 import { DequeuedEvent, EventKey } from "../types/Event"
 import { Bucket } from "../models/Bucket"
-import { WindowingOptions } from "../models/WindowingSystem"
 import { Duration, toMs } from "../types/Duration"
 import { KeyedWindowingSystem, KeyedWindowingOptions } from "../models/KeyedWindowingSystem"
 
@@ -11,7 +10,6 @@ export type SlidingWindowOptions<T> = KeyedWindowingOptions<T> & {
 
 export class SlidingWindow<T> extends KeyedWindowingSystem<T> {
     private size: number
-    private condition: (events: T[]) => boolean
 
     private buckets: { [key: EventKey]: Bucket<T>[] } = {}
     private closedBuckets: { [key: EventKey]: Bucket<T>[] } = {}
@@ -49,7 +47,7 @@ export class SlidingWindow<T> extends KeyedWindowingSystem<T> {
             }, this.size - delay)
 
             if (!this.buckets[eventKey]) this.buckets[eventKey] = []
-            this.buckets[eventKey].push(eventBucket)
+            await this.buckets[eventKey].push(eventBucket)
         }
 
         for (let bucket of this.buckets[eventKey]) {
