@@ -1,5 +1,5 @@
 import { EventEmitter } from "events"
-import { sessionWindow, Storage } from "../src"
+import { sessionWindow, redis } from "../src"
 import { Observable, tap, map } from "rxjs"
 import delay from "delay"
 import Redis from "ioredis"
@@ -25,11 +25,11 @@ new Observable<Event>(subscriber => {
     emitter.on("complete", () => subscriber.complete())
 }).pipe(
     tap(e => countBefore[e.key]++),
-    sessionWindow({
-        stateManager: new Storage.Redis(client),
+    sessionWindow<any>({
+        stateManager: redis(client),
         size: [1, "s"],
         timeout: [500, "ms"],
-        watermark: [200, "ms"],
+        watermark: [1, "s"],
         withEventKey: v => v.key,
         withEventTime: v => v.timestamp,
         logger: {toConsole: true}

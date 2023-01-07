@@ -33,38 +33,47 @@ export class SessionWindow<T> extends KeyedWindowingSystem<T> {
 
     async onDequeuedEvent(subscriber: Subscriber<T[]>, event: DequeuedEvent<T>): Promise<void> {
         const eventKey = event.eventKey
+        let assigned = false
 
         //late data
         for (let bucket of (this.closedBuckets[eventKey] || [])) {
             if (bucket.ownsEvent(event)) {
                 await bucket.push(event)
+                assigned = true
                 return
             }
         }
 
-        if (!this.buckets[eventKey] || !this.buckets[eventKey][0]) {
-            const bucket = new Bucket(this.stateManager, this.logger, event.eventTime)
+        if (!assigned) {
+            if (!this.buckets[eventKey] || !this.buckets[eventKey][0]) {
+                const bucket = new Bucket(this.stateManager, this.logger, event.eventTime)
 
-            this.buckets[eventKey] = []
-            this.buckets[eventKey].push({
-                bucket,
-                durationTimer: setTimeout(async () => await this.closeBucket(subscriber, eventKey, bucket.id), this.maxDuration),
-                timeoutTimer: setTimeout(async () => await this.closeBucket(subscriber, eventKey, bucket.id), this.timeoutSize)
-            })
+                this.buckets[eventKey] = []
+                this.buckets[eventKey].push({
+                    bucket,
+                    durationTimer: setTimeout(async () => await this.closeBucket(subscriber, eventKey, bucket.id), this.maxDuration),
+                    timeoutTimer: setTimeout(async () => await this.closeBucket(subscriber, eventKey, bucket.id), this.timeoutSize)
+                })
 
-            await this.buckets[eventKey][0].bucket.push(event)
-        }
+                assigned = true
+                await this.buckets[eventKey][0].bucket.push(event)
 
-        else {
-            const owner = this.buckets[eventKey].find(b => b.bucket.ownsEvent(event))
-            if (!owner) {
-                return
+            } else {
+                const owner = this.buckets[eventKey].find(b => b.bucket.ownsEvent(event))
+
+                if (owner) {
+                    assigned = true
+                    clearTimeout(owner.timeoutTimer)
+                    owner.timeoutTimer = setTimeout(async () => await this.closeBucket(subscriber, eventKey, owner.bucket.id), this.timeoutSize)
+
+                    await owner.bucket.push(event)
+                }
+
             }
 
-            clearTimeout(owner.timeoutTimer)
-            owner.timeoutTimer = setTimeout(async () => await this.closeBucket(subscriber, eventKey, owner.bucket.id), this.timeoutSize)
-
-            await owner.bucket.push(event)
+            if (!assigned) {
+                this.logger.warning(`[event lost]   :: key: ${this.logger.yellow(event.eventKey)} - time ${this.logger.yellow(event.eventTime)}`)
+            }
         }
     }
 
