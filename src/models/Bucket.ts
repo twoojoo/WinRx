@@ -23,7 +23,7 @@ export class Bucket<T> {
         this.logger = logger
         this.openedAt = timestamp
         this.stateManager = stateManager
-        this.logger.info(`[bucket opened]   :: id: ${this.logger.yellow(this.id)} - time: ${this.logger.yellow(this.openedAt)}`)
+        this.logger.info(`[bucket opened]   :: id: ${this.logger.cyan(this.id)} - time: ${this.logger.cyan(this.openedAt)}`)
     }
 
     /** Determin if the bucket is closed and watermarked */
@@ -80,10 +80,10 @@ export class Bucket<T> {
             const events = await this[mode]()
             this.destroy()
             callback(events)
-            this.logger.info(`[bucket released] :: id: ${this.logger.yellow(this.id)} - key: ${this.logger.yellow(events[0]?.eventKey) || "default"} - items: ${this.logger.yellow(events.length)}`)
+            this.logger.info(`[bucket released] :: id: ${this.logger.cyan(this.id)} - key: ${this.logger.cyan(events[0]?.eventKey) || "default"} - items: ${this.logger.yellow(events.length)}`)
         }, watermark)
-        
-        this.logger.info(`[bucket closed]   :: id: ${this.logger.yellow(this.id)} - time: ${this.logger.yellow(this.closedAt)} - items: ${this.eventCounter}`)
+
+        this.logger.info(`[bucket closed]   :: id: ${this.logger.cyan(this.id)} - time: ${this.logger.cyan(this.closedAt)} - items: ${this.eventCounter}`)
     }
 
     /** Destroy = closed + watermarked */
