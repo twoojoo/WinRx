@@ -63,15 +63,16 @@ export class Redis<T> extends StateMananger<T> {
 
     private async getOrFlush(bucketId: string, action: "get" | "flush") {
         const events: AssignedEvent<T>[] = []
-
         for (let i = 1; i <= this.counters[bucketId]; i++) {
-            const key = `winrx-${bucketId}-${this.counters[bucketId]}`
+            const key = `winrx-${bucketId}-${i}`
 
             const event = JSON.parse(await this.redisClient.get(key))
             if (event) events.push(event)
         }
 
         if (action == "flush") await this.clear(bucketId)
+
+        console.log(events.map(e => e.value["i"]))
 
         return events
     }
