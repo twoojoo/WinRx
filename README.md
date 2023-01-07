@@ -35,8 +35,6 @@ a new bucket, or close an existing one to release a **window of events**.
 
 <br>
 
-### Supported Storage Types
-
 <!-- ## General behaviour
 
 - Every window operator receives single **T** value and outputs a **T[]** value
