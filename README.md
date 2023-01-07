@@ -9,7 +9,7 @@ customized way.
 - [Basic Architecture](#basic-architecture)
 - [Features](#features)
   - [Event Time vs. Processing Time](#event-time-vs.-processing-time)
-  - [Events Keys](#evetns-keys)
+  - [Events Keys](#events-keys)
 - [Windowing Systems](#windowing-systems)
   - [Session Window](#session-window)
   - [Sliding Window](#sliding-window)
