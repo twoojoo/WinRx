@@ -35,7 +35,6 @@ export class SessionWindow<T> extends KeyedWindowingSystem<T> {
         const eventKey = event.eventKey
         let assigned = false
 
-        //late data
         for (let bucket of (this.closedBuckets[eventKey] || [])) {
             if (bucket.ownsEvent(event)) {
                 await bucket.push(event)
@@ -83,8 +82,6 @@ export class SessionWindow<T> extends KeyedWindowingSystem<T> {
             const isTarget = b.bucket.id == bucketId
 
             if (isTarget) {
-
-                // move bucket to the closed buckets object
                 if (!this.closedBuckets[eventKey]) this.closedBuckets[eventKey] = []
                 this.closedBuckets[eventKey].push(b.bucket)
 
@@ -93,8 +90,6 @@ export class SessionWindow<T> extends KeyedWindowingSystem<T> {
                     "flush",
                     events => {
                         this.release(subscriber, events)
-
-                        //remove bucket from the closed bukcet object
                         this.closedBuckets[eventKey] = this.closedBuckets[eventKey].filter(b => b.id != bucketId)
                     }
                 )

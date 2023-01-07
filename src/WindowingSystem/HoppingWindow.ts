@@ -10,19 +10,14 @@ export class HoppingWindow<T> extends WindowingSystem<T> {
     private size: number
     private hop: number
 
-    private lastHopIndex: number = 0
     private buckets: Bucket<T>[] = []
     private closedBuckets: Bucket<T>[] = []
-
-    //every window uses this timestamp as starting timestamp
     private lastHopTimestamp: number
-    // private startupTimestamp: number
 
     constructor(options: HoppingWindowOptions<T>) {
         super(options)
         this.size = toMs(options.size)
 
-        //if hop = size force next window to start after previous
         if (this.size == toMs(options.hop)) this.hop = toMs(options.hop) + 1
         else this.hop = toMs(options.hop)
     }

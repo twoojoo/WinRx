@@ -1,7 +1,7 @@
 import { AssignedEvent, DequeuedEvent, IncomingEvent } from "../types/Event"
 import { WinRxlogger } from "../utils/Logger"
 
-/** The Storage class handles both the queue (where events are put as soon as they reach
+/** The StateManager class handles both the queue (where events are put as soon as they reach
  * the window) and the window's buckets (where events are stored upon each bucket's release).*/
 export abstract class StateMananger<T> {
     private logger: WinRxlogger
