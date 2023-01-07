@@ -21,10 +21,10 @@ a new bucket, or close an existing one to release a **window of events**.
 
 ### Supported Windowing Systems
 
+- [Session Window](#session-window)   (supports keys)
+- [Sliding Window](#sliding-window)   (supports keys)
 - [Tumbling Window](#tumbling-window)
-- [Session Window](#session-window)
 - [Hopping Window](#hopping-window)
-- [Sliding Window](#sliding-window)
 - [Counting Window](#counting-window)
 
 ### Supported Storage Types
