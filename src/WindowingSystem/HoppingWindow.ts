@@ -10,12 +10,9 @@ export class HoppingWindow<T> extends WindowingSystem<T> {
     private size: number
     private hop: number
 
-    //window should be ordered by creation
-    //index 0 always have the oldes alive window
-    // private buckets: { [key: EventKey]: Bucket<T>[] } = {}
-
     private lastHopIndex: number = 0
-    private buckets: { [key: EventKey]: Bucket<T> }[] = []
+    private buckets:  Bucket<T>[] = []
+    private closedBuckets:  Bucket<T>[] = []
 
     //every window uses this timestamp as starting timestamp
     private lastHopTimestamp: number
@@ -37,8 +34,8 @@ export class HoppingWindow<T> extends WindowingSystem<T> {
     }
 
     async onDequeuedEvent(subscriber: Subscriber<T[]>, event: DequeuedEvent<T>): Promise<void> {
-        const eventKey = event.eventKey
-        this.buckets.forEach(b => { if (!b[eventKey]) b[eventKey] = undefined })
+        // const eventKey = event.eventKey
+        // this.buckets.forEach(b => { if (!b[eventKey]) b[eventKey] = undefined })
         // const lastCreatedIndex = this.buckets.length - 1
 
         // // create first bucket if missing
@@ -47,15 +44,25 @@ export class HoppingWindow<T> extends WindowingSystem<T> {
         // }
 
         //push to event owners
-        // for (let i = 0; i < this.buckets.length; i++) {
-        //     if (this.buckets[i][eventKey]?.ownsEvent(event)) {
-        //         this.buckets[i][eventKey].push(event)
-        //     }
-        // }
+        for (let i = 0; i < this.buckets.length; i++) {
+            if (this.buckets[i][eventKey]?.ownsEvent(event)) {
+                await this.buckets[i][eventKey].push(event)
+            }
+        }
     }
 
-    async closeBuckets(subscriber: Subscriber<T[]>) {
+    async closeBucket(subscriber: Subscriber<T[]>) {
         this.lastHopIndex
+
+        const bucketToClose = await this.buckets.shift()
+            bucketToClose.close(
+                this.watermark,
+                "flush",
+                events => {
+                    this.release(subscriber, events)
+                    this.closedBuckets = this.closedBuckets.filter(b => b.id != bucketToClose.id) || []
+                }
+            )
 
         // for (let )
         // for (let key in this.buckets) {
@@ -86,10 +93,10 @@ export class HoppingWindow<T> extends WindowingSystem<T> {
         if (this.hop >= this.size) firstCloseTiemout = this.size
 
         setTimeout(async () => {
-            await this.closeBuckets(subscriber)
+            await this.closeBucket(subscriber)
 
             setInterval(async () => {
-                await this.closeBuckets(subscriber)
+                await this.closeBucket(subscriber)
             }, closeIntervalSize)
 
         }, firstCloseTiemout)

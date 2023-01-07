@@ -4,9 +4,9 @@ By introducing new operators, **WinRx** allows you to extend RXJS' windowing
 capablities to make it able to process windows of data from a stream in a more
 customized way.
 
-### Architecture
+### Basic Architecture
 
-In order to prevent data races, all events are stored into a **queue** as soon
+In order to avoid back pressure, all events are stored into a **queue** as soon
 as they are ingested. A **loop** keeps dequeueing them so that they can be actually
 processed one by one by the **windowing system**. The windowing systems handles the
 assignment of each event to a specific **bucket**, basing on event timestamp (event
