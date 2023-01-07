@@ -11,12 +11,12 @@ export class HoppingWindow<T> extends WindowingSystem<T> {
     private hop: number
 
     private lastHopIndex: number = 0
-    private buckets:  Bucket<T>[] = []
-    private closedBuckets:  Bucket<T>[] = []
+    private buckets: Bucket<T>[] = []
+    private closedBuckets: Bucket<T>[] = []
 
     //every window uses this timestamp as starting timestamp
     private lastHopTimestamp: number
-    private startupTimestamp: number
+    // private startupTimestamp: number
 
     constructor(options: HoppingWindowOptions<T>) {
         super(options)
@@ -28,77 +28,73 @@ export class HoppingWindow<T> extends WindowingSystem<T> {
     }
 
     async onStart(subscriber: Subscriber<T[]>): Promise<void> {
-        this.startupTimestamp = Date.now()
+        // this.startupTimestamp = Date.now()
         this.setOpeningInterval()
         this.setClosingInterval(subscriber)
     }
 
     async onDequeuedEvent(subscriber: Subscriber<T[]>, event: DequeuedEvent<T>): Promise<void> {
-        // const eventKey = event.eventKey
-        // this.buckets.forEach(b => { if (!b[eventKey]) b[eventKey] = undefined })
-        // const lastCreatedIndex = this.buckets.length - 1
+        let assigned = false
+        let owners = 0
 
-        // // create first bucket if missing
-        // if (!this.buckets[this.lastCreatedIndex][eventKey]) {
-        //     this.buckets[this.lastHopIndex][eventKey] = new Bucket(this.stateManager, this.logger, this.lastHopTimestamp)
-        // }
-
-        //push to event owners
-        for (let i = 0; i < this.buckets.length; i++) {
-            if (this.buckets[i][eventKey]?.ownsEvent(event)) {
-                await this.buckets[i][eventKey].push(event)
+        for (let bucket of this.closedBuckets) {
+            if (bucket.ownsEvent(event)) {
+                assigned = true
+                owners++
+                await bucket.push(event)
             }
+        }
+
+        for (let bucket of this.buckets) {
+            if (bucket.ownsEvent(event)) {
+                assigned = true
+                owners++
+                await bucket.push(event)
+            }
+        }
+
+        if (!assigned) {
+            this.logger.warning(`[event lost]   :: key: ${this.logger.yellow(event.eventKey)} - time ${this.logger.yellow(event.eventTime)}`)
+        }
+
+        if (owners > 2) {
+            console.log(">2", Date.now())
         }
     }
 
+    openBucket() {
+        this.lastHopTimestamp = this.lastHopTimestamp ? this.lastHopTimestamp + this.hop : Date.now()
+        this.buckets.push(new Bucket(this.stateManager, this.logger, this.lastHopTimestamp))
+    }
+
     async closeBucket(subscriber: Subscriber<T[]>) {
-        this.lastHopIndex
+        const bucketToClose = this.buckets.shift()
+        this.closedBuckets.push(bucketToClose)
 
-        const bucketToClose = await this.buckets.shift()
-            bucketToClose.close(
-                this.watermark,
-                "flush",
-                events => {
-                    this.release(subscriber, events)
-                    this.closedBuckets = this.closedBuckets.filter(b => b.id != bucketToClose.id) || []
-                }
-            )
-
-        // for (let )
-        // for (let key in this.buckets) {
-        //     if (!this.buckets[key][0]) continue
-
-        //     const bucketToClose = await this.buckets[key].shift()
-        //     bucketToClose.close(
-        //         this.watermark,
-        //         "flush",
-        //         events => {
-        //             this.release(subscriber, events)
-        //             this.closedBuckets[key] = this.closedBuckets[key]?.filter(b => b.id != bucketToClose.id) || []
-        //         }
-        //     )
-        // }
+        bucketToClose.close(
+            this.watermark,
+            "flush",
+            events => {
+                this.release(subscriber, events)
+                this.closedBuckets = this.closedBuckets.filter(b => b.id != bucketToClose.id) || []
+            },
+            bucketToClose.openedAt + this.size
+        )
     }
 
     setOpeningInterval() {
-        this.lastHopTimestamp = Date.now()
+        this.openBucket()
         setInterval(() => {
-            this.lastHopTimestamp = this.lastHopTimestamp + this.hop + 1
+            this.openBucket()
         }, this.hop)
     }
 
     setClosingInterval(subscriber: Subscriber<T[]>) {
-        let closeIntervalSize = this.hop
-        let firstCloseTiemout = Math.abs(this.hop - this.size)
-        if (this.hop >= this.size) firstCloseTiemout = this.size
-
         setTimeout(async () => {
-            await this.closeBucket(subscriber)
-
+            this.closeBucket(subscriber)
             setInterval(async () => {
-                await this.closeBucket(subscriber)
-            }, closeIntervalSize)
-
-        }, firstCloseTiemout)
+                this.closeBucket(subscriber)
+            }, this.hop)
+        }, this.size)
     }
 }

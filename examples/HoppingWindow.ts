@@ -5,50 +5,35 @@ import delay from "delay"
 
 const emitter = new EventEmitter()
 
-let windowCount = 0
-let receivedKeys = [false, false, false]
-let countBefore = [0, 0, 0]
-let countAfter = [0, 0, 0]
-let total = 0
+let countBefore = 0
+let countAfter = 0
 
 const subj = new Subject<any>()
 subj.pipe(
-    tap(e => countBefore[e.key]++),
+    tap(e => countBefore++),
     hoppingWindow({
         size: 5000, 
         hop: 2500,
         watermark: 200,
-        // withEventKey: (e) => e.key,
         logger: {toConsole: true}
     }),
     tap(e => {
-        const key = e[0].key
-        countAfter[key] += e.length
-        receivedKeys[key] = true
+        // const key = e[0].key
+        countAfter += e.length
+        // receivedKeys[key] = true
     })
 ).subscribe(() => {});
 
 (async function () {
     for (let i = 0; i < 20000; i++) {
-        if (i == 2500) console.log("---------------------2500-------------------")
         await delay(1)
         subj.next({
-            key: randomIntFromInterval(0, 2),
             timestamp: Date.now(),
             value: i
         })
     }
 
     setTimeout(() => {
-        const final = countAfter.reduce((a, b) => a + b, 0)
-        const total = countBefore.reduce((a, b) => a + b, 0)
-        let mark = "="
-        if (final > total) mark = ">"
-        else if (final < total) mark = "<"
-        console.log("total :", final, total, mark)
+        console.log(countAfter, "/", countBefore)
     }, 20000)
 })()
-
-function randomIntFromInterval(min: number, max: number) { // min and max included 
-    return Math.floor(Math.random() * (max - min + 1) + min)
-}

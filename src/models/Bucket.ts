@@ -74,18 +74,16 @@ export class Bucket<T> {
     /** close the bucket getting or flushing the stored events belonging to it.
      * Execute the passed callback to consume the events and destroy the bucket. */
     async close(watermark: number, mode: "flush" | "get", callback: (events: AssignedEvent<T>[]) => void, timestamp: number = Date.now()) {
-        if (this.closedAt) return
         this.closedAt = timestamp
-
-        this.logger.info(`[bucket closed]   :: id: ${this.logger.yellow(this.id)} - time: ${this.logger.yellow(this.closedAt)} - items: ${this.eventCounter}`)
-
+        
         setTimeout(async () => {
-            // "get" | "flush"
             const events = await this[mode]()
-            this.logger.info(`[bucket released] :: id: ${this.logger.yellow(this.id)} - key: ${this.logger.yellow(events[0]?.eventKey) || "default"} - items: ${this.logger.yellow(events.length)}`)
-            callback(events)
             this.destroy()
+            callback(events)
+            this.logger.info(`[bucket released] :: id: ${this.logger.yellow(this.id)} - key: ${this.logger.yellow(events[0]?.eventKey) || "default"} - items: ${this.logger.yellow(events.length)}`)
         }, watermark)
+        
+        this.logger.info(`[bucket closed]   :: id: ${this.logger.yellow(this.id)} - time: ${this.logger.yellow(this.closedAt)} - items: ${this.eventCounter}`)
     }
 
     /** Destroy = closed + watermarked */
