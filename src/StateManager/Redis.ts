@@ -71,9 +71,7 @@ export class Redis<T> extends StateMananger<T> {
         }
 
         if (action == "flush") await this.clear(bucketId)
-
-        console.log(events.map(e => e.value["i"]))
-
+        
         return events
     }
 }

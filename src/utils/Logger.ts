@@ -18,11 +18,11 @@ export class WinRxlogger {
     }
 
     info(...args: any[]) {
-        this.print("[info]", ...args)
+        this.print("[info]   ", ...args)
     }
 
     error(...args: any[]) {
-        this.print("[error]", ...args)
+        this.print("[error]  ", ...args)
     }
 
     warning(...args: any[]) {
@@ -59,8 +59,8 @@ export class WinRxlogger {
         if (this.toFile) appendFileSync(this.toFile, `${date} :: ` + prefix + " :: " + this.windowId + " :: " + args.join(" ") + "\n")
 
         if (this.toConsole) {
-            const coloredPrefix = prefix == "[info]" ? this.green(prefix) :
-                prefix == "[error]" ? this.red(prefix) : this.yellow(prefix)
+            const coloredPrefix = prefix == "[info]   " ? this.green(prefix) :
+                prefix == "[error]  " ? this.red(prefix) : this.yellow(prefix)
 
             const consoleText =
                 this.purple(date) +
@@ -79,7 +79,7 @@ export class WinRxlogger {
         const consoleText = this.white(
             "datetime                ",
             "|",
-            "kind  ",
+            "kind     ",
             "|",
             "window  ",
             "|",

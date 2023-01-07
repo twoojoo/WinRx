@@ -62,7 +62,7 @@ export class SlidingWindow<T> extends KeyedWindowingSystem<T> {
         }
 
         if (!assigned) {
-            this.logger.warning(`[event lost]   :: key: ${this.logger.cyan(event.eventKey)} - time ${this.logger.cyan(event.eventTime)}`)
+            this.logger.warning(`[event lost]      | key: ${this.logger.cyan(event.eventKey)} - time ${this.logger.cyan(event.eventTime)}`)
         }
     }
 
