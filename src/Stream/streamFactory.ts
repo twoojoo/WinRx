@@ -5,15 +5,15 @@ import { streamFromSubject } from "./streamFromSubject";
 import { Stream } from "../Types/Stream";
 
 export type StreamFactory<T> = {
-    fromKafka: (consumer: Consumer, topics: string[], config?: ConsumerConfig) => Stream<{ key: string, value: T }>
-    fromEvent: (emitter: EventEmitter, name: string) => Stream<{ name: string, value: T }>
+    fromKafka: <T>(consumer: Consumer, topics: string[], config?: ConsumerConfig) => Stream<{ key: string, value: T }>
+    fromEvent: <T>(emitter: EventEmitter, name: string) => Stream<{ name: string, value: T }>
 }
 
 export function stream<T>(name?: string): StreamFactory<T> {
     const rxSubj = new Subject<any>();
 
     return {
-        fromKafka: (consumer: Consumer, topics: string[], config?: ConsumerConfig) => {
+        fromKafka: <T>(consumer: Consumer, topics: string[], config?: ConsumerConfig) => {
             consumer.run({
                 ...config,
                 eachMessage: async ({ message, topic }) => {
@@ -32,7 +32,7 @@ export function stream<T>(name?: string): StreamFactory<T> {
             return streamFromSubject<{ key: string, value: T }>(rxSubj)
         },
 
-        fromEvent: (emitter: EventEmitter, name: string) => {
+        fromEvent: <T>(emitter: EventEmitter, name: string) => {
             emitter.on(name, (value) => {
                 rxSubj.next({
                     name,

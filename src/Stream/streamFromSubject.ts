@@ -8,20 +8,6 @@ export function streamFromSubject<T>(subj: Subject<T>): Stream<T> {
         pipe: any,
         subscribe: any
     }>(subj as unknown)
-
-    stream.flow = (...args: any[]) => {
-        const newSubj = (stream).pipe(...args)
-        return streamFromSubject(newSubj)
-    }
-
-    stream.toEvent = (emitter: EventEmitter, name: string) => {
-        const newSubj = new Subject()
-        stream.subscribe(event => {
-            emitter.emit(name, event)
-            newSubj.next(event)
-        })
-        return streamFromSubject(newSubj)
-    }
-
+    
     return stream as Stream<T>
 }

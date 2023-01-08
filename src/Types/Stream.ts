@@ -1,7 +1,8 @@
 import { EventEmitter } from "events"
-import { Subject } from "rxjs"
+import { OperatorFunction, Subject } from "rxjs"
+import { Operators } from "../Operators"
 
-type RxJsSubjectOmissions = 'pipe'
+type RxJsSubjectOmissions = //'pipe'
     | 'complete'
     | 'error'
     | 'asObservable'
@@ -21,12 +22,10 @@ type RxJsSubjectOmissions = 'pipe'
     | 'closed'
 
 //Stream "methods"
-type Flow<T> = (...args: any[]) => Stream<any>
+type Flow<T> = <R>(...args: OperatorFunction<T, any>[]) => Stream<R>
 type Join<T> = (...args: Stream<any>[]) => Stream<any>
 type ToEvent<T> = (emitter: EventEmitter, name: string) => Stream<any>
 
-export type Stream<T> = Omit<Subject<T>, RxJsSubjectOmissions> & {
-    flow: Flow<T>
-    join: Join<T>
-    toEvent: ToEvent<T>
+export type Stream<T> = Omit<Subject<T>, RxJsSubjectOmissions> & Operators<T> & {
+    
 }

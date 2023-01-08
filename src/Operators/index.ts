@@ -1,28 +1,41 @@
-// import { Stream } from "../Types/Stream"
-import { Observable } from "rxjs"
+// // import { Stream } from "../Types/Stream"
+// import { Observable, Subscriber, OperatorFunction } from "rxjs"
+
+// import { Observable } from "rxjs";
+import { Observable, Subject, Subscriber } from "rxjs";
+import { streamFromSubject } from "../Stream/streamFromSubject";
+import { Stream } from "../Types/Stream";
 
 type OperatorCallback<T, R> = (event: T) => Promise<R> | R
 
-export function map<T, R>(callback: OperatorCallback<T, R>) {
-    return (source: Observable<T>) => operatorFactory(source, callback)
+export type Operators<T> = {
+    map: <R>(callback: OperatorCallback<T, R>) => Stream<R>,
+    forEach: (callback: OperatorCallback<T, void>) => Stream<T>
 }
 
-export function forEach<T, R = T>(callback: OperatorCallback<T, R>) {
-    const overriddenCallback = async (event: T) => {
-        callback(event)
-        return event
-    }
-    
-    return (source: Observable<T>) => operatorFactory(source, overriddenCallback)
-}
+export const operators = <T>(source: Observable<T>): Operators<T> => ({
 
-const operatorFactory = <T, R>(source: Observable<T>, callback: OperatorCallback<T, R>): Observable<R> => {
-    return new Observable<R>(sub => {
+    map: <R>(callback: OperatorCallback<T, R>): Stream<R> => {
+        const subj = new Subject()
         source.subscribe({
             async next(event: T) {
                 const result = await callback(event)
-                sub.next(result)
+                subj.next(result)
             }
         })
-    })
-}
+
+        return streamFromSubject(subj) as Stream<R>
+    },
+
+    forEach: (callback: OperatorCallback<T, void>): Stream<T> => {
+        const subj = new Subject()
+        source.subscribe({
+            async next(event: T) {
+                await callback(event)
+                subj.next(event)
+            }
+        })
+
+        return streamFromSubject(subj) as Stream<T>
+    }
+})

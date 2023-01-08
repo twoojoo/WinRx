@@ -1,5 +1,5 @@
 import { Subscriber } from "rxjs";
-import { Memory } from "../StateManager";
+import { Memory } from "../StateManagers";
 import { StateMananger } from "./StateManager";
 import { IncomingEvent, EventKey, AssignedEvent, DequeuedEvent } from "../Types/Event";
 import { Duration, toMs } from "../Types/Duration";

@@ -8,7 +8,7 @@ const emitter = new EventEmitter()
 let countBefore = 0
 let countAfter = 0
 
-const subj = new Subject<any>()
+const subj = new Subject<{timestamp: number, value: number}>()
 subj.pipe(
     tap(e => countBefore++),
     hoppingWindow({

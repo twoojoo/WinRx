@@ -1,12 +1,13 @@
 import * as ws from "./WindowingSystem"
-import * as sm from "./StateManager"
+import * as sm from "./StateManagers"
 
 import { Observable, OperatorFunction, Subscriber } from "rxjs"
 import { WindowingSystem, WindowingOptions } from "./Models/WindowingSystem"
 import { Redis } from "ioredis"
+// import { OnBeforeSubscription, OnNext, OperatorCallback, operatorFactory } from "./Operators"
 
 export { stream } from "./Stream/streamFactory"
-export * from "./Operators"
+// export { map } from "./Operators"
 
 export const memory = () => new sm.Memory()
 export const redis = (client: Redis) => new sm.Redis(client)
@@ -48,6 +49,19 @@ const buildOperator = <T>(source: Observable<T>, opts: WindowingOptions<T>, winS
 
     return observable
 }
+
+// function windowingOperatorFactory<T, R>(source: Observable<T>, opts: WindowingOptions<T>, winSys: WindowingSystem<T>): Observable<T[]> {
+//     const callback: OperatorCallback<T> = async (event: T): Promise<T[]> => {
+//         const formattedEvent = winSys.formatEvent(event)
+//         await winSys.stateManager.enqueue(formattedEvent)
+//         return 
+//     }
+
+//     const onBeforeSubscription: OnBeforeSubscription = (sub) => winSys.onStart(sub as Subscriber<T[]>)
+//     const onNext: OnNext = (sub, next) => startDequeueloop(sub, winSys)
+
+//     return operatorFactory(source, callback, onBeforeSubscription, onNext)
+// }
 
 /** Loop on stateManager's queue and dequeue events in order to process them one by one.
  * If called while there is another loop runnin, just returns leaving the queue untouched. */

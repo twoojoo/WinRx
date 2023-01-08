@@ -2,7 +2,7 @@ import { IncomingEvent, EventKey, AssignedEvent, DequeuedEvent } from "../Types/
 import { LoggerOptions, WinRxlogger } from "../Utils/Logger"
 import { Duration, toMs } from "../Types/Duration";
 import { StateMananger } from "./StateManager";
-import { Memory } from "../StateManager";
+import { Memory } from "../StateManagers";
 import { Subscriber } from "rxjs";
 
 type TimestampEtractor<T> = (value: T) => number
