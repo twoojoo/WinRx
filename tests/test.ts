@@ -1,4 +1,4 @@
-import { stream } from "../src/Stream/streamFactory";
+import { stream } from "../src/sources";
 import { EventEmitter } from "events"
 
 const emitter = new EventEmitter()

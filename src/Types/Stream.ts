@@ -1,6 +1,6 @@
 import { EventEmitter } from "events"
 import { OperatorFunction, Subject } from "rxjs"
-import { Operators } from "../Operators"
+import { Operators } from "../operators"
 
 type RxJsSubjectOmissions = //'pipe'
     | 'complete'

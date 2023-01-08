@@ -6,7 +6,7 @@ import { WindowingSystem, WindowingOptions } from "./Models/WindowingSystem"
 import { Redis } from "ioredis"
 // import { OnBeforeSubscription, OnNext, OperatorCallback, operatorFactory } from "./Operators"
 
-export { stream } from "./Stream/streamFactory"
+export { stream } from "./sources"
 // export { map } from "./Operators"
 
 export const memory = () => new sm.Memory()

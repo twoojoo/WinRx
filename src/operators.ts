@@ -3,8 +3,8 @@
 
 // import { Observable } from "rxjs";
 import { Observable, Subject, Subscriber } from "rxjs";
-import { streamFromSubject } from "../Stream/streamFromSubject";
-import { Stream } from "../Types/Stream";
+import { streamFromSubject } from "./Stream/streamFromSubject";
+import { Stream } from "./Types/Stream";
 
 type OperatorCallback<T, R> = (event: T) => Promise<R> | R
 
