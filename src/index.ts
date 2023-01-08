@@ -1,4 +1,4 @@
-import * as ws from "./WindowingSystem"
+import * as ws from "./WindowingSystems"
 import * as sm from "./StateManagers"
 
 import { Observable, OperatorFunction, Subscriber } from "rxjs"
@@ -7,7 +7,6 @@ import { Redis } from "ioredis"
 // import { OnBeforeSubscription, OnNext, OperatorCallback, operatorFactory } from "./Operators"
 
 export { stream } from "./sources"
-// export { map } from "./Operators"
 
 export const memory = () => new sm.Memory()
 export const redis = (client: Redis) => new sm.Redis(client)

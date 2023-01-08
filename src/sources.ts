@@ -1,15 +1,15 @@
 import { Consumer, ConsumerConfig } from "kafkajs";
 import { EventEmitter } from "events"
 import { Subject } from "rxjs";
-import { streamFromSubject } from "./Stream/streamFromSubject";
+import { streamFromSubject } from "./Utils/streamFromSubject";
 import { Stream } from "./Types/Stream";
 
-export type StreamFactory<T> = {
+export type Sources<T> = {
     fromKafka: <T>(consumer: Consumer, topics: string[], config?: ConsumerConfig) => Stream<{ key: string, value: T }>
     fromEvent: <T>(emitter: EventEmitter, name: string) => Stream<{ name: string, value: T }>
 }
 
-export function stream<T>(name?: string): StreamFactory<T> {
+export function stream<T>(name?: string): Sources<T> {
     const rxSubj = new Subject<any>();
 
     return {

@@ -5,8 +5,10 @@ const emitter = new EventEmitter()
 
 stream()
     .fromEvent<{i: number}>(emitter, "test-event")
-    .map(e => e.value.toString())
+    .map(e => JSON.stringify(e))
     .forEach(e => console.log(e))
+    .tumblingWindow({size: 2000})
+    .toEvent(emitter, "test-result")
 
 
 let counter = 0
