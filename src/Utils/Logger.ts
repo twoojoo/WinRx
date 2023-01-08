@@ -76,6 +76,7 @@ export class WinRxlogger {
     }
 
     printHeader() {
+        if (!this.toConsole) return
         const consoleText = this.white(
             "datetime                ",
             "|",

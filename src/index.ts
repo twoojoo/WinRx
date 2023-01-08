@@ -2,9 +2,11 @@ import * as ws from "./WindowingSystem"
 import * as sm from "./StateManager"
 
 import { Observable, OperatorFunction, Subscriber } from "rxjs"
-import { WindowingSystem, WindowingOptions } from "./models/WindowingSystem"
+import { WindowingSystem, WindowingOptions } from "./Models/WindowingSystem"
 import { Redis } from "ioredis"
 
+export { stream } from "./Stream/streamFactory"
+export * from "./Operators"
 
 export const memory = () => new sm.Memory()
 export const redis = (client: Redis) => new sm.Redis(client)

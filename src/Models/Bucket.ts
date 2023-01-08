@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto"
-import { AssignedEvent, DequeuedEvent, IncomingEvent } from "../types/Event"
-import { WinRxlogger } from "../utils/Logger"
+import { AssignedEvent, DequeuedEvent, IncomingEvent } from "../Types/Event"
+import { WinRxlogger } from "../Utils/Logger"
 import { StateMananger } from "./StateManager"
 
 /** A Bucket is a collection of events. It doesn't handle intervals and timeouts,

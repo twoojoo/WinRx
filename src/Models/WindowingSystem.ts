@@ -1,6 +1,6 @@
-import { IncomingEvent, EventKey, AssignedEvent, DequeuedEvent } from "../types/Event";
-import { LoggerOptions, WinRxlogger } from "../utils/Logger"
-import { Duration, toMs } from "../types/Duration";
+import { IncomingEvent, EventKey, AssignedEvent, DequeuedEvent } from "../Types/Event";
+import { LoggerOptions, WinRxlogger } from "../Utils/Logger"
+import { Duration, toMs } from "../Types/Duration";
 import { StateMananger } from "./StateManager";
 import { Memory } from "../StateManager";
 import { Subscriber } from "rxjs";

@@ -1,8 +1,8 @@
 import { Observer, Subscriber } from "rxjs"
-import { DequeuedEvent, EventKey } from "../types/Event"
-import { Bucket } from "../models/Bucket"
-import { Duration, toMs } from "../types/Duration"
-import { KeyedWindowingOptions, KeyedWindowingSystem } from "../models/KeyedWindowingSystem"
+import { DequeuedEvent, EventKey } from "../Types/Event"
+import { Bucket } from "../Models/Bucket"
+import { Duration, toMs } from "../Types/Duration"
+import { KeyedWindowingOptions, KeyedWindowingSystem } from "../Models/KeyedWindowingSystem"
 
 export type SessionWindowOptions<T> = KeyedWindowingOptions<T> & { size: Duration, timeout: Duration }
 

@@ -1,9 +1,9 @@
 import { Subscriber } from "rxjs";
 import { Memory } from "../StateManager";
 import { StateMananger } from "./StateManager";
-import { IncomingEvent, EventKey, AssignedEvent, DequeuedEvent } from "../types/Event";
-import { Duration, toMs } from "../types/Duration";
-import { LoggerOptions, WinRxlogger } from "../utils/Logger"
+import { IncomingEvent, EventKey, AssignedEvent, DequeuedEvent } from "../Types/Event";
+import { Duration, toMs } from "../Types/Duration";
+import { LoggerOptions, WinRxlogger } from "../Utils/Logger"
 import { WindowingOptions, WindowingSystem } from "./WindowingSystem";
 
 type TimestampEtractor<T> = (value: T) => number
