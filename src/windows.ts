@@ -24,9 +24,7 @@ export function windows<T>(source: Observable<T>): Windows<T> {
 
             source.subscribe({
                 async next(event: T) {
-                    const formattedEvent = win.formatEvent(event)
-                    await win.stateManager.enqueue(formattedEvent)
-                    startDequeueloop(sub, win)
+                    pushEventToWindow(event, win, sub)
                 }
             })
 
@@ -35,9 +33,15 @@ export function windows<T>(source: Observable<T>): Windows<T> {
     }
 }
 
+export async function pushEventToWindow<T>(event: T, window: WindowingSystem<T>, sub: Subject<T[]>) {
+    const formattedEvent = window.formatEvent(event)
+    await window.stateManager.enqueue(formattedEvent)
+    startDequeueloop(sub, window)
+}
+
 /** Loop on stateManager's queue and dequeue events in order to process them one by one.
  * If called while there is another loop runnin, just returns leaving the queue untouched. */
-async function startDequeueloop<T>(sub: Subject<T[]>, win: WindowingSystem<T>) {
+export async function startDequeueloop<T>(sub: Subject<T[]>, win: WindowingSystem<T>) {
     if (win.isLooping) return
     win.isLooping = true
 
