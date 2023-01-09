@@ -1,4 +1,5 @@
 import { Subject, Subscriber } from "rxjs"
+import { WindowingSystem } from "./Models/WindowingSystem"
 import { Stream } from "./Types/Stream"
 import { streamFromSubject, subjectFromStream } from "./Utils/parseStream"
 import { TumblingWindow, TumblingWindowOptions } from "./WindowingSystems"
@@ -33,52 +34,7 @@ export function join<T>(source: Stream<T>): Join<T> {
                     return {
                         tumblingWindow(options: TumblingWindowOptions<JoinEvent<T, R>>): Apply<T, R, N> {
                             const window = new TumblingWindow<JoinEvent<T, R>>(options)
-                            return {
-                                apply(operation: JoinOperation<T, R, N>): Stream<N> {
-                                    const windowSub = new Subject<JoinEvent<T, R>[]>()
-                                    
-                                    window.onStart((windowSub as unknown) as Subscriber<JoinEvent<T, R>[]>)
-
-                                    subjectFromStream(source).subscribe({
-                                        async next(event: T) {
-                                            const tuple = [event, undefined]
-                                            await pushEventToWindow(tuple, window, windowSub)
-                                        }
-                                    });
-
-                                    subjectFromStream(stream).subscribe({
-                                        async next(event: R) {
-                                            const tuple = [undefined, event]
-                                            await pushEventToWindow(tuple, window, windowSub)
-                                        }
-                                    })
-
-                                    const finalSubject = new Subject<N>()
-                                    windowSub.subscribe({
-                                        next(eventsWindow: JoinEvent<T, R>[]) {
-                                            const events1: T[] = [], events2: R[] = []
-
-                                            eventsWindow.forEach(tuple => {
-                                                if (!tuple[0]) events2.push(tuple[1] as R)
-                                                else events1.push(tuple[0] as T)
-                                            })
-                                            
-                                            { eventsWindow = null }
-
-                                            const matchedEvents: (T | R)[][] = []
-                                            for (let i = 0; i < events1.length; i++) {
-                                                const e1 = events1[i]
-                                                const matches = events2.filter(e2 => condition(e1, e2))
-                                                if (matches[0]) matchedEvents.push([e1, ...matches])
-                                            }
-
-                                            matchedEvents.forEach(matches => finalSubject.next(operation(...matches)))
-                                        }
-                                    })
-
-                                    return streamFromSubject(finalSubject)
-                                }
-                            }
+                            return apply(source, stream, window, condition)
                         }
                     }
                 }
@@ -87,3 +43,51 @@ export function join<T>(source: Stream<T>): Join<T> {
     }
 }
 
+function apply<T, R, N>(stream1: Stream<T>, stream2: Stream<R>, window: WindowingSystem<JoinEvent<T, R>>, condition: JoinCondition<T, R>): Apply<T, R, N> {
+    return {
+        apply(operation: JoinOperation<T, R, N>): Stream<N> {
+            const windowSub = new Subject<JoinEvent<T, R>[]>()
+
+            window.onStart((windowSub as unknown) as Subscriber<JoinEvent<T, R>[]>)
+
+            subjectFromStream(stream1).subscribe({
+                async next(event: T) {
+                    const tuple = [event, undefined]
+                    await pushEventToWindow(tuple, window, windowSub)
+                }
+            });
+
+            subjectFromStream(stream2).subscribe({
+                async next(event: R) {
+                    const tuple = [undefined, event]
+                    await pushEventToWindow(tuple, window, windowSub)
+                }
+            })
+
+            const finalSubject = new Subject<N>()
+            windowSub.subscribe({
+                next(eventsWindow: JoinEvent<T, R>[]) {
+                    const events1: T[] = [], events2: R[] = []
+
+                    eventsWindow.forEach(tuple => {
+                        if (!tuple[0]) events2.push(tuple[1] as R)
+                        else events1.push(tuple[0] as T)
+                    })
+
+                    { eventsWindow = null }
+
+                    const matchedEvents: (T | R)[][] = []
+                    for (let i = 0; i < events1.length; i++) {
+                        const e1 = events1[i]
+                        const matches = events2.filter(e2 => condition(e1, e2))
+                        if (matches[0]) matchedEvents.push([e1, ...matches])
+                    }
+
+                    matchedEvents.forEach(matches => finalSubject.next(operation(...matches)))
+                }
+            })
+
+            return streamFromSubject(finalSubject)
+        }
+    }
+}
