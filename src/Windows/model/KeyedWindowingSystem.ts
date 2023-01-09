@@ -9,7 +9,7 @@ import { InnerEvent } from "../../event";
 
 type KeyExtractor<T> = (value: T) => EventKey
 
-export type KeyedWindowingOptions<T extends InnerEvent<R>, R> = WindowingOptions<R> & {
+export type KeyedWindowingOptions<R> = WindowingOptions<R> & {
     withEventKey?: KeyExtractor<R>
 }
 
@@ -21,7 +21,7 @@ export abstract class KeyedWindowingSystem<T extends InnerEvent<R>, R> extends W
 
     isLooping: boolean = false
 
-    constructor(options: KeyedWindowingOptions<T, R>) {
+    constructor(options: KeyedWindowingOptions<R>) {
         super(options)
         this.keyExtractor = options.withEventKey
     }

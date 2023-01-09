@@ -5,7 +5,7 @@ import { Duration, toMs } from "../Types/Duration"
 import { KeyedWindowingOptions, KeyedWindowingSystem } from "./model/KeyedWindowingSystem"
 import { InnerEvent } from "../event"
 
-export type SessionWindowOptions<T extends InnerEvent<R>, R> = KeyedWindowingOptions<T, R> & { size: Duration, timeout: Duration }
+export type SessionWindowOptions<R> = KeyedWindowingOptions<R> & { size: Duration, timeout: Duration }
 
 export class SessionWindow<T extends InnerEvent<R>, R> extends KeyedWindowingSystem<T, R> {
     private maxDuration: number
@@ -21,7 +21,7 @@ export class SessionWindow<T extends InnerEvent<R>, R> extends KeyedWindowingSys
 
     private closedBuckets: { [key: EventKey]: Bucket<T>[] } = {}
 
-    constructor(options: SessionWindowOptions<T, R>) {
+    constructor(options: SessionWindowOptions<R>) {
         super(options)
 
         this.maxDuration = toMs(options.size)

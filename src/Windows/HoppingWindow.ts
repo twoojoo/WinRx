@@ -5,7 +5,7 @@ import { DequeuedEvent, EventKey } from "../Types/Event"
 import { Duration, toMs } from "../Types/Duration"
 import { InnerEvent } from "../event"
 
-export type HoppingWindowOptions<T extends InnerEvent<R>, R> = WindowingOptions<R> & { size: Duration, hop: Duration }
+export type HoppingWindowOptions<R> = WindowingOptions<R> & { size: Duration, hop: Duration }
 
 export class HoppingWindow<T extends InnerEvent<R>, R> extends WindowingSystem<T, R> {
     private size: number
@@ -15,7 +15,7 @@ export class HoppingWindow<T extends InnerEvent<R>, R> extends WindowingSystem<T
     private closedBuckets: Bucket<T>[] = []
     private lastHopTimestamp: number
 
-    constructor(options: HoppingWindowOptions<T, R>) {
+    constructor(options: HoppingWindowOptions<R>) {
         super(options)
         this.size = toMs(options.size)
 

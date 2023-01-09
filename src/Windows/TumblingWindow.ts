@@ -5,7 +5,7 @@ import { WindowingSystem, WindowingOptions } from "./model/WindowingSystem"
 import { Duration, toMs } from "../Types/Duration"
 import { InnerEvent } from "../event"
 
-export type TumblingWindowOptions<T extends InnerEvent<R>, R> = WindowingOptions<R> & { size: Duration }
+export type TumblingWindowOptions<R> = WindowingOptions<R> & { size: Duration }
 
 export class TumblingWindow<T extends InnerEvent<R>, R> extends WindowingSystem<T, R> {
     private size: number
@@ -15,7 +15,7 @@ export class TumblingWindow<T extends InnerEvent<R>, R> extends WindowingSystem<
 
     private lastBucketTimestamp: number
 
-    constructor(options: TumblingWindowOptions<T, R>) {
+    constructor(options: TumblingWindowOptions<R>) {
         super(options)
         this.size = toMs(options.size)
     }

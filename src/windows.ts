@@ -8,26 +8,26 @@ import { HoppingWindow, HoppingWindowOptions } from "./Windows/HoppingWindow";
 import { SessionWindow, SessionWindowOptions } from "./Windows/SessionWindow";
 
 export type Windows<T> = {
-    tumblingWindow: (options: TumblingWindowOptions<InnerEvent<T>, T>) => Stream<InnerEvent<T[]>>,
-    hoppingWindow: (options: HoppingWindowOptions<InnerEvent<T>, T>) => Stream<InnerEvent<T[]>>,
-    sessionWindow: (options: SessionWindowOptions<InnerEvent<T>, T>) => Stream<InnerEvent<T[]>>,
+    tumblingWindow: (options: TumblingWindowOptions<T>) => Stream<InnerEvent<T[]>>,
+    hoppingWindow: (options: HoppingWindowOptions<T>) => Stream<InnerEvent<T[]>>,
+    sessionWindow: (options: SessionWindowOptions<T>) => Stream<InnerEvent<T[]>>,
 }
 
 export function windows<T>(source: Observable<InnerEvent<T>>): Windows<T> {
     return {
-        tumblingWindow(options: TumblingWindowOptions<InnerEvent<T>, T>): Stream<InnerEvent<T[]>> {
+        tumblingWindow(options: TumblingWindowOptions<T>): Stream<InnerEvent<T[]>> {
             const win = new TumblingWindow(options)
             const sub = initWindow(source, win)
             return streamFromSubject(sub) 
         },
 
-        hoppingWindow(options: HoppingWindowOptions<InnerEvent<T>, T>): Stream<InnerEvent<T[]>> {
+        hoppingWindow(options: HoppingWindowOptions<T>): Stream<InnerEvent<T[]>> {
             const win = new HoppingWindow(options)
             const sub = initWindow(source, win)
             return streamFromSubject(sub) 
         },
 
-        sessionWindow(options: SessionWindowOptions<InnerEvent<T>, T>): Stream<InnerEvent<T[]>> {
+        sessionWindow(options: SessionWindowOptions<T>): Stream<InnerEvent<T[]>> {
             const win = new SessionWindow(options)
             const sub = initWindow(source, win)
             return streamFromSubject(sub) 

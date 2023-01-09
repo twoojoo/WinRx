@@ -7,8 +7,6 @@ import { InnerEvent } from "../../event";
 
 type TimestampEtractor<T> = (value: T) => number
 
-// type ReleasedEvent<T extends InnerEvent<R>, R> = InnerEvent<R[]>
-
 export type WindowingOptions<R> = {
     id?: string | number
     watermark?: Duration,
