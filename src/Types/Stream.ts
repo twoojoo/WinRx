@@ -1,5 +1,4 @@
-import { EventEmitter } from "events"
-import { OperatorFunction, Subject } from "rxjs"
+import { Subject } from "rxjs"
 import { Join } from "../join"
 import { Operators } from "../operators"
 import { Sinks } from "../sinks"
