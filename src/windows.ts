@@ -11,19 +11,25 @@ export type Windows<T> = {
 export function windows<T>(source: Observable<T>): Windows<T> {
     return {
         tumblingWindow(options: TumblingWindowOptions<T>): Stream<T[]> {
-            const sub = new Subject<T[]>()
             const win = new TumblingWindow(options)
-            win.onStart((sub as unknown) as Subscriber<T[]>)
-
-            source.subscribe({
-                async next(event: T) {
-                    pushEventToWindow(event, win, sub)
-                }
-            })
-
-            return streamFromSubject(sub) as Stream<T[]>
+            const sub = initWindow(source, win)
+            return streamFromSubject(sub) 
         }
     }
+}
+
+function initWindow<T>(source: Observable<T>, win: WindowingSystem<T>) {
+    const sub = new Subject<T[]>()
+
+    win.onStart((sub as unknown) as Subscriber<T[]>)
+
+    source.subscribe({
+        async next(event: T) {
+            pushEventToWindow(event, win, sub)
+        }
+    })
+
+    return sub
 }
 
 export async function pushEventToWindow<T>(event: T, window: WindowingSystem<T>, sub: Subject<T[]>) {
