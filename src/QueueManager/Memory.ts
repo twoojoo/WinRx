@@ -8,12 +8,11 @@ export class Memory<T> extends QueueManager<T> {
     }
 
     async enqueue(event: T): Promise<void> {
-        this.queue.push(event)   
+        this.queue.push(event) 
     }
 
     async dequeue(): Promise<T> {
-        const event = this.queue.shift()
-        return event
+        return this.queue.shift()
     }
 
     async isQueueEmpty(): Promise<boolean> {

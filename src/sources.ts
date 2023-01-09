@@ -23,7 +23,7 @@ export type Sources = {
     fromEvent: <T>(emitter: EventEmitter, name: string) => Stream<{ name: string, value: T }>
 }
 
-export function stream(name?: string, queueManager: QueueManager<any> = new Memory<any>()): Sources {
+export function stream(name: string, queueManager: QueueManager<any> = new Memory<any>()): Sources {
     
     queueManager.setStreamName(name)
     const queue = new Queue(queueManager)

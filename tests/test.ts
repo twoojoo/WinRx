@@ -3,11 +3,11 @@ import { EventEmitter } from "events"
 
 const emitter = new EventEmitter()
 
-const stream2 = stream()
+const stream2 = stream("stream2")
     .fromEvent<number>(emitter, "stream2")
     .map(e => e.value)
 
-const stream1 = stream()
+const stream1 = stream("stream1")
     .fromEvent<number>(emitter, "stream1")
     .map(e => e.value)
     .join(stream2)

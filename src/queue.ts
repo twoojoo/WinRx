@@ -1,5 +1,4 @@
 import { QueueManager } from "./Models/QueueManager"
-import { IncomingEvent } from "./Types/Event"
 
 export class Queue<T> {
     isLooping: boolean = false
@@ -14,7 +13,7 @@ export class Queue<T> {
     }
 
     async dequeueLoop(callback: (event: T) => void) {
-        if (!this.isLooping) return
+        if (this.isLooping) return
         this.isLooping = true
 
         while (!(await this.isEmpty())) {
@@ -26,6 +25,6 @@ export class Queue<T> {
     }
 
     private async isEmpty(): Promise<boolean> {
-        return false
+        return await this.queueManager.isQueueEmpty()
     }
 }
