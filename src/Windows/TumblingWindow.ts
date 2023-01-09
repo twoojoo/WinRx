@@ -1,12 +1,13 @@
-import { Subscriber } from "rxjs"
+import { Subject, Subscriber } from "rxjs"
 import { DequeuedEvent, EventKey } from "../Types/Event"
 import { Bucket } from "../Models/Bucket"
-import { WindowingSystem, WindowingOptions } from "../Windows/model/WindowingSystem"
+import { WindowingSystem, WindowingOptions } from "./model/WindowingSystem"
 import { Duration, toMs } from "../Types/Duration"
+import { InnerEvent } from "../event"
 
-export type TumblingWindowOptions<T> = WindowingOptions<T> & { size: Duration }
+export type TumblingWindowOptions<T extends InnerEvent<R>, R> = WindowingOptions<R> & { size: Duration }
 
-export class TumblingWindow<T> extends WindowingSystem<T> {
+export class TumblingWindow<T extends InnerEvent<R>, R> extends WindowingSystem<T, R> {
     private size: number
 
     private currentBucket: Bucket<T>
@@ -14,16 +15,14 @@ export class TumblingWindow<T> extends WindowingSystem<T> {
 
     private lastBucketTimestamp: number
 
-    constructor(options: TumblingWindowOptions<T>) {
+    constructor(options: TumblingWindowOptions<T, R>) {
         super(options)
         this.size = toMs(options.size)
     }
 
-    async onStart(subscriber: Subscriber<T[]>): Promise<void> {
-        this.logWindowStart("tumbling")
-
+    async onStart(sub: Subject<InnerEvent<R[]>>): Promise<void> {
         this.lastBucketTimestamp = Date.now()
-        this.currentBucket = new Bucket(this.stateManager, this.logger, this.lastBucketTimestamp)
+        this.currentBucket = new Bucket(this.stateManager, this.lastBucketTimestamp)
 
         setInterval(() => {
             this.lastBucketTimestamp = this.lastBucketTimestamp + this.size 
@@ -34,17 +33,17 @@ export class TumblingWindow<T> extends WindowingSystem<T> {
                 this.watermark,
                 "flush",
                 events => {
-                    this.release(subscriber, events)
+                    this.release(sub, events)
                     this.closedBuckets = this.closedBuckets.filter(b => b.isDestroyed())
                 },
                 this.lastBucketTimestamp
             )
 
-            this.currentBucket = new Bucket(this.stateManager, this.logger, this.lastBucketTimestamp)
+            this.currentBucket = new Bucket(this.stateManager, this.lastBucketTimestamp)
         }, this.size)
     }
 
-    async onDequeuedEvent(subscriber: Subscriber<T[]>, event: DequeuedEvent<T>): Promise<void> {
+    async onDequeuedEvent(sub: Subject<InnerEvent<R[]>>, event: DequeuedEvent<T>): Promise<void> {
         let assigned = false
 
         for (let bucket of this.closedBuckets) {
@@ -60,8 +59,8 @@ export class TumblingWindow<T> extends WindowingSystem<T> {
             assigned = true
         }
 
-        if (!assigned) {
-            this.logger.warning(`[event lost]   :: key: ${this.logger.yellow(event.eventKey)} - time ${this.logger.yellow(event.eventTime)}`)
-        }
+        // if (!assigned) {
+        //     this.logger.warning(`[event lost]   :: key: ${this.logger.yellow(event.eventKey)} - time ${this.logger.yellow(event.eventTime)}`)
+        // }
     }
 }

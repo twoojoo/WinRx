@@ -10,5 +10,6 @@ export abstract class QueueManager<T> {
     //queue methods
     abstract enqueue(event: T): Promise<void>
     abstract dequeue(): Promise<T>
+    // abstract flush():
     abstract isQueueEmpty(): Promise<boolean>
 }

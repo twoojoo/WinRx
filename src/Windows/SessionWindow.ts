@@ -1,12 +1,13 @@
-import { Observer, Subscriber } from "rxjs"
+import { Observer, Subject, Subscriber } from "rxjs"
 import { DequeuedEvent, EventKey } from "../Types/Event"
 import { Bucket } from "../Models/Bucket"
 import { Duration, toMs } from "../Types/Duration"
-import { KeyedWindowingOptions, KeyedWindowingSystem } from "../Windows/model/KeyedWindowingSystem"
+import { KeyedWindowingOptions, KeyedWindowingSystem } from "./model/KeyedWindowingSystem"
+import { InnerEvent } from "../event"
 
-export type SessionWindowOptions<T> = KeyedWindowingOptions<T> & { size: Duration, timeout: Duration }
+export type SessionWindowOptions<T extends InnerEvent<R>, R> = KeyedWindowingOptions<T, R> & { size: Duration, timeout: Duration }
 
-export class SessionWindow<T> extends KeyedWindowingSystem<T> {
+export class SessionWindow<T extends InnerEvent<R>, R> extends KeyedWindowingSystem<T, R> {
     private maxDuration: number
     private timeoutSize: number
 
@@ -20,18 +21,18 @@ export class SessionWindow<T> extends KeyedWindowingSystem<T> {
 
     private closedBuckets: { [key: EventKey]: Bucket<T>[] } = {}
 
-    constructor(options: SessionWindowOptions<T>) {
+    constructor(options: SessionWindowOptions<T, R>) {
         super(options)
 
         this.maxDuration = toMs(options.size)
         this.timeoutSize = toMs(options.timeout)
     }
 
-    async onStart(observer: Observer<T[]>): Promise<void> {
-        this.logWindowStart("session")
+    async onStart(sub: Subject<InnerEvent<R[]>>): Promise<void> {
+        return
     }
 
-    async onDequeuedEvent(subscriber: Subscriber<T[]>, event: DequeuedEvent<T>): Promise<void> {
+    async onDequeuedEvent(sub: Subject<InnerEvent<R[]>>, event: DequeuedEvent<T>): Promise<void> {
         const eventKey = event.eventKey
         let assigned = false
 
@@ -45,13 +46,13 @@ export class SessionWindow<T> extends KeyedWindowingSystem<T> {
 
         if (!assigned) {
             if (!this.buckets[eventKey] || !this.buckets[eventKey][0]) {
-                const bucket = new Bucket(this.stateManager, this.logger, event.eventTime)
+                const bucket = new Bucket(this.stateManager, event.eventTime)
 
                 this.buckets[eventKey] = []
                 this.buckets[eventKey].push({
                     bucket,
-                    durationTimer: setTimeout(async () => await this.closeBucket(subscriber, eventKey, bucket.id), this.maxDuration),
-                    timeoutTimer: setTimeout(async () => await this.closeBucket(subscriber, eventKey, bucket.id), this.timeoutSize)
+                    durationTimer: setTimeout(async () => await this.closeBucket(sub, eventKey, bucket.id), this.maxDuration),
+                    timeoutTimer: setTimeout(async () => await this.closeBucket(sub, eventKey, bucket.id), this.timeoutSize)
                 })
 
                 assigned = true
@@ -63,7 +64,7 @@ export class SessionWindow<T> extends KeyedWindowingSystem<T> {
                 if (owner) {
                     assigned = true
                     clearTimeout(owner.timeoutTimer)
-                    owner.timeoutTimer = setTimeout(async () => await this.closeBucket(subscriber, eventKey, owner.bucket.id), this.timeoutSize)
+                    owner.timeoutTimer = setTimeout(async () => await this.closeBucket(sub, eventKey, owner.bucket.id), this.timeoutSize)
 
                     await owner.bucket.push(event)
                 }
@@ -76,7 +77,7 @@ export class SessionWindow<T> extends KeyedWindowingSystem<T> {
         }
     }
 
-    private async closeBucket(subscriber: Subscriber<T[]>, eventKey: EventKey, bucketId: string) {
+    private async closeBucket(sub: Subject<InnerEvent<R[]>>, eventKey: EventKey, bucketId: string) {
 
         this.buckets[eventKey] = this.buckets[eventKey].filter(b => {
             const isTarget = b.bucket.id == bucketId
@@ -89,7 +90,7 @@ export class SessionWindow<T> extends KeyedWindowingSystem<T> {
                     this.watermark,
                     "flush",
                     events => {
-                        this.release(subscriber, events)
+                        this.release(sub, events)
                         this.closedBuckets[eventKey] = this.closedBuckets[eventKey].filter(b => b.id != bucketId)
                     }
                 )

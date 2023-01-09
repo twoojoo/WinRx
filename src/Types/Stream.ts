@@ -1,5 +1,6 @@
 import { EventEmitter } from "events"
 import { OperatorFunction, Subject } from "rxjs"
+import { InnerEvent } from "../event"
 import { Join } from "../join"
 import { Operators } from "../operators"
 import { Sinks } from "../sinks"
@@ -24,7 +25,7 @@ type RxJsSubjectOmissions = //'pipe'
     | 'next'
     | 'closed'
 
-export type Stream<T> = 
+export type Stream<T extends InnerEvent<any>> = 
     Omit<Subject<T>, RxJsSubjectOmissions> &
     Operators<T> &
     Windows<T> &

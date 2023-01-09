@@ -1,12 +1,13 @@
-import { Subscriber } from "rxjs"
-import { WindowingSystem, WindowingOptions } from "../Windows/model/WindowingSystem"
+import { Subject, Subscriber } from "rxjs"
+import { WindowingSystem, WindowingOptions } from "./model/WindowingSystem"
 import { Bucket } from "../Models/Bucket"
 import { DequeuedEvent, EventKey } from "../Types/Event"
 import { Duration, toMs } from "../Types/Duration"
+import { InnerEvent } from "../event"
 
-export type HoppingWindowOptions<T> = WindowingOptions<T> & { size: Duration, hop: Duration }
+export type HoppingWindowOptions<T extends InnerEvent<R>, R> = WindowingOptions<R> & { size: Duration, hop: Duration }
 
-export class HoppingWindow<T> extends WindowingSystem<T> {
+export class HoppingWindow<T extends InnerEvent<R>, R> extends WindowingSystem<T, R> {
     private size: number
     private hop: number
 
@@ -14,7 +15,7 @@ export class HoppingWindow<T> extends WindowingSystem<T> {
     private closedBuckets: Bucket<T>[] = []
     private lastHopTimestamp: number
 
-    constructor(options: HoppingWindowOptions<T>) {
+    constructor(options: HoppingWindowOptions<T, R>) {
         super(options)
         this.size = toMs(options.size)
 
@@ -22,13 +23,13 @@ export class HoppingWindow<T> extends WindowingSystem<T> {
         else this.hop = toMs(options.hop)
     }
 
-    async onStart(subscriber: Subscriber<T[]>): Promise<void> {
-        this.logWindowStart("hopping")
+    async onStart(sub: Subject<InnerEvent<R[]>>): Promise<void> {
+        +
         this.setOpeningInterval()
-        this.setClosingInterval(subscriber)
+        this.setClosingInterval(sub)
     }
 
-    async onDequeuedEvent(subscriber: Subscriber<T[]>, event: DequeuedEvent<T>): Promise<void> {
+    async onDequeuedEvent(sub: Subject<InnerEvent<R[]>>, event: DequeuedEvent<T>): Promise<void> {
         let assigned = false
         let owners = 0
 
@@ -48,9 +49,9 @@ export class HoppingWindow<T> extends WindowingSystem<T> {
             }
         }
 
-        if (!assigned) {
-            this.logger.warning(`[event lost]   :: key: ${this.logger.yellow(event.eventKey)} - time ${this.logger.yellow(event.eventTime)}`)
-        }
+        // if (!assigned) {
+        //     this.logger.warning(`[event lost]   :: key: ${this.logger.yellow(event.eventKey)} - time ${this.logger.yellow(event.eventTime)}`)
+        // }
 
         if (owners > 2) {
             console.log(">2", Date.now())
@@ -59,10 +60,10 @@ export class HoppingWindow<T> extends WindowingSystem<T> {
 
     openBucket() {
         this.lastHopTimestamp = this.lastHopTimestamp ? this.lastHopTimestamp + this.hop : Date.now()
-        this.buckets.push(new Bucket(this.stateManager, this.logger, this.lastHopTimestamp))
+        this.buckets.push(new Bucket(this.stateManager, this.lastHopTimestamp))
     }
 
-    async closeBucket(subscriber: Subscriber<T[]>) {
+    async closeBucket(sub: Subject<InnerEvent<R[]>>) {
         const bucketToClose = this.buckets.shift()
         this.closedBuckets.push(bucketToClose)
 
@@ -70,7 +71,7 @@ export class HoppingWindow<T> extends WindowingSystem<T> {
             this.watermark,
             "flush",
             events => {
-                this.release(subscriber, events)
+                this.release(sub, events)
                 this.closedBuckets = this.closedBuckets.filter(b => b.id != bucketToClose.id) || []
             },
             bucketToClose.openedAt + this.size
@@ -84,11 +85,11 @@ export class HoppingWindow<T> extends WindowingSystem<T> {
         }, this.hop)
     }
 
-    setClosingInterval(subscriber: Subscriber<T[]>) {
+    setClosingInterval(sub: Subject<InnerEvent<R[]>>) {
         setTimeout(async () => {
-            this.closeBucket(subscriber)
+            this.closeBucket(sub)
             setInterval(async () => {
-                this.closeBucket(subscriber)
+                this.closeBucket(sub)
             }, this.hop)
         }, this.size)
     }

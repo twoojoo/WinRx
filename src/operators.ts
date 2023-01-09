@@ -1,24 +1,24 @@
 import { Observable, Subject } from "rxjs";
 import { streamFromSubject } from "./Utils/parseStream";
 import { Stream } from "./Types/Stream";
+import { InnerEvent } from "./event";
 
 type OperatorCallback<T, R> = (event: T) => Promise<R> | R
 
 export type Operators<T> = {
-    map: <R>(callback: OperatorCallback<T, R>) => Stream<R>,
-    forEach: (callback: OperatorCallback<T, void>) => Stream<T>,
-    filter: (callback: OperatorCallback<T, boolean>) => Stream<T>
-    // join: <R, N>(stream: Stream<R>) => Join<T, R, N>
+    map: <R>(callback: OperatorCallback<T, R>) => Stream<InnerEvent<R>>,
+    forEach: (callback: OperatorCallback<T, void>) => Stream<InnerEvent<T>>,
+    filter: (callback: OperatorCallback<T, boolean>) => Stream<InnerEvent<T>>
 }
 
-export function operators<T>(source: Observable<T>): Operators<T> {
+export function operators<T>(source: Observable<InnerEvent<T>>): Operators<T> {
     return {
-        map<R>(callback: OperatorCallback<T, R>): Stream<R> {
-            const subj = new Subject<R>()
+        map<R>(callback: OperatorCallback<T, R>): Stream<InnerEvent<R>> {
+            const subj = new Subject<InnerEvent<R>>()
 
             source.subscribe({
-                async next(event: T) {
-                    const result = await callback(event)
+                async next(event: InnerEvent<T>) {
+                    const result: InnerEvent<R> = {...event, value: await callback(event.value)} 
                     subj.next(result)
                 }
             })
@@ -26,12 +26,12 @@ export function operators<T>(source: Observable<T>): Operators<T> {
             return streamFromSubject(subj)
         },
 
-        forEach(callback: OperatorCallback<T, void>): Stream<T> {
-            const subj = new Subject<T>()
+        forEach(callback: OperatorCallback<T, void>): Stream<InnerEvent<T>> {
+            const subj = new Subject<InnerEvent<T>>()
 
             source.subscribe({
-                async next(event: T) {
-                    await callback(event)
+                async next(event: InnerEvent<T>) {
+                    await callback(event.value)
                     subj.next(event)
                 }
             })
@@ -39,12 +39,12 @@ export function operators<T>(source: Observable<T>): Operators<T> {
             return streamFromSubject(subj)
         },
 
-        filter(callback: OperatorCallback<T, boolean>): Stream<T> {
-            const subj = new Subject<T>()
+        filter(callback: OperatorCallback<T, boolean>): Stream<InnerEvent<T>> {
+            const subj = new Subject<InnerEvent<T>>()
 
             source.subscribe({
-                async next(event: T) {
-                    if (await callback(event)) {
+                async next(event: InnerEvent<T>) {
+                    if (await callback(event.value)) {
                         subj.next(event)
                     }
                 }

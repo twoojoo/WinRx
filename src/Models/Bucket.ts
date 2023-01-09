@@ -1,6 +1,5 @@
 import { randomUUID } from "crypto"
 import { AssignedEvent, DequeuedEvent, IncomingEvent } from "../Types/Event"
-import { WinRxlogger } from "../Utils/Logger"
 import { StateMananger } from "./StateManager"
 
 /** A Bucket is a collection of events. It doesn't handle intervals and timeouts,
@@ -14,16 +13,13 @@ export class Bucket<T> {
     private stateManager: StateMananger<T>
     private closedAt: number | undefined = undefined
     private destroyedAt: number | undefined = undefined
-    private logger: WinRxlogger
 
     private eventCounter = 0
 
-    constructor(stateManager: StateMananger<T>, logger: WinRxlogger, timestamp: number = Date.now()) {
+    constructor(stateManager: StateMananger<T>, timestamp: number = Date.now()) {
         this.id = randomUUID()
-        this.logger = logger
         this.openedAt = timestamp
         this.stateManager = stateManager
-        this.logger.info(`[bucket opened]   | id: ${this.logger.cyan(this.id)} - time: ${this.logger.cyan(this.openedAt)}`)
     }
 
     /** Determin if the bucket is closed and watermarked */
@@ -80,10 +76,10 @@ export class Bucket<T> {
             const events = await this[mode]()
             this.destroy()
             callback(events)
-            this.logger.info(`[bucket released] | id: ${this.logger.cyan(this.id)} - key: ${this.logger.cyan(events[0]?.eventKey) || "default"} - items: ${this.logger.yellow(events.length)}`)
+            // this.logger.info(`[bucket released] | id: ${this.logger.cyan(this.id)} - key: ${this.logger.cyan(events[0]?.eventKey) || "default"} - items: ${this.logger.yellow(events.length)}`)
         }, watermark)
 
-        this.logger.info(`[bucket closed]   | id: ${this.logger.cyan(this.id)} - time: ${this.logger.cyan(this.closedAt)} - items: ${this.logger.yellow(this.eventCounter)}`)
+        // this.logger.info(`[bucket closed]   | id: ${this.logger.cyan(this.id)} - time: ${this.logger.cyan(this.closedAt)} - items: ${this.logger.yellow(this.eventCounter)}`)
     }
 
     /** Destroy = closed + watermarked */

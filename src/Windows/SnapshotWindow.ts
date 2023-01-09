@@ -1,6 +1,6 @@
 import { Observer } from "rxjs"
 import { StateMananger } from "../Models/StateManager"
-import { WindowingSystem, WindowingOptions } from "../Windows/model/WindowingSystem"
+import { WindowingSystem, WindowingOptions } from "./model/WindowingSystem"
 
 export type SnapshotWindowOptions<T> = WindowingOptions<T> & { offset: number, tolerance: number }
 
