@@ -1,12 +1,12 @@
-import { Consumer, ConsumerConfig } from "kafkajs";
-import { EventEmitter } from "events"
-import { Subject } from "rxjs";
 import { streamFromSubject } from "./Utils/parseStream";
-import { Stream } from "./Types/Stream";
-import { StateMananger } from "./Models/StateManager";
-import { Memory } from "./QueueManager";
-import { Queue } from "./queue";
 import { QueueManager } from "./Models/QueueManager";
+import { Consumer, ConsumerConfig } from "kafkajs";
+import { Stream } from "./Types/Stream";
+import { Memory } from "./QueueManager";
+import { EventEmitter } from "events"
+import { randomUUID } from "crypto";
+import { Queue } from "./queue";
+import { Subject } from "rxjs";
 
 type KafkaEvent<T> = {
     key: string,
@@ -23,7 +23,7 @@ export type Sources = {
     fromEvent: <T>(emitter: EventEmitter, name: string) => Stream<{ name: string, value: T }>
 }
 
-export function stream(name: string, queueManager: QueueManager<any> = new Memory<any>()): Sources {
+export function stream(name: string = randomUUID(), queueManager: QueueManager<any> = new Memory<any>()): Sources {
     
     queueManager.setStreamName(name)
     const queue = new Queue(queueManager)

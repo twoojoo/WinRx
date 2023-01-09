@@ -14,7 +14,7 @@ const stream1 = stream("stream1")
     .on((e1, e2) => e1 == e2)
     .tumblingWindow({ size: 2000 })
     .apply((...args) => args.join(" - "))
-
+    
 stream1.toEvent(emitter, "test-result")
 
 let counter1 = 0

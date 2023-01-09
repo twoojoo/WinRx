@@ -1,11 +1,13 @@
-import { Observable, Subject, Subscriber } from "rxjs";
-import { streamFromSubject } from "./Utils/parseStream";
-import { Stream } from "./Types/Stream";
-import { TumblingWindow, TumblingWindowOptions } from "./WindowingSystems";
+import { HoppingWindow, HoppingWindowOptions, SessionWindow, SessionWindowOptions, TumblingWindow, TumblingWindowOptions } from "./WindowingSystems";
 import { WindowingSystem } from "./Models/WindowingSystem";
+import { streamFromSubject } from "./Utils/parseStream";
+import { Observable, Subject, Subscriber } from "rxjs";
+import { Stream } from "./Types/Stream";
 
 export type Windows<T> = {
-    tumblingWindow: (options: TumblingWindowOptions<T>) => Stream<T[]>
+    tumblingWindow: (options: TumblingWindowOptions<T>) => Stream<T[]>,
+    hoppingWindow: (options: HoppingWindowOptions<T>) => Stream<T[]>,
+    sessionWindow: (options: SessionWindowOptions<T>) => Stream<T[]>,
 }
 
 export function windows<T>(source: Observable<T>): Windows<T> {
@@ -14,7 +16,19 @@ export function windows<T>(source: Observable<T>): Windows<T> {
             const win = new TumblingWindow(options)
             const sub = initWindow(source, win)
             return streamFromSubject(sub) 
-        }
+        },
+
+        hoppingWindow(options: HoppingWindowOptions<T>): Stream<T[]> {
+            const win = new HoppingWindow(options)
+            const sub = initWindow(source, win)
+            return streamFromSubject(sub) 
+        },
+
+        sessionWindow(options: SessionWindowOptions<T>): Stream<T[]> {
+            const win = new SessionWindow(options)
+            const sub = initWindow(source, win)
+            return streamFromSubject(sub) 
+        },
     }
 }
 
