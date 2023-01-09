@@ -1,4 +1,4 @@
-import { Observable, Subject, Subscriber } from "rxjs"
+import { Subject, Subscriber } from "rxjs"
 import { Stream } from "./Types/Stream"
 import { streamFromSubject, subjectFromStream } from "./Utils/parseStream"
 import { TumblingWindow, TumblingWindowOptions } from "./WindowingSystems"

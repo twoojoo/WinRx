@@ -1,15 +1,8 @@
-// // import { Stream } from "../Types/Stream"
-// import { Observable, Subscriber, OperatorFunction } from "rxjs"
-
-// import { Observable } from "rxjs";
 import { Observable, Subject, Subscriber } from "rxjs";
 import { streamFromSubject } from "./Utils/parseStream";
 import { Stream } from "./Types/Stream";
 import { TumblingWindow, TumblingWindowOptions } from "./WindowingSystems";
-import { } from "./WindowingSystems"
 import { WindowingSystem } from "./Models/WindowingSystem";
-
-// type OperatorCallback<T, R> = (event: T) => Promise<R> | R
 
 export type Windows<T> = {
     tumblingWindow: (options: TumblingWindowOptions<T>) => Stream<T[]>

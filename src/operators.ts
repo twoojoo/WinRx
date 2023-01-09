@@ -1,9 +1,6 @@
-import { Observable, Subject, Subscriber } from "rxjs";
+import { Observable, Subject } from "rxjs";
 import { streamFromSubject } from "./Utils/parseStream";
 import { Stream } from "./Types/Stream";
-import { pushEventToWindow, startDequeueloop, Windows } from "./windows";
-import { TumblingWindow, TumblingWindowOptions } from "./WindowingSystems";
-import { WindowingSystem } from "./Models/WindowingSystem";
 
 type OperatorCallback<T, R> = (event: T) => Promise<R> | R
 
