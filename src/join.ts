@@ -14,11 +14,11 @@ type JoinOperator<T, R, N> = {
 }
 
 type JoinWindows<T, R, N> = {
-    tumblingWindow: (options: TumblingWindowOptions<JoinEvent<T, R>>) => Apply<T, R, N>
+    tumblingWindow: (options: TumblingWindowOptions<JoinEvent<T, R>>) => Apply<T, R>
 }
 
-type Apply<T, R, N> = {
-    apply: (operation: JoinOperation<T, R, N>) => Stream<N>
+type Apply<T, R> = {
+    apply: <N>(operation: JoinOperation<T, R, N>) => Stream<N>
 }
 
 type JoinEvent<T, R> = (T | R)[]
@@ -32,7 +32,7 @@ export function join<T>(source: Stream<T>): Join<T> {
             return {
                 on(condition: JoinCondition<T, R>): JoinWindows<T, R, N> {
                     return {
-                        tumblingWindow(options: TumblingWindowOptions<JoinEvent<T, R>>): Apply<T, R, N> {
+                        tumblingWindow(options: TumblingWindowOptions<JoinEvent<T, R>>): Apply<T, R> {
                             const window = new TumblingWindow<JoinEvent<T, R>>(options)
                             return apply(source, stream, window, condition)
                         }
@@ -43,9 +43,9 @@ export function join<T>(source: Stream<T>): Join<T> {
     }
 }
 
-function apply<T, R, N>(stream1: Stream<T>, stream2: Stream<R>, window: WindowingSystem<JoinEvent<T, R>>, condition: JoinCondition<T, R>): Apply<T, R, N> {
+function apply<T, R>(stream1: Stream<T>, stream2: Stream<R>, window: WindowingSystem<JoinEvent<T, R>>, condition: JoinCondition<T, R>): Apply<T, R> {
     return {
-        apply(operation: JoinOperation<T, R, N>): Stream<N> {
+        apply<N>(operation: JoinOperation<T, R, N>): Stream<N> {
             const windowSub = new Subject<JoinEvent<T, R>[]>()
 
             window.onStart((windowSub as unknown) as Subscriber<JoinEvent<T, R>[]>)
