@@ -1,11 +1,8 @@
 import { streamFromSubject } from "./Utils/parseStream";
-import { QueueManager } from "./Models/QueueManager";
 import { Consumer, ConsumerConfig } from "kafkajs";
 import { Stream } from "./Types/Stream";
-import { Memory } from "./QueueManager";
 import { EventEmitter } from "events"
 import { randomUUID } from "crypto";
-import { Queue } from "./queue";
 import { Subject } from "rxjs";
 
 type KafkaEvent<T> = {
@@ -23,11 +20,7 @@ export type Sources = {
     fromEvent: <T>(emitter: EventEmitter, name: string) => Stream<{ name: string, value: T }>
 }
 
-export function stream(name: string = randomUUID(), queueManager: QueueManager<any> = new Memory<any>()): Sources {
-    
-    queueManager.setStreamName(name)
-    const queue = new Queue(queueManager)
-    
+export function stream(name: string = randomUUID()): Sources {
     return {
         fromKafka: <T>(consumer: Consumer, topics: string[], config?: ConsumerConfig): Stream<KafkaEvent<T>> => {
             const sub = new Subject<KafkaEvent<T>>();
@@ -40,9 +33,8 @@ export function stream(name: string = randomUUID(), queueManager: QueueManager<a
                         key: message.key.toString("utf-8"),
                         value: attemptJsonParsing(message.value.toString("utf-8"))
                     }
-                    
-                    await queue.enqueue(event)
-                    await queue.dequeueLoop((event) => sub.next(event))
+
+                    sub.next(event)
                 }
             })
 
@@ -57,8 +49,7 @@ export function stream(name: string = randomUUID(), queueManager: QueueManager<a
                     value: attemptJsonParsing(value)
                 }
 
-                await queue.enqueue(event)
-                await queue.dequeueLoop((event) => sub.next(event))
+                sub.next(event)
             })
 
             return streamFromSubject(sub)

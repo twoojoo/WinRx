@@ -2,16 +2,19 @@ import { StateMananger } from "../Models/StateManager"
 import { default as RedisClient } from "ioredis"
 import { AssignedEvent, DequeuedEvent, IncomingEvent } from "../Types/Event"
 import { randomUUID } from "crypto"
+import { Duration, toMs } from "../Types/Duration"
 
 export class Redis<T> extends StateMananger<T> {
     private redisClient: RedisClient
     private counters: { [winId: string]: number } = {}
     private queueKey: string
+    private TTL: number
 
-    constructor(client: RedisClient) {
+    constructor(client: RedisClient, TTL?: Duration) {
         super()
         this.redisClient = client
         this.queueKey = "winrx-queue-" + randomUUID()
+        this.TTL = toMs(TTL)
     }
 
     async enqueue(event: IncomingEvent<T>): Promise<void> {
@@ -45,7 +48,8 @@ export class Redis<T> extends StateMananger<T> {
         this.counters[bucketId]++
 
         const key = `winrx-${bucketId}-${this.counters[bucketId]}`
-        await this.redisClient.set(key, JSON.stringify(event))
+        if (this.TTL) await this.redisClient.set(key, JSON.stringify(event), "PX", this.TTL)
+        else await this.redisClient.set(key, JSON.stringify(event))
     }
 
     async get(bucketId: string): Promise<AssignedEvent<T>[]> {
@@ -53,7 +57,7 @@ export class Redis<T> extends StateMananger<T> {
     }
 
     async flush(bucketId: string): Promise<AssignedEvent<T>[]> {
-        return await this.getOrFlush(bucketId, "flush")
+        return await this.getOrFlush(bucketId, this.TTL ? "get" : "flush")
     }
 
     async clear(bucketId: string) {

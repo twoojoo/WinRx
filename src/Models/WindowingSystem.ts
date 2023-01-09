@@ -10,7 +10,7 @@ type KeyExtractor<T> = (value: T) => EventKey
 
 export type WindowingOptions<T> = {
     id?: string | number
-    stateManager?: StateMananger<T>,
+    stateManager?: StateMananger<any>,
     watermark?: Duration,
     withEventTime?: TimestampEtractor<T>,
     logger?: LoggerOptions
