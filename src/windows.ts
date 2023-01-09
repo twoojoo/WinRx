@@ -3,7 +3,7 @@
 
 // import { Observable } from "rxjs";
 import { Observable, Subject, Subscriber } from "rxjs";
-import { streamFromSubject } from "./Utils/streamFromSubject";
+import { streamFromSubject } from "./Utils/parseStream";
 import { Stream } from "./Types/Stream";
 import { TumblingWindow, TumblingWindowOptions } from "./WindowingSystems";
 import { } from "./WindowingSystems"

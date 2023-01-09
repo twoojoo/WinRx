@@ -1,6 +1,6 @@
 import { Producer } from "kafkajs"
 import { Observable, Subject } from "rxjs"
-import { streamFromSubject } from "./Utils/streamFromSubject"
+import { streamFromSubject } from "./Utils/parseStream"
 import { Stream } from "./Types/Stream"
 import { EventEmitter } from "events"
 

@@ -3,20 +3,31 @@ import { EventEmitter } from "events"
 
 const emitter = new EventEmitter()
 
-stream()
-    .fromEvent<{i: number}>(emitter, "test-event")
-    .map(e => JSON.stringify(e))
-    .forEach(e => console.log(e))
-    .tumblingWindow({size: 2000})
-    .toEvent(emitter, "test-result")
+const stream2 = stream()
+    .fromEvent<number>(emitter, "stream2")
+    .map(e => e.value)
 
+const stream1 = stream()
+    .fromEvent<number>(emitter, "stream1")
+    .map(e => e.value)
+    .join(stream2)
+    .on((e1, e2) => e1 == e2)
+    .tumblingWindow({ size: 2000 })
+    .apply((...args) => args.join(" - "))
 
-let counter = 0
+stream1.toEvent(emitter, "test-result")
+
+let counter1 = 0
 setInterval(() => {
-    emitter.emit("test-event", `{"i": ${counter}}`)
-    counter++
+    emitter.emit("stream1", counter1)
+    counter1 += 2
 }, 500)
+
+let counter2 = 0
+setInterval(() => {
+    emitter.emit("stream2", counter2)
+    counter2++
+}, 250)
 
 
 emitter.on("test-result", (v) => console.log(v))
-emitter.on("test-result-1", (v) => console.log(v))

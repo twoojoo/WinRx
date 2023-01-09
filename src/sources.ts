@@ -1,7 +1,7 @@
 import { Consumer, ConsumerConfig } from "kafkajs";
 import { EventEmitter } from "events"
 import { Subject } from "rxjs";
-import { streamFromSubject } from "./Utils/streamFromSubject";
+import { streamFromSubject } from "./Utils/parseStream";
 import { Stream } from "./Types/Stream";
 
 export type Sources<T> = {
