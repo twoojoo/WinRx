@@ -1,13 +1,13 @@
-import { stream } from "../src/sources";
+import { Stream } from "../src/stream";
 import { EventEmitter } from "events"
 
 const emitter = new EventEmitter()
 
-const stream2 = stream("stream2")
+const stream2 = Stream("stream2")
     .fromEvent<string>(emitter, "stream2")
     .map(e => e.value)
 
-const stream1 = stream("stream1")
+const stream1 = Stream("stream1")
     .fromEvent<number>(emitter, "stream1")
     .map(e => e.value)
     .merge(stream2)

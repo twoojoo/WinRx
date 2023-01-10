@@ -1,9 +1,40 @@
 import { streamFromSubject } from "./utils/parseStream";
 import { Consumer, ConsumerConfig } from "kafkajs";
-import { Stream } from "./types/Stream";
 import { EventEmitter } from "events"
 import { randomUUID } from "crypto";
 import { Subject } from "rxjs";
+import { Join } from "./operators/join"
+import { Merge } from "./operators/merge"
+import { Operators } from "./operators/operators"
+import { Sinks } from "./operators/sinks"
+import { Windows } from "./operators/windows"
+
+type RxJsSubjectOmissions = //'pipe'
+    | 'complete'
+    | 'error'
+    | 'asObservable'
+    | 'forEach'
+    | 'subscribe'
+    | 'unsubscribe'
+    | 'hasError'
+    | 'isStopped'
+    | 'lift'
+    | 'operator'
+    | 'source'
+    | 'thrownError'
+    | 'toPromise'
+    | 'observers'
+    | 'observed'
+    | 'next'
+    | 'closed'
+
+export type Stream<T> =
+    Omit<Subject<T>, RxJsSubjectOmissions> &
+    Operators<T> &
+    Windows<T> &
+    Join<T> &
+    Merge<T> &
+    Sinks<T>
 
 type KafkaEvent<T> = {
     key: string,

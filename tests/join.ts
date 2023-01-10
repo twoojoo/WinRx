@@ -1,4 +1,4 @@
-import { Stream } from "../src/sources";
+import { Stream } from "../src/stream";
 import { EventEmitter } from "events"
 import { redis } from "../src";
 import Redis from "ioredis";
