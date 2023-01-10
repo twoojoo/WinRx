@@ -1,12 +1,12 @@
 import { streamFromSubject, subjectFromStream } from "../utils/parseStream"
-import { Stream } from "../windows/types/Stream"
+import { Stream } from "../types/Stream"
 import { Subject } from "rxjs"
 
 export type Merge<T> = {
     merge: <R>(stream: Stream<R>) => Stream<T | R>
 }
 
-export function merge<T>(source: Stream<T>): Merge<T> {
+export function mergeFactory<T>(source: Stream<T>): Merge<T> {
     return {
         merge<R>(stream: Stream<R>): Stream<T | R> {
             const subj = new Subject<T | R>()

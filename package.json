@@ -12,10 +12,12 @@
     "tumbling",
     "session",
     "hopping",
-    "snapshot",
-    "counting",
     "redis",
-    "stream"
+    "stream",
+    "processing",
+    "join",
+    "operators",
+    "kafka"
   ],
   "author": "twoojoo",
   "license": "ISC",

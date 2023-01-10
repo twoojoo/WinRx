@@ -2,7 +2,7 @@ import { HoppingWindow, HoppingWindowOptions, SessionWindow, SessionWindowOption
 import { WindowingSystem } from "../windows/models/WindowingSystem";
 import { streamFromSubject } from "../utils/parseStream";
 import { Observable, Subject, Subscriber } from "rxjs";
-import { Stream } from "../windows/types/Stream";
+import { Stream } from "../types/Stream";
 
 export type Windows<T> = {
     tumblingWindow: (options: TumblingWindowOptions<T>) => Stream<T[]>,
@@ -10,7 +10,7 @@ export type Windows<T> = {
     sessionWindow: (options: SessionWindowOptions<T>) => Stream<T[]>,
 }
 
-export function windows<T>(source: Observable<T>): Windows<T> {
+export function windowsFactory<T>(source: Observable<T>): Windows<T> {
     return {
         tumblingWindow(options: TumblingWindowOptions<T>): Stream<T[]> {
             const win = new TumblingWindow(options)

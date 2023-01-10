@@ -1,6 +1,6 @@
 import { Subject, Subscriber } from "rxjs"
 import { WindowingSystem } from "../windows/models/WindowingSystem"
-import { Stream } from "../windows/types/Stream"
+import { Stream } from "../types/Stream"
 import { streamFromSubject, subjectFromStream } from "../utils/parseStream"
 import { TumblingWindow, TumblingWindowOptions } from "../windows/windowingSystems"
 import { pushEventToWindow } from "./windows"
@@ -26,7 +26,7 @@ type JoinCondition<T, R> = (event1: T, event2: R) => boolean
 type JoinOperation<T, R, N> = (...args: (T | R)[]) => N
 
 
-export function join<T>(source: Stream<T>): Join<T> {
+export function joinFactory<T>(source: Stream<T>): Join<T> {
     return {
         join<R, N>(stream: Stream<R>): JoinOperator<T, R, N> {
             return {
@@ -34,7 +34,7 @@ export function join<T>(source: Stream<T>): Join<T> {
                     return {
                         tumblingWindow(options: TumblingWindowOptions<JoinEvent<T, R>>): Apply<T, R> {
                             const window = new TumblingWindow<JoinEvent<T, R>>(options)
-                            return apply(source, stream, window, condition)
+                            return applyFactory(source, stream, window, condition)
                         }
                     }
                 }
@@ -43,7 +43,7 @@ export function join<T>(source: Stream<T>): Join<T> {
     }
 }
 
-function apply<T, R>(stream1: Stream<T>, stream2: Stream<R>, window: WindowingSystem<JoinEvent<T, R>>, condition: JoinCondition<T, R>): Apply<T, R> {
+function applyFactory<T, R>(stream1: Stream<T>, stream2: Stream<R>, window: WindowingSystem<JoinEvent<T, R>>, condition: JoinCondition<T, R>): Apply<T, R> {
     return {
         apply<N>(operation: JoinOperation<T, R, N>): Stream<N> {
             const windowSub = new Subject<JoinEvent<T, R>[]>()

@@ -2,7 +2,7 @@ import {Redis, Memory} from "./windows/stateManagers"
 import {default as IORedisClient} from "ioredis"
 import { Duration } from "./windows/types/Duration"
 
-export { stream } from "./sources"
+export { Stream } from "./sources"
 
 export function memory() {
     return new Memory()

@@ -1,7 +1,5 @@
 import { stream } from "../src/sources";
 import { EventEmitter } from "events"
-import { redis } from "../src";
-import Redis from "ioredis";
 
 const emitter = new EventEmitter()
 

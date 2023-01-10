@@ -1,10 +1,10 @@
 import { Subject } from "rxjs";
-import { Stream } from "../windows/types/Stream";
-import { sinks } from "../sinks";
-import { operators } from "../operators/operators";
-import { windows } from "../operators/windows";
-import { join } from "../operators/join";
-import { merge } from "../operators/merge";
+import { Stream } from "../types/Stream";
+import { sinksFactory } from "../operators/sinks";
+import { operatorsFactory } from "../operators/operators";
+import { windowsFactory } from "../operators/windows";
+import { joinFactory } from "../operators/join";
+import { mergeFactory } from "../operators/merge";
 
 /** Converts an RXJS subject into a WinRx Stream */
 export function streamFromSubject<T>(subj: Subject<T>): Stream<T> {
@@ -12,11 +12,11 @@ export function streamFromSubject<T>(subj: Subject<T>): Stream<T> {
 
     Object.assign(
         stream,
-        sinks<T>(stream),
-        windows<T>(stream),
-        join<T>(stream),
-        merge<T>(stream),
-        operators<T>(stream)
+        sinksFactory<T>(stream),
+        windowsFactory<T>(stream),
+        joinFactory<T>(stream),
+        mergeFactory<T>(stream),
+        operatorsFactory<T>(stream)
     )
 
     return stream as Stream<T>

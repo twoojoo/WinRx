@@ -1,4 +1,4 @@
-import { stream } from "../src/sources";
+import { Stream } from "../src/sources";
 import { EventEmitter } from "events"
 import { redis } from "../src";
 import Redis from "ioredis";
@@ -6,11 +6,11 @@ import Redis from "ioredis";
 const emitter = new EventEmitter()
 const client = new Redis("redis://localhost:6379")
 
-const stream2 = stream("stream2")
+const stream2 = Stream("stream2")
     .fromEvent<number>(emitter, "stream2")
     .map(e => e.value)
 
-const stream1 = stream("stream1")
+const stream1 = Stream("stream1")
     .fromEvent<number>(emitter, "stream1")
     .map(e => e.value)
     .join(stream2).on((e1, e2) => e1 == e2).tumblingWindow({

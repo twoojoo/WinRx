@@ -1,6 +1,6 @@
 import { Observable, Subject } from "rxjs";
 import { streamFromSubject } from "../utils/parseStream";
-import { Stream } from "../windows/types/Stream";
+import { Stream } from "../types/Stream";
 
 type OperatorCallback<T, R> = (event: T) => Promise<R> | R
 
@@ -11,7 +11,7 @@ export type Operators<T> = {
     // join: <R, N>(stream: Stream<R>) => Join<T, R, N>
 }
 
-export function operators<T>(source: Observable<T>): Operators<T> {
+export function operatorsFactory<T>(source: Observable<T>): Operators<T> {
     return {
         map<R>(callback: OperatorCallback<T, R>): Stream<R> {
             const subj = new Subject<R>()

@@ -1,6 +1,6 @@
 import { streamFromSubject } from "./utils/parseStream";
 import { Consumer, ConsumerConfig } from "kafkajs";
-import { Stream } from "./windows/types/Stream";
+import { Stream } from "./types/Stream";
 import { EventEmitter } from "events"
 import { randomUUID } from "crypto";
 import { Subject } from "rxjs";
@@ -20,7 +20,7 @@ export type Sources = {
     fromEvent: <T>(emitter: EventEmitter, name: string) => Stream<{ name: string, value: T }>
 }
 
-export function stream(name: string = randomUUID()): Sources {
+export function Stream(name: string = randomUUID()): Sources {
     return {
         fromKafka: <T>(consumer: Consumer, topics: string[], config?: ConsumerConfig): Stream<KafkaEvent<T>> => {
             const sub = new Subject<KafkaEvent<T>>();
