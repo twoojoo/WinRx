@@ -1,8 +1,8 @@
-import { HoppingWindow, HoppingWindowOptions, SessionWindow, SessionWindowOptions, TumblingWindow, TumblingWindowOptions } from "./WindowingSystems";
-import { WindowingSystem } from "./Models/WindowingSystem";
+import { HoppingWindow, HoppingWindowOptions, SessionWindow, SessionWindowOptions, TumblingWindow, TumblingWindowOptions } from "./Windows/WindowingSystems";
+import { WindowingSystem } from "./Windows/Models/WindowingSystem";
 import { streamFromSubject } from "./Utils/parseStream";
 import { Observable, Subject, Subscriber } from "rxjs";
-import { Stream } from "./Types/Stream";
+import { Stream } from "./Windows/Types/Stream";
 
 export type Windows<T> = {
     tumblingWindow: (options: TumblingWindowOptions<T>) => Stream<T[]>,

@@ -1,5 +1,5 @@
 import { Subject } from "rxjs";
-import { Stream } from "../Types/Stream";
+import { Stream } from "../Windows/Types/Stream";
 import { sinks } from "../sinks";
 import { operators } from "../operators";
 import { windows } from "../windows";

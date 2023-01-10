@@ -1,6 +1,6 @@
-import {Redis, Memory} from "./StateManagers"
+import {Redis, Memory} from "./Windows/StateManagers"
 import {default as IORedisClient} from "ioredis"
-import { Duration } from "./Types/Duration"
+import { Duration } from "./Windows/Types/Duration"
 
 export { stream } from "./sources"
 

@@ -1,9 +1,9 @@
 import { Subject } from "rxjs"
-import { Join } from "../join"
-import { Merge } from "../merge"
-import { Operators } from "../operators"
-import { Sinks } from "../sinks"
-import { Windows } from "../windows"
+import { Join } from "../../join"
+import { Merge } from "../../merge"
+import { Operators } from "../../operators"
+import { Sinks } from "../../sinks"
+import { Windows } from "../../windows"
 
 type RxJsSubjectOmissions = //'pipe'
     | 'complete'
