@@ -1,6 +1,6 @@
 import { Observable, Subject } from "rxjs";
 import { streamFromSubject } from "../utils/parseStream";
-import { Stream } from "../windows/Types/Stream";
+import { Stream } from "../windows/types/Stream";
 
 type OperatorCallback<T, R> = (event: T) => Promise<R> | R
 

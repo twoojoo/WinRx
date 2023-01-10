@@ -1,5 +1,5 @@
-import { AssignedEvent, DequeuedEvent, IncomingEvent } from "../Types/Event"
-import { StateMananger } from "../Models/StateManager"
+import { AssignedEvent, DequeuedEvent, IncomingEvent } from "../types/Event"
+import { StateMananger } from "../models/StateManager"
 
 export class Memory<T> extends StateMananger<T> {
     private queue: IncomingEvent<T>[] = []

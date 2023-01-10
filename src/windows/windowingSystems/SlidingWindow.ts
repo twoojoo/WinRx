@@ -1,8 +1,8 @@
 import { Subscriber } from "rxjs"
-import { DequeuedEvent, EventKey } from "../Types/Event"
-import { Bucket } from "../Models/Bucket"
-import { Duration, toMs } from "../Types/Duration"
-import { KeyedWindowingSystem, KeyedWindowingOptions } from "../Models/KeyedWindowingSystem"
+import { DequeuedEvent, EventKey } from "../types/Event"
+import { Bucket } from "../models/Bucket"
+import { Duration, toMs } from "../types/Duration"
+import { KeyedWindowingSystem, KeyedWindowingOptions } from "../models/KeyedWindowingSystem"
 
 export type SlidingWindowOptions<T> = KeyedWindowingOptions<T> & {
     size: Duration

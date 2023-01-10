@@ -1,5 +1,5 @@
-import { AssignedEvent, DequeuedEvent, IncomingEvent } from "../Types/Event"
-import { WinRxlogger } from "../Utils/Logger"
+import { AssignedEvent, DequeuedEvent, IncomingEvent } from "../types/Event"
+import { WinRxlogger } from "../utils/Logger"
 
 /** The StateManager class handles both the queue (where events are put as soon as they reach
  * the window) and the window's buckets (where events are stored upon each bucket's release).*/

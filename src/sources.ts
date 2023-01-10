@@ -1,6 +1,6 @@
 import { streamFromSubject } from "./utils/parseStream";
 import { Consumer, ConsumerConfig } from "kafkajs";
-import { Stream } from "./windows/Types/Stream";
+import { Stream } from "./windows/types/Stream";
 import { EventEmitter } from "events"
 import { randomUUID } from "crypto";
 import { Subject } from "rxjs";

@@ -1,7 +1,7 @@
 import { Producer } from "kafkajs"
 import { Observable, Subject } from "rxjs"
 import { streamFromSubject } from "./utils/parseStream"
-import { Stream } from "./windows/Types/Stream"
+import { Stream } from "./windows/types/Stream"
 import { EventEmitter } from "events"
 
 type KeyExtractor<T> = (event: T) => string | number

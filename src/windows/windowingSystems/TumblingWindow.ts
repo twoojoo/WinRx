@@ -1,8 +1,8 @@
 import { Subscriber } from "rxjs"
-import { DequeuedEvent, EventKey } from "../Types/Event"
-import { Bucket } from "../Models/Bucket"
-import { WindowingSystem, WindowingOptions } from "../Models/WindowingSystem"
-import { Duration, toMs } from "../Types/Duration"
+import { DequeuedEvent, EventKey } from "../types/Event"
+import { Bucket } from "../models/Bucket"
+import { WindowingSystem, WindowingOptions } from "../models/WindowingSystem"
+import { Duration, toMs } from "../types/Duration"
 
 export type TumblingWindowOptions<T> = WindowingOptions<T> & { size: Duration }
 

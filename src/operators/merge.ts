@@ -1,5 +1,5 @@
 import { streamFromSubject, subjectFromStream } from "../utils/parseStream"
-import { Stream } from "../windows/Types/Stream"
+import { Stream } from "../windows/types/Stream"
 import { Subject } from "rxjs"
 
 export type Merge<T> = {

@@ -1,8 +1,8 @@
-import { StateMananger } from "../Models/StateManager"
+import { StateMananger } from "../models/StateManager"
 import { default as RedisClient } from "ioredis"
-import { AssignedEvent, DequeuedEvent, IncomingEvent } from "../Types/Event"
+import { AssignedEvent, DequeuedEvent, IncomingEvent } from "../types/Event"
 import { randomUUID } from "crypto"
-import { Duration, toMs } from "../Types/Duration"
+import { Duration, toMs } from "../types/Duration"
 
 export class Redis<T> extends StateMananger<T> {
     private redisClient: RedisClient
