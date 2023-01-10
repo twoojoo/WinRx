@@ -1,10 +1,10 @@
 import { Subject } from "rxjs";
-import { Stream } from "../Windows/Types/Stream";
+import { Stream } from "../windows/Types/Stream";
 import { sinks } from "../sinks";
-import { operators } from "../operators";
-import { windows } from "../windows";
-import { join } from "../join";
-import { merge } from "../merge";
+import { operators } from "../operators/operators";
+import { windows } from "../operators/windows";
+import { join } from "../operators/join";
+import { merge } from "../operators/merge";
 
 /** Converts an RXJS subject into a WinRx Stream */
 export function streamFromSubject<T>(subj: Subject<T>): Stream<T> {

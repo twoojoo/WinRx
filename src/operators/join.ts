@@ -1,8 +1,8 @@
 import { Subject, Subscriber } from "rxjs"
-import { WindowingSystem } from "./Windows/Models/WindowingSystem"
-import { Stream } from "./Windows/Types/Stream"
-import { streamFromSubject, subjectFromStream } from "./Utils/parseStream"
-import { TumblingWindow, TumblingWindowOptions } from "./Windows/WindowingSystems"
+import { WindowingSystem } from "../windows/Models/WindowingSystem"
+import { Stream } from "../windows/Types/Stream"
+import { streamFromSubject, subjectFromStream } from "../utils/parseStream"
+import { TumblingWindow, TumblingWindowOptions } from "../windows/WindowingSystems"
 import { pushEventToWindow } from "./windows"
 
 export type Join<T> = {
