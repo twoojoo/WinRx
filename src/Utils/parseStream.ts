@@ -4,6 +4,7 @@ import { sinks } from "../sinks";
 import { operators } from "../operators";
 import { windows } from "../windows";
 import { join } from "../join";
+import { merge } from "../merge";
 
 /** Converts an RXJS subject into a WinRx Stream */
 export function streamFromSubject<T>(subj: Subject<T>): Stream<T> {
@@ -14,6 +15,7 @@ export function streamFromSubject<T>(subj: Subject<T>): Stream<T> {
         sinks<T>(stream),
         windows<T>(stream),
         join<T>(stream),
+        merge<T>(stream),
         operators<T>(stream)
     )
 

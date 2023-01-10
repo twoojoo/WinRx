@@ -1,5 +1,6 @@
 import { Subject } from "rxjs"
 import { Join } from "../join"
+import { Merge } from "../merge"
 import { Operators } from "../operators"
 import { Sinks } from "../sinks"
 import { Windows } from "../windows"
@@ -28,4 +29,5 @@ export type Stream<T> =
     Operators<T> &
     Windows<T> &
     Join<T> &
+    Merge<T> &
     Sinks<T>
