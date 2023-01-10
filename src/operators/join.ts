@@ -1,7 +1,7 @@
 import { Subject, Subscriber } from "rxjs"
 import { WindowingSystem } from "../windows/models/WindowingSystem"
 import { Stream } from "../stream";
-import { streamFromSubject, subjectFromStream } from "../utils/parseStream"
+import { streamFromSubject, subjectFromStream } from "../stream"
 import { TumblingWindow, TumblingWindowOptions } from "../windows/windowingSystems"
 import { pushEventToWindow } from "./windows"
 

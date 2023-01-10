@@ -1,35 +1,15 @@
-import { streamFromSubject } from "./utils/parseStream";
+// import { streamFromSubject } from "./stream";
 import { Consumer, ConsumerConfig } from "kafkajs";
 import { EventEmitter } from "events"
 import { randomUUID } from "crypto";
 import { Subject } from "rxjs";
-import { Join } from "./operators/join"
-import { Merge } from "./operators/merge"
-import { Operators } from "./operators/operators"
-import { Sinks } from "./operators/sinks"
-import { Windows } from "./operators/windows"
-
-type RxJsSubjectOmissions = //'pipe'
-    | 'complete'
-    | 'error'
-    | 'asObservable'
-    | 'forEach'
-    | 'subscribe'
-    | 'unsubscribe'
-    | 'hasError'
-    | 'isStopped'
-    | 'lift'
-    | 'operator'
-    | 'source'
-    | 'thrownError'
-    | 'toPromise'
-    | 'observers'
-    | 'observed'
-    | 'next'
-    | 'closed'
+import { Join, joinFactory } from "./operators/join"
+import { Merge, mergeFactory } from "./operators/merge"
+import { Operators, operatorsFactory } from "./operators/operators"
+import { Sinks, sinksFactory } from "./operators/sinks"
+import { Windows, windowsFactory } from "./operators/windows"
 
 export type Stream<T> =
-    Omit<Subject<T>, RxJsSubjectOmissions> &
     Operators<T> &
     Windows<T> &
     Join<T> &
@@ -94,4 +74,25 @@ function attemptJsonParsing(value: string): any {
     } catch (err) {
         return value
     }
+}
+
+/** Converts an RXJS Subject into a Stream object */
+export function streamFromSubject<T>(subj: Subject<T>): Stream<T> {
+    const stream = subj as any
+
+    Object.assign(
+        stream,
+        sinksFactory<T>(stream),
+        windowsFactory<T>(stream),
+        joinFactory<T>(stream),
+        mergeFactory<T>(stream),
+        operatorsFactory<T>(stream)
+    )
+
+    return stream as Stream<T>
+}
+
+/** Just Typescript sintactic sugar to parse a Stream into a RxJs Subject */
+export function subjectFromStream<T>(stream: Stream<T>) {
+    return (stream as unknown) as Subject<T>
 }

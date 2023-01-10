@@ -1,6 +1,6 @@
 import { Producer } from "kafkajs"
 import { Observable, Subject } from "rxjs"
-import { streamFromSubject } from "../utils/parseStream"
+import { streamFromSubject, subjectFromStream } from "../stream"
 import { Stream } from "../stream";
 import { EventEmitter } from "events"
 
@@ -12,11 +12,11 @@ export type Sinks<T> = {
     toEvent: (emitter: EventEmitter, name: string) => Stream<T>
 }
 
-export function sinksFactory<T>(source: Observable<T>): Sinks<T> {
+export function sinksFactory<T>(source: Stream<T>): Sinks<T> {
     return {
         toKafka(producer: Producer, topic: string, keyFrom: KeyExtractor<T>, valueFrom: ValueExtractor<T> = e => e) {
             const subj = new Subject()
-            source.subscribe({
+            subjectFromStream(source).subscribe({
                 async next(event) {
                     const key = keyFrom(event).toString()
                     const value = stringifyValue(valueFrom(event))
@@ -35,7 +35,7 @@ export function sinksFactory<T>(source: Observable<T>): Sinks<T> {
 
         toEvent(emitter: EventEmitter, name: string) {
             const subj = new Subject()
-            source.subscribe({
+            subjectFromStream(source).subscribe({
                 async next(event) {
                     emitter.emit(name, event)
                 }

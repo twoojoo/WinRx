@@ -1,5 +1,5 @@
 import { Observable, Subject } from "rxjs";
-import { streamFromSubject } from "../utils/parseStream";
+import { streamFromSubject, subjectFromStream } from "../stream";
 import { Stream } from "../stream";
 
 type OperatorCallback<T, R> = (event: T) => Promise<R> | R
@@ -11,12 +11,12 @@ export type Operators<T> = {
     // join: <R, N>(stream: Stream<R>) => Join<T, R, N>
 }
 
-export function operatorsFactory<T>(source: Observable<T>): Operators<T> {
+export function operatorsFactory<T>(source: Stream<T>): Operators<T> {
     return {
         map<R>(callback: OperatorCallback<T, R>): Stream<R> {
             const subj = new Subject<R>()
 
-            source.subscribe({
+            subjectFromStream(source).subscribe({
                 async next(event: T) {
                     const result = await callback(event)
                     subj.next(result)
@@ -29,7 +29,7 @@ export function operatorsFactory<T>(source: Observable<T>): Operators<T> {
         forEach(callback: OperatorCallback<T, void>): Stream<T> {
             const subj = new Subject<T>()
 
-            source.subscribe({
+            subjectFromStream(source).subscribe({
                 async next(event: T) {
                     await callback(event)
                     subj.next(event)
@@ -42,7 +42,7 @@ export function operatorsFactory<T>(source: Observable<T>): Operators<T> {
         filter(callback: OperatorCallback<T, boolean>): Stream<T> {
             const subj = new Subject<T>()
 
-            source.subscribe({
+            subjectFromStream(source).subscribe({
                 async next(event: T) {
                     if (await callback(event)) {
                         subj.next(event)

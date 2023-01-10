@@ -1,4 +1,4 @@
-import { streamFromSubject, subjectFromStream } from "../utils/parseStream"
+import { streamFromSubject, subjectFromStream } from "../stream"
 import { Stream } from "../stream";
 import { Subject } from "rxjs"
 
