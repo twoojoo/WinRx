@@ -1,4 +1,4 @@
-import { WinRxlogger } from "../src/Utils/Logger"
+import { WinRxlogger } from "../src/Windows/Utils/Logger"
 
 const logger = new WinRxlogger({
     toConsole: true,
