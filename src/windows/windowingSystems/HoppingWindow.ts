@@ -1,7 +1,7 @@
 import { Subscriber } from "rxjs"
 import { WindowingSystem, WindowingOptions } from "../models/WindowingSystem"
 import { Bucket } from "../models/Bucket"
-import { DequeuedEvent, EventKey } from "../types/Event"
+import { DequeuedEvent } from "../types/Event"
 import { Duration, toMs } from "../types/Duration"
 
 export type HoppingWindowOptions<T> = WindowingOptions<T> & { size: Duration, hop: Duration }

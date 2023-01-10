@@ -1,5 +1,5 @@
 import { Subscriber } from "rxjs"
-import { DequeuedEvent, EventKey } from "../types/Event"
+import { DequeuedEvent } from "../types/Event"
 import { Bucket } from "../models/Bucket"
 import { WindowingSystem, WindowingOptions } from "../models/WindowingSystem"
 import { Duration, toMs } from "../types/Duration"

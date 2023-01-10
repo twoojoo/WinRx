@@ -1,4 +1,3 @@
-// import { streamFromSubject } from "./stream";
 import { Consumer, ConsumerConfig } from "kafkajs";
 import { EventEmitter } from "events"
 import { randomUUID } from "crypto";
