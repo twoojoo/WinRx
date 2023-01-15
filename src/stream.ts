@@ -32,7 +32,7 @@ export type Sources = {
 
 export function Stream(name: string = randomUUID()): Sources {
     return {
-        fromKafka: <T>(consumer: Consumer, topics: string[], config?: ConsumerConfig): Stream<KafkaEvent<T>> => {
+        fromKafka<T>(consumer: Consumer, topics: string[], config?: ConsumerConfig): Stream<KafkaEvent<T>> {
             const sub = new Subject<KafkaEvent<T>>();
             consumer.run({
                 ...config,
@@ -51,7 +51,7 @@ export function Stream(name: string = randomUUID()): Sources {
             return streamFromSubject(sub)
         },
 
-        fromEvent: <T>(emitter: EventEmitter, name: string): Stream<EmitterEvent<T>> => {
+        fromEvent<T>(emitter: EventEmitter, name: string): Stream<EmitterEvent<T>> {
             const sub = new Subject<EmitterEvent<T>>();
             emitter.on(name, async (value) => {
                 const event = {

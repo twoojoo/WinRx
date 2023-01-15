@@ -8,7 +8,6 @@ export type Operators<T> = {
     map: <R>(callback: OperatorCallback<T, R>) => Stream<R>,
     forEach: (callback: OperatorCallback<T, void>) => Stream<T>,
     filter: (callback: OperatorCallback<T, boolean>) => Stream<T>
-    // join: <R, N>(stream: Stream<R>) => Join<T, R, N>
 }
 
 export function operatorsFactory<T>(source: Stream<T>): Operators<T> {
