@@ -10,9 +10,9 @@ Stream("stream2")
 Stream("stream1")
     .fromEvent<number>(emitter, "stream1")
     .map(e => e.value)
-    .merge(Pool().get("stream2"))
+    .mergeMap(Pool().get<string>("stream2"), e1 => e1, e2 => parseInt(e2))
 
-Pool().get("stream1").toEvent(emitter, "test-result")
+Pool().get<number>("stream1").toEvent(emitter, "test-result")
 
 let counter1 = 0
 setInterval(() => {

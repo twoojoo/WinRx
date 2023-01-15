@@ -8,6 +8,10 @@ import { Operators, operatorsFactory } from "./operators/operators"
 import { Sinks, sinksFactory } from "./operators/sinks"
 import { Windows, windowsFactory } from "./operators/windows"
 
+type Pool = {
+    get: <T>(name: string) => Stream<T>
+}
+
 export type Stream<T> =
     Operators<T> &
     Windows<T> &
@@ -28,9 +32,9 @@ type EmitterEvent<T> = {
 
 const streamPool: { [name: string]: Stream<any> } = {}
 
-export function Pool() {
+export function Pool(): Pool {
     return {
-        get(name: string) { return streamPool[name] }
+        get<T>(name: string) { return streamPool[name] as Stream<T> }
     }
 }
 
