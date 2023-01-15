@@ -7,10 +7,7 @@ import { Merge, mergeFactory } from "./operators/merge"
 import { Operators, operatorsFactory } from "./operators/operators"
 import { Sinks, sinksFactory } from "./operators/sinks"
 import { Windows, windowsFactory } from "./operators/windows"
-
-type Pool = {
-    get: <T>(name: string) => Stream<T>
-}
+import { streamPool } from "./pool";
 
 export type Stream<T> =
     Operators<T> &
@@ -28,14 +25,6 @@ type KafkaEvent<T> = {
 type EmitterEvent<T> = {
     name: string,
     value: T
-}
-
-const streamPool: { [name: string]: Stream<any> } = {}
-
-export function Pool(): Pool {
-    return {
-        get<T>(name: string) { return streamPool[name] as Stream<T> }
-    }
 }
 
 export type Sources = {

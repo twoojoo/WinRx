@@ -1,4 +1,4 @@
-import { Stream, Pool } from "../src/stream";
+import { Stream, Pool } from "../src";
 import { EventEmitter } from "events"
 
 const emitter = new EventEmitter()
@@ -10,7 +10,11 @@ Stream("stream2")
 Stream("stream1")
     .fromEvent<number>(emitter, "stream1")
     .map(e => e.value)
-    .mergeMap(Pool().get<string>("stream2"), e1 => e1, e2 => parseInt(e2))
+    .mergeMap(
+        Pool().get<string>("stream2"),
+        e1 => e1,
+        e2 => parseInt(e2)
+    )
 
 Pool().get<number>("stream1").toEvent(emitter, "test-result")
 
@@ -20,10 +24,10 @@ setInterval(() => {
     counter1 += 2
 }, 500)
 
-let counter2 = ""
+let counter2 = "1"
 setInterval(() => {
     emitter.emit("stream2", counter2)
-    counter2 += "a "
+    counter2 += "1"
 }, 250)
 
 

@@ -1,8 +1,9 @@
-import {Redis, Memory} from "./windows/stateManagers"
-import {default as IORedisClient} from "ioredis"
+import { Redis, Memory } from "./windows/stateManagers"
+import { default as IORedisClient } from "ioredis"
 import { Duration } from "./windows/types/Duration"
 
-export { Stream, Pool } from "./stream"
+export { Stream } from "./stream"
+export { Pool } from "./pool"
 
 export function memory() {
     return new Memory()
