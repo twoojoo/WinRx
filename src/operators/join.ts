@@ -87,7 +87,7 @@ function applyFactory<T, R>(stream1: Stream<T>, stream2: Stream<R>, window: Wind
                 }
             })
 
-            return streamFromSubject(finalSubject)
+            return streamFromSubject(stream1.name(), finalSubject)
         }
     }
 }

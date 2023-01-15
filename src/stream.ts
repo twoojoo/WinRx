@@ -13,7 +13,8 @@ export type Stream<T> =
     Windows<T> &
     Join<T> &
     Merge<T> &
-    Sinks<T>
+    Sinks<T> &
+    { name: () => string }
 
 type KafkaEvent<T> = {
     key: string,
@@ -25,11 +26,20 @@ type EmitterEvent<T> = {
     value: T
 }
 
+const streamPool: { [name: string]: Stream<any> } = {}
+
+export function Pool() {
+    return {
+        get(name: string) { return streamPool[name] }
+    }
+}
+
 export type Sources = {
     fromKafka: <T>(consumer: Consumer, topics: string[], config?: ConsumerConfig) => Stream<{ key: string, value: T }>
     fromEvent: <T>(emitter: EventEmitter, name: string) => Stream<{ name: string, value: T }>
 }
 
+// Stream functions is a sourceFactory
 export function Stream(name: string = randomUUID()): Sources {
     return {
         fromKafka<T>(consumer: Consumer, topics: string[], config?: ConsumerConfig): Stream<KafkaEvent<T>> {
@@ -48,7 +58,7 @@ export function Stream(name: string = randomUUID()): Sources {
                 }
             })
 
-            return streamFromSubject(sub)
+            return streamFromSubject(name, sub)
         },
 
         fromEvent<T>(emitter: EventEmitter, name: string): Stream<EmitterEvent<T>> {
@@ -62,7 +72,7 @@ export function Stream(name: string = randomUUID()): Sources {
                 sub.next(event)
             })
 
-            return streamFromSubject(sub)
+            return streamFromSubject(name, sub)
         }
     }
 }
@@ -76,7 +86,7 @@ function attemptJsonParsing(value: string): any {
 }
 
 /** Converts an RXJS Subject into a Stream object */
-export function streamFromSubject<T>(subj: Subject<T>): Stream<T> {
+export function streamFromSubject<T>(name: string, subj: Subject<T>): Stream<T> {
     const stream = subj as any
 
     Object.assign(
@@ -85,9 +95,11 @@ export function streamFromSubject<T>(subj: Subject<T>): Stream<T> {
         windowsFactory<T>(stream),
         joinFactory<T>(stream),
         mergeFactory<T>(stream),
-        operatorsFactory<T>(stream)
+        operatorsFactory<T>(stream),
+        { name: () => name }
     )
 
+    streamPool[name] = stream as Stream<T>
     return stream as Stream<T>
 }
 

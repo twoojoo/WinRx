@@ -30,7 +30,7 @@ export function mergeFactory<T>(source: Stream<T>): Merge<T> {
                 }
             })
 
-            return streamFromSubject(subj)
+            return streamFromSubject(source.name(), subj)
         },
         mergeMap<R, N, M>(
             stream: Stream<R>, 
@@ -51,7 +51,7 @@ export function mergeFactory<T>(source: Stream<T>): Merge<T> {
                 }
             })
 
-            return streamFromSubject(subj)
+            return streamFromSubject(source.name(), subj)
         },
     }
 }

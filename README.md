@@ -62,8 +62,6 @@ a new bucket, or close an existing one to release a **window of events**.
 > use sliding windows when dealing with high-frequency events, unless it is
 > acceptable to lose some data every now and then.
 
-### Counting Window
-
 ## State Managers
 
 ### Memory

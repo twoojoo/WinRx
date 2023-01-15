@@ -30,7 +30,7 @@ export function sinksFactory<T>(source: Stream<T>): Sinks<T> {
                 }
             })
 
-            return streamFromSubject(subj) as Stream<T>
+            return streamFromSubject(source.name(), subj) as Stream<T>
         },
 
         toEvent(emitter: EventEmitter, name: string) {
@@ -41,7 +41,7 @@ export function sinksFactory<T>(source: Stream<T>): Sinks<T> {
                 }
             })
 
-            return streamFromSubject(subj) as Stream<T>
+            return streamFromSubject(source.name(), subj) as Stream<T>
         }
     }
 }

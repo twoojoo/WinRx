@@ -22,7 +22,7 @@ export function operatorsFactory<T>(source: Stream<T>): Operators<T> {
                 }
             })
 
-            return streamFromSubject(subj)
+            return streamFromSubject(source.name(), subj)
         },
 
         forEach(callback: OperatorCallback<T, void>): Stream<T> {
@@ -35,7 +35,7 @@ export function operatorsFactory<T>(source: Stream<T>): Operators<T> {
                 }
             })
 
-            return streamFromSubject(subj)
+            return streamFromSubject(source.name(), subj)
         },
 
         filter(callback: OperatorCallback<T, boolean>): Stream<T> {
@@ -49,7 +49,7 @@ export function operatorsFactory<T>(source: Stream<T>): Operators<T> {
                 }
             })
 
-            return streamFromSubject(subj)
+            return streamFromSubject(source.name(), subj)
         },
     }
 }
