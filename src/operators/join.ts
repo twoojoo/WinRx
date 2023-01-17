@@ -6,18 +6,22 @@ import { TumblingWindow, TumblingWindowOptions } from "../windows/windowingSyste
 import { pushEventToWindow } from "./windows"
 
 export type Join<T> = {
+    /** Join the current stream with another stream*/
     join: <R, N>(stream: Stream<R>) => JoinOperator<T, R, N>
 }
 
 type JoinOperator<T, R, N> = {
+    /**Provide a condition for the join operation*/
     on: (condition: JoinCondition<T, R>) => JoinWindows<T, R, N>
 }
 
 type JoinWindows<T, R, N> = {
+    /**Set a tumbling window system for the join operation*/
     tumblingWindow: (options: TumblingWindowOptions<JoinEvent<T, R>>) => Apply<T, R>
 }
 
 type Apply<T, R> = {
+    /**Apply a transformation to the joined events*/
     apply: <N>(operation: JoinOperation<T, R, N>) => Stream<N>
 }
 

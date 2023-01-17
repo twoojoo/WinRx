@@ -8,7 +8,9 @@ type KeyExtractor<T> = (event: T) => string | number
 type ValueExtractor<T> = (event: T) => any
 
 export type Sinks<T> = {
+    /**Send stream output to a kafka broker on a specific topic*/
     toKafka: (producer: Producer, topic: string, keyFrom: KeyExtractor<T>, valueFrom?: ValueExtractor<T>) => Stream<T>
+    /**Trigger an event passing the stream output*/
     toEvent: (emitter: EventEmitter, name: string) => Stream<T>
 }
 

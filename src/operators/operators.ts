@@ -5,8 +5,11 @@ import { Stream } from "../stream";
 type OperatorCallback<T, R> = (event: T) => Promise<R> | R
 
 export type Operators<T> = {
+    /**Transforms stream's events */
     map: <R>(callback: OperatorCallback<T, R>) => Stream<R>,
+    /**Executes an action every time an event occurs without transforming the event*/
     forEach: (callback: OperatorCallback<T, void>) => Stream<T>,
+    /**Filter events that match a contition*/
     filter: (callback: OperatorCallback<T, boolean>) => Stream<T>
 }
 

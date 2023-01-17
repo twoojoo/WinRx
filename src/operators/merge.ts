@@ -5,7 +5,9 @@ import { Subject } from "rxjs"
 type Mapper<T, R> = (event: T) => Promise<R> | R
 
 export type Merge<T> = {
+    /** Merge the current stream of type T with a stream of type R creating a stream which events are of type T | R */
     merge: <R>(stream: Stream<R>) => Stream<T | R>
+    /** Merge the current stream of type T with a stream of type R and map both streams's event to different values*/
     mergeMap: <R, N, M>(
         stream: Stream<R>, 
         mapper1: Mapper<T, N>, 

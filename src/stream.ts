@@ -28,7 +28,9 @@ type EmitterEvent<T> = {
 }
 
 export type Sources = {   
+    /**Create a stream of kafka messages consumed from a topic or more*/
     fromKafka: <T>(consumer: Consumer, topics: string[], config?: ConsumerConfig) => Stream<{ key: string, value: T }>
+    /**Create a stream from a named event*/
     fromEvent: <T>(emitter: EventEmitter, name: string) => Stream<{ name: string, value: T }>
 }
 

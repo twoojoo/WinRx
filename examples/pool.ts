@@ -17,6 +17,7 @@ Stream("stream1")
     )
 
 Pool().getStream<number>("stream1").toEvent(emitter, "test-result")
+console.log(Pool().list())
 
 let counter1 = 0
 setInterval(() => {
