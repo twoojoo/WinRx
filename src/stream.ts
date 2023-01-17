@@ -27,7 +27,7 @@ type EmitterEvent<T> = {
     value: T
 }
 
-export type Sources = {
+export type Sources = {   
     fromKafka: <T>(consumer: Consumer, topics: string[], config?: ConsumerConfig) => Stream<{ key: string, value: T }>
     fromEvent: <T>(emitter: EventEmitter, name: string) => Stream<{ name: string, value: T }>
 }
