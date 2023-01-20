@@ -11,6 +11,7 @@ import { streamPool } from "./pool";
 import { StateManager } from "./state/state-manager";
 import { MetaEvent, makeMetaEvent } from "./event";
 import { Init, initFactory } from "./operators/init";
+import { MemoryStateManager } from "./state/Memory";
 
 export type StreamContext = {
     name: string,
@@ -44,8 +45,13 @@ export type Sources = {
     fromEvent: <E>(emitter: EventEmitter, name: string) => Stream<EmitterEvent<E>>
 }
 
-// Stream functions is a sourceFactory
-export function Stream(name: string = randomUUID(), stateManager: StateManager<any>): Sources {
+/**Create a stream. Use the stream name as unique ideintifier. If a state manager is not provided, the state will be persited in memory.*/
+export function Stream(name: string, stateManager: StateManager<any> = new MemoryStateManager()): Sources {
+    if (!!streamPool[name]) throw Error(`a stream already exists with name "${name}"`)
+
+    stateManager.setStreamName(name)
+    const ctx: StreamContext = { name, stateManager }
+
     return {
         fromKafka<E>(consumer: Consumer, topics: string[], config?: ConsumerConfig): Stream<KafkaEvent<E>> {
             const sub = new Subject<MetaEvent<KafkaEvent<E>>>();
@@ -64,11 +70,6 @@ export function Stream(name: string = randomUUID(), stateManager: StateManager<a
                 }
             })
 
-            const ctx: StreamContext = {
-                name,
-                stateManager
-            }
-
             return streamFromSubject(ctx, sub)
         },
 
@@ -83,11 +84,6 @@ export function Stream(name: string = randomUUID(), stateManager: StateManager<a
                 await ctx.stateManager.enqueueEvent(makeMetaEvent(event))
                 ctx.stateManager.dequeueLoop(sub)
             })
-
-            const ctx: StreamContext = {
-                name,
-                stateManager
-            }
 
             return streamFromSubject(ctx, sub)
         }

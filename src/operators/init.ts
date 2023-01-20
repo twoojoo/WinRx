@@ -25,7 +25,8 @@ export function initFactory<E>(source: Stream<E>): Init<E> {
 			})
 
 			return streamFromSubject(source.ctx, subj)
-		}, 
+		},
+		 
 		withEventTime(extractor: EventTimeExtractor<E>): Stream<E> {
 			const subj = new Subject<MetaEvent<E>>()
 

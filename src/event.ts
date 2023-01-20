@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto"
 
+/**Wrapper type of the stream event containing metadata and tracking info*/
 export type MetaEvent<E> = {
 	metadata: {
 		id: string, 
@@ -17,6 +18,7 @@ export type MetaEvent<E> = {
 	spec: E,
 }
 
+/**Build a new MetaEvent from an incoming event*/
 export function makeMetaEvent<E>(
 	event: E, 
 ): MetaEvent<E> {
@@ -34,6 +36,7 @@ export function makeMetaEvent<E>(
 	}
 }
 
+/**Parse a MetaEvent into a new MetaEvent with a different event type*/
 export function parseIntenalEvent<E, R>(newEventValue: E, oldEvent: MetaEvent<R>): MetaEvent<E> {
 	return { ...oldEvent, spec: newEventValue }
 }

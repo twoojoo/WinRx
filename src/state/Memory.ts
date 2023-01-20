@@ -4,8 +4,8 @@ import { StateManager } from "./state-manager";
 export class MemoryStateManager<E> extends StateManager<E> {
 	private mainQueue = []
 
-	constructor(streamName: string, name?: string) {
-		super(streamName, name)
+	constructor() {
+		super()
 	}
 
 	async enqueueEvent(event: MetaEvent<E>) {

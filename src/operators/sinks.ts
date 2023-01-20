@@ -24,12 +24,14 @@ export function sinksFactory<E>(source: Stream<E>): Sinks<E> {
                     const key = keyFrom ? keyFrom(event.spec).toString() : event.metadata.key
                     const value = stringifyValue(event.spec)
 
-                    producer.send({
+                    await producer.send({
                         topic, messages: [{
                             key,
                             value
                         }]
                     })
+
+                    subj.next(event)
                 }
             })
 
@@ -41,6 +43,7 @@ export function sinksFactory<E>(source: Stream<E>): Sinks<E> {
             subjectFromStream(source).subscribe({
                 async next(event) {
                     emitter.emit(name || event.metadata.key, event.spec)
+                    subj.next(event)
                 }
             })
 
