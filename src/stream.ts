@@ -1,6 +1,5 @@
 import { Consumer, ConsumerConfig } from "kafkajs";
 import { EventEmitter } from "events"
-import { randomUUID } from "crypto";
 import { Subject } from "rxjs";
 // import { Join, joinFactory } from "./operators/join"
 import { Merge, mergeFactory } from "./operators/merge"
