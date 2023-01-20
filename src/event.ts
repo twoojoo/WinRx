@@ -12,6 +12,7 @@ export type MetaEvent<E> = {
 		windows: {
 			[windowName: string]: {
 				ingestionTime: number
+				bucketId?: string 
 			}
 		}
 	}

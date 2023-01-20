@@ -3,7 +3,7 @@ import { Subject } from "rxjs";
 import { Merge, mergeFactory } from "./operators/merge"
 import { Operators, operatorsFactory } from "./operators/operators"
 import { Sinks, sinksFactory } from "./operators/sinks"
-// import { Windows, windowsFactory } from "./operators/windows"
+import { Windows, windowsFactory } from "./operators/windows"
 import { streamPool } from "./pool";
 import { StateManager } from "./state/state-manager";
 import { MetaEvent } from "./event";
@@ -21,7 +21,7 @@ export type StreamContext = {
 export type Stream<E> =
     Init<E> &
     Operators<E> &
-    // Windows<E> &
+    Windows<E> &
     // Join<E> &
     Merge<E> &
     Sinks<E> &
@@ -48,7 +48,7 @@ export function streamFromSubject<E>(ctx: StreamContext, subj: Subject<MetaEvent
         stream,
         initFactory<E>(stream),
         sinksFactory<E>(stream),
-        // windowsFactory<E>(stream),
+        windowsFactory<E>(stream),
         // joinFactory<E>(stream),
         mergeFactory<E>(stream),
         operatorsFactory<E>(stream),

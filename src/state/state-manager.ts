@@ -51,8 +51,8 @@ export abstract class StateManager<E> {
 	// } 
 
 	// //WINDOW BUCKETS METHODS
-	// abstract push(event: MetaEvent<E>): Promise<void>
-	// abstract flush(bucketId: string): Promise<MetaEvent<E>[]>
+	abstract push(windowName: string, event: MetaEvent<E>): Promise<void>
+	abstract flush(windowName: string, bucketId: string): Promise<MetaEvent<E>[]>
 	// abstract get(bucketId: string): Promise<MetaEvent<E>[]>
 	// abstract clear(bucketId: string): Promise<void>
 }

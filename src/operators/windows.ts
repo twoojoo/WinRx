@@ -1,45 +1,53 @@
-import { HoppingWindow, HoppingWindowOptions, SessionWindow, SessionWindowOptions, TumblingWindow, TumblingWindowOptions } from "../windows/windowingSystems";
+// import { HoppingWindow, HoppingWindowOptions, SessionWindow, SessionWindowOptions, TumblingWindow, TumblingWindowOptions } from "../windows/windowingSystems";
 // import { WindowingSystem } from "../windows/models/WindowingSystem";
-import { streamFromSubject } from "../stream";
+import { streamFromSubject, subjectFromStream } from "../stream";
 import { Subject } from "rxjs";
 import { Stream } from "../stream";
 import { MetaEvent } from "../event";
+import { tumblingWindow, TumblingWindowOptions } from "../windows/tumblingWindow";
 
 export type Windows<E> = {
-    tumblingWindow: (name: string, options: TumblingWindowOptions<MetaEvent<E>>) => Stream<E[]>,
-    hoppingWindow: (name: string, options: HoppingWindowOptions<MetaEvent<E>>) => Stream<E[]>,
-    sessionWindow: (name: string, options: SessionWindowOptions<MetaEvent<E>>) => Stream<E[]>,
+    tumblingWindow: (name: string, options: TumblingWindowOptions) => Stream<E[]>,
+    // hoppingWindow: (name: string, options: HoppingWindowOptions<MetaEvent<E>>) => Stream<E[]>,
+    // sessionWindow: (name: string, options: SessionWindowOptions<MetaEvent<E>>) => Stream<E[]>,
 }
 
 export function windowsFactory<E>(source: Stream<E>): Windows<E> {
     return {
-        tumblingWindow(name: string, options: TumblingWindowOptions<MetaEvent<E>>): Stream<E[]> {
-            if (source.ctx.windows.includes(name)) throw Error(`a window named "${name}" already exists for stream "${source.name()}"`)
-            source.ctx.windows.push(name)
-            const sub = new Subject<MetaEvent<E[]>>()
-            // const win = new TumblingWindow(options)
-            // const sub = initWindow(subjectFromStream(source), win)
+        tumblingWindow(name: string, opts: TumblingWindowOptions): Stream<E[]> {
+            const sub = init(name, source)
+            const win = tumblingWindow(source.ctx, name, opts, sub)
+
+            subjectFromStream(source).subscribe({
+                async next(event: MetaEvent<E>) {
+                    event.tracking.windows[name] = {ingestionTime: Date.now()}
+                    win.onEvent(event)
+                }
+            })
+
             return streamFromSubject(source.ctx, sub) 
         },
 
-        hoppingWindow(name: string, options: HoppingWindowOptions<MetaEvent<E>>): Stream<E[]> {
-            if (source.ctx.windows.includes(name)) throw Error(`a window named "${name}" already exists for stream "${source.name()}"`)
-            source.ctx.windows.push(name)
-            const sub = new Subject<MetaEvent<E[]>>()
-            // const win = new HoppingWindow(options)
-            // const sub = initWindow(subjectFromStream(source), win)
-            return streamFromSubject(source.ctx, sub) 
-        },
+        // hoppingWindow(name: string, opts: HoppingWindowOptions<MetaEvent<E>>): Stream<E[]> {
+        //     const sub = init(name, source)
+        //     // const win = new HoppingWindow(options)
+        //     // const sub = initWindow(subjectFromStream(source), win)
+        //     return streamFromSubject(source.ctx, sub) 
+        // },
 
-        sessionWindow(name: string, options: SessionWindowOptions<MetaEvent<E>>): Stream<E[]> {
-            if (source.ctx.windows.includes(name)) throw Error(`a window named "${name}" already exists for stream "${source.name()}"`)
-            source.ctx.windows.push(name)
-            const sub = new Subject<MetaEvent<E[]>>()
-            // const win = new SessionWindow(options)
-            // const sub = initWindow(subjectFromStream(source), win)
-            return streamFromSubject(source.ctx, sub) 
-        },
+        // sessionWindow(name: string, opts: SessionWindowOptions<MetaEvent<E>>): Stream<E[]> {
+        //     const sub = init(name, source)
+        //     // const win = new SessionWindow(options)
+        //     // const sub = initWindow(subjectFromStream(source), win)
+        //     return streamFromSubject(source.ctx, sub) 
+        // },
     }
+}
+
+function init<E>(name: string, source: Stream<E>): Subject<MetaEvent<E[]>> {
+    if (source.ctx.windows.includes(name)) throw Error(`a window named "${name}" already exists for stream "${source.name()}"`)
+    source.ctx.windows.push(name)
+    return new Subject<MetaEvent<E[]>>()
 }
 
 // function initWindow<T>(source: Observable<T>, win: WindowingSystem<T>) {

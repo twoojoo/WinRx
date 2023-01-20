@@ -1,4 +1,4 @@
-import { Duration } from "./windows/types/Duration"
+import { Duration } from "./windows.old/types/Duration"
 import { RedisStateManager } from "./state/Redis"
 import { default as RedisClient } from "ioredis"
 
