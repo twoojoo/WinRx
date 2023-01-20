@@ -19,6 +19,12 @@ export type Merge<E1> = {
         mapper2: Mapper<E2, R2>, 
     ) => Stream<R1 | R2>,
 
+    /** [Typescript] Sintactic sugar for the mergeMap operator that force the imput events to be of the same type*/
+    mergeSameMap: <R>(
+        stream: Stream<E1>,
+        mapper: Mapper<E1, R>
+    ) => Stream<R>
+
     /** [Typescript] Sintactic sugar for the mergeMap operator that force the result of both mapper functions to be of the same type*/
     mergeMapSame: <E2, R>(
         stream: Stream<E2>, 
@@ -82,6 +88,29 @@ export function mergeFactory<E1>(source: Stream<E1>): Merge<E1> {
             subjectFromStream(stream).subscribe({
                 async next(event: MetaEvent<E2>) {
                     const newValue = await mapper2(event.spec) as R2
+                    subj.next(parseIntenalEvent(newValue, event))
+                }
+            })
+
+            return streamFromSubject(source.ctx, subj)
+        },
+
+        mergeSameMap<R>(
+            stream: Stream<E1>, 
+            mapper: Mapper<E1, R>,
+        ): Stream<R> {
+            const subj = new Subject<MetaEvent<R>>()
+
+            subjectFromStream(source).subscribe({
+                async next(event: MetaEvent<E1>) {
+                    const newValue = await mapper(event.spec) as R
+                    subj.next(parseIntenalEvent(newValue, event))
+                }
+            })
+
+            subjectFromStream(stream).subscribe({
+                async next(event: MetaEvent<E1>) {
+                    const newValue = await mapper(event.spec) as R
                     subj.next(parseIntenalEvent(newValue, event))
                 }
             })
