@@ -1,6 +1,6 @@
-import { Subject } from "rxjs"
-import { MetaEvent } from "../event"
 import { Stream, streamFromSubject, subjectFromStream } from "../stream"
+import { MetaEvent } from "../event"
+import { Subject } from "rxjs"
 
 export type EventKeyExtractor<E> = (event: E) => number | string
 export type EventTimeExtractor<E> = (event: E) => number | string

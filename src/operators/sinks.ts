@@ -1,10 +1,10 @@
-import { Producer } from "kafkajs"
-import { Observable, Subject } from "rxjs"
 import { streamFromSubject, subjectFromStream } from "../stream"
-import { Stream } from "../stream";
 import { EventEmitter } from "events"
 import { MetaEvent } from "../event";
+import { Stream } from "../stream";
 import { Logger } from "../logger";
+import { Producer } from "kafkajs"
+import { Subject } from "rxjs"
 
 type KeyExtractor<T> = (event: T) => string | number
 type ValueExtractor<T> = (event: T) => any

@@ -56,9 +56,8 @@ export function streamFromSubject<E>(ctx: StreamContext, subj: Subject<MetaEvent
         { ctx }
     )
 
-    //prevent modifications (EXPERIMENTAL) 
     Object.defineProperty(stream, "name", { writable: false }) 
-    Object.defineProperty(stream, "ctx", { writable: false }) 
+    // Object.defineProperty(stream, "ctx", { writable: false,  }) 
 
     streamPool[ctx.name] = stream as Stream<E>
     return stream as Stream<E>

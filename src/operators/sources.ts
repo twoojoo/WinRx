@@ -1,9 +1,9 @@
-import { Consumer, ConsumerConfig } from "kafkajs";
-import { EventEmitter } from "events"
 import { Stream, StreamContext, streamFromSubject } from "../stream";
 import { makeMetaEvent, MetaEvent } from "../event";
-import { Subject } from "rxjs";
+import { Consumer, ConsumerConfig } from "kafkajs";
+import { EventEmitter } from "events"
 import { Logger } from "../logger";
+import { Subject } from "rxjs";
 
 type KafkaEvent<E> = {
     key: string,
