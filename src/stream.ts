@@ -39,9 +39,9 @@ type EmitterEvent<E> = {
 }
 
 export type Sources = {   
-    /**Create a stream of kafka messages consumed from a topic or more*/
+    /**Create a stream of kafka messages consumed from a topic or more (uses stream name as topic name if topics array is not provided)*/
     fromKafka: <E>(consumer: Consumer, topics: string[], config?: ConsumerConfig) => Stream<KafkaEvent<E>>
-    /**Create a stream from a named event*/
+    /**Create a stream from a named event (uses stream name as event name if not provided)*/
     fromEvent: <E>(emitter: EventEmitter, name: string) => Stream<EmitterEvent<E>>
 }
 
@@ -53,7 +53,9 @@ export function Stream(name: string, stateManager: StateManager<any> = new Memor
     const ctx: StreamContext = { name, stateManager }
 
     return {
-        fromKafka<E>(consumer: Consumer, topics: string[], config?: ConsumerConfig): Stream<KafkaEvent<E>> {
+        fromKafka<E>(consumer: Consumer, topics?: string[], config?: ConsumerConfig): Stream<KafkaEvent<E>> {
+            if (!topics || topics.length == 0) topics = [ctx.name] //use stream name as topic if topics not provided
+
             const sub = new Subject<MetaEvent<KafkaEvent<E>>>();
             consumer.run({
                 ...config,
@@ -73,7 +75,9 @@ export function Stream(name: string, stateManager: StateManager<any> = new Memor
             return streamFromSubject(ctx, sub)
         },
 
-        fromEvent<E>(emitter: EventEmitter, name: string): Stream<EmitterEvent<E>> {
+        fromEvent<E>(emitter: EventEmitter, name?: string): Stream<EmitterEvent<E>> {
+            if (!name) name = ctx.name //use stream name as event name if event name is not provided
+
             const sub = new Subject<MetaEvent<EmitterEvent<E>>>();
             emitter.on(name, async (value) => {
                 const event = {

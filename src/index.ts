@@ -1,16 +1,10 @@
-import { Redis, Memory } from "./windows/stateManagers"
-import { default as IORedisClient } from "ioredis"
 import { Duration } from "./windows/types/Duration"
+import { RedisStateManager } from "./state/Redis"
+import { default as RedisClient } from "ioredis"
 
 export { Stream } from "./stream"
 export { Pool } from "./pool"
 
-// export function redis(opts: Omit<Redis>)
-
-// export function memory() {
-//     return new Memory()
-// }
-
-export function redis(client: IORedisClient, TTL?: Duration) {
-    return new Redis(client, TTL)
+export function redis(client: RedisClient, TTL?: Duration) {
+    return new RedisStateManager(client, TTL)
 }

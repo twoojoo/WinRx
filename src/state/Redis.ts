@@ -1,7 +1,7 @@
 import { MetaEvent } from "../event";
 import { StateManager } from "./state-manager";
 import { default as RedisClient } from "ioredis"
-import { Duration } from "dayjs/plugin/duration";
+import { Duration } from "../windows/types/Duration"
 
 export class RedisStateManager<E> extends StateManager<E> {
 	private redisClient: RedisClient

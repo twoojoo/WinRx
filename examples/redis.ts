@@ -1,17 +1,16 @@
-import { Stream } from "../src/stream";
+import { Stream, redis } from "../src/index";
 import { EventEmitter } from "events"
-import { RedisStateManager } from "../src/state/Redis";
 import Redis from "ioredis";
 
 const client = new Redis("redis://localhost:6379")
 
 const emitter = new EventEmitter()
 
-const stream2 = Stream("stream2", new RedisStateManager(client))
+const stream2 = Stream("stream2", redis(client))
     .fromEvent<string>(emitter, "stream2")
     .map(e => e.value)
 
-const stream1 = Stream("stream1", new RedisStateManager(client))
+const stream1 = Stream("stream1", redis(client))
     .fromEvent<number>(emitter, "stream1")
     .withEventKey(e => "blblba")
     .map(e => e.value)
