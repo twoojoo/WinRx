@@ -10,10 +10,10 @@ const stream2 = Stream("stream2")
 const stream1 = Stream("stream1")
     .fromEvent<number>(emitter, "stream1")
     .map(e => e.value)
-    .mergeMap(
+    .mergeMapSame(
         stream2,
         e1 => e1 * 10,
-        e2 => parseInt(e2) * 100
+        e2 => parseInt(e2)
     )
 
 stream1.toEvent(emitter, "test-result")

@@ -3,28 +3,29 @@ import { WindowingSystem } from "../windows/models/WindowingSystem";
 import { streamFromSubject, subjectFromStream } from "../stream";
 import { Observable, Subject, Subscriber } from "rxjs";
 import { Stream } from "../stream";
+import { MetaEvent } from "../event";
 
-export type Windows<T> = {
-    tumblingWindow: (options: TumblingWindowOptions<T>) => Stream<T[]>,
-    hoppingWindow: (options: HoppingWindowOptions<T>) => Stream<T[]>,
-    sessionWindow: (options: SessionWindowOptions<T>) => Stream<T[]>,
+export type Windows<E> = {
+    tumblingWindow: (options: TumblingWindowOptions<MetaEvent<E>>) => Stream<E[]>,
+    hoppingWindow: (options: HoppingWindowOptions<MetaEvent<E>>) => Stream<E[]>,
+    sessionWindow: (options: SessionWindowOptions<MetaEvent<E>>) => Stream<E[]>,
 }
 
-export function windowsFactory<T>(source: Stream<T>): Windows<T> {
+export function windowsFactory<E>(source: Stream<E>): Windows<E> {
     return {
-        tumblingWindow(options: TumblingWindowOptions<T>): Stream<T[]> {
+        tumblingWindow(options: TumblingWindowOptions<MetaEvent<E>>): Stream<E[]> {
             const win = new TumblingWindow(options)
             const sub = initWindow(subjectFromStream(source), win)
             return streamFromSubject(source.name(), sub) 
         },
 
-        hoppingWindow(options: HoppingWindowOptions<T>): Stream<T[]> {
+        hoppingWindow(options: HoppingWindowOptions<MetaEvent<E>>): Stream<E[]> {
             const win = new HoppingWindow(options)
             const sub = initWindow(subjectFromStream(source), win)
             return streamFromSubject(source.name(), sub) 
         },
 
-        sessionWindow(options: SessionWindowOptions<T>): Stream<T[]> {
+        sessionWindow(options: SessionWindowOptions<MetaEvent<E>>): Stream<E[]> {
             const win = new SessionWindow(options)
             const sub = initWindow(subjectFromStream(source), win)
             return streamFromSubject(source.name(), sub) 
