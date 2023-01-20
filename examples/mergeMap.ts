@@ -4,12 +4,15 @@ import { MemoryStateManager } from "../src/state/Memory";
 
 const emitter = new EventEmitter()
 
-const stream2 = Stream("stream2", new MemoryStateManager("stream2", "smMem2"))
-    .fromEvent<string>(emitter, "stream2")
+const S1 = "stream1"
+const S2 = "stream2"
+
+const stream2 = Stream(S2)
+    .fromEvent<string>(emitter)
     .map(e => e.value)
 
-const stream1 = Stream("stream1", new MemoryStateManager("stream1", "smMem1"))
-    .fromEvent<number>(emitter, "stream1")
+const stream1 = Stream(S1)
+    .fromEvent<number>(emitter)
     .map(e => e.value)
     .mergeMapSame(
         stream2,
@@ -21,15 +24,15 @@ stream1.toEvent(emitter, "test-result")
 
 let counter1 = 0
 setInterval(() => {
-    emitter.emit("stream1", counter1)
+    emitter.emit(S1, counter1)
     counter1 += 2
 }, 500)
 
 let counter2 = ""
 setInterval(() => {
-    emitter.emit("stream2", counter2)
+    emitter.emit(S2, counter2)
     counter2 += "1"
 }, 250)
 
 
-emitter.on("test-result", (v) => console.log(v))
+// emitter.on("test-result", (v) => console.log(v))

@@ -14,6 +14,7 @@ import { sourcesFactory, Sources } from "./operators/sources";
 export type StreamContext = {
     name: string, //must be uniqued (checked at startup)
     stateManager: StateManager<any>
+    logger: boolean,
     windows: string[] //collects stream windows names that must be unique per stream (checked at startup)
 }
 
@@ -29,12 +30,12 @@ export type Stream<E> =
 
 
 /**Create a stream. Use the stream name as unique ideintifier. If a state manager is not provided, the state will be persited in memory.*/
-export function Stream(name: string, stateManager: StateManager<any> = new MemoryStateManager()): Sources {
+export function Stream(name: string, stateManager: StateManager<any> = new MemoryStateManager(), logger: boolean = true): Sources {
     if (!!streamPool[name]) throw Error(`a stream named "${name}" already exists in the stream pool`)
 
     //setup stream context
     stateManager.setStreamName(name)
-    const ctx: StreamContext = { name, stateManager, windows: [] }
+    const ctx: StreamContext = { name, stateManager, windows: [], logger }
 
     return sourcesFactory(ctx)
 }

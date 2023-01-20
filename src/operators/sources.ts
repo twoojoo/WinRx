@@ -3,13 +3,14 @@ import { EventEmitter } from "events"
 import { Stream, StreamContext, streamFromSubject } from "../stream";
 import { makeMetaEvent, MetaEvent } from "../event";
 import { Subject } from "rxjs";
+import { Logger } from "../logger";
 
 type KafkaEvent<E> = {
     key: string,
     value: E
 }
 
-type EmitterEvent<E> = {
+type NativeEvent<E> = {
     name: string,
     value: E
 }
@@ -18,7 +19,7 @@ export type Sources = {
     /**Create a stream of kafka messages consumed from a topic or more (uses stream name as topic name if topics array is not provided)*/
     fromKafka: <E>(consumer: Consumer, topics?: string[], config?: ConsumerConfig) => Stream<KafkaEvent<E>>
     /**Create a stream from a named event (uses stream name as event name if not provided)*/
-    fromEvent: <E>(emitter: EventEmitter, name?: string) => Stream<EmitterEvent<E>>
+    fromEvent: <E>(emitter: EventEmitter, name?: string) => Stream<NativeEvent<E>>
 }
 
 export function sourcesFactory(ctx: StreamContext): Sources {
@@ -37,6 +38,8 @@ export function sourcesFactory(ctx: StreamContext): Sources {
                         value: attemptJsonParsing(message.value.toString("utf-8"))
                     }
 
+                    Logger(ctx).info(`ingested Kafka event - topic: ${topic} - key: ${event.key}`)
+
                     await ctx.stateManager.enqueueEvent(makeMetaEvent(event))
                     ctx.stateManager.dequeueLoop(sub)
                 }
@@ -45,15 +48,17 @@ export function sourcesFactory(ctx: StreamContext): Sources {
             return streamFromSubject(ctx, sub)
         },
 
-        fromEvent<E>(emitter: EventEmitter, name?: string): Stream<EmitterEvent<E>> {
+        fromEvent<E>(emitter: EventEmitter, name?: string): Stream<NativeEvent<E>> {
             if (!name) name = ctx.name //use stream name as event name if event name is not provided
 
-            const sub = new Subject<MetaEvent<EmitterEvent<E>>>();
+            const sub = new Subject<MetaEvent<NativeEvent<E>>>();
             emitter.on(name, async (value) => {
                 const event = {
                     name,
                     value: attemptJsonParsing(value)
                 }
+
+                Logger(ctx).info("ingested native event - name: " + event.name)
 
                 await ctx.stateManager.enqueueEvent(makeMetaEvent(event))
                 ctx.stateManager.dequeueLoop(sub)

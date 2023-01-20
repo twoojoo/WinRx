@@ -4,6 +4,7 @@ import { streamFromSubject, subjectFromStream } from "../stream"
 import { Stream } from "../stream";
 import { EventEmitter } from "events"
 import { MetaEvent } from "../event";
+import { Logger } from "../logger";
 
 type KeyExtractor<T> = (event: T) => string | number
 type ValueExtractor<T> = (event: T) => any
@@ -30,6 +31,8 @@ export function sinksFactory<E>(source: Stream<E>): Sinks<E> {
                             value
                         }]
                     })
+
+                    Logger(source.ctx).info(`released Kafka event - topic: ${topic} - key: ${key}`)
 
                     subj.next(event)
                 }
