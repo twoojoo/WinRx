@@ -59,7 +59,8 @@ export function Stream(name: string = randomUUID(), stateManager: StateManager<a
                         value: attemptJsonParsing(message.value.toString("utf-8"))
                     }
 
-                    sub.next(makeMetaEvent(event))
+                    await ctx.stateManager.enqueueEvent(makeMetaEvent(event))
+                    ctx.stateManager.dequeueLoop(sub)
                 }
             })
 
@@ -79,10 +80,11 @@ export function Stream(name: string = randomUUID(), stateManager: StateManager<a
                     value: attemptJsonParsing(value)
                 }
 
-                sub.next(makeMetaEvent(event))
+                await ctx.stateManager.enqueueEvent(makeMetaEvent(event))
+                ctx.stateManager.dequeueLoop(sub)
             })
 
-            const ctx: StreamContext= {
+            const ctx: StreamContext = {
                 name,
                 stateManager
             }
