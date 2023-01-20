@@ -16,19 +16,19 @@ export function windowsFactory<E>(source: Stream<E>): Windows<E> {
         tumblingWindow(options: TumblingWindowOptions<MetaEvent<E>>): Stream<E[]> {
             const win = new TumblingWindow(options)
             const sub = initWindow(subjectFromStream(source), win)
-            return streamFromSubject(source.name(), sub) 
+            return streamFromSubject(source.ctx, sub) 
         },
 
         hoppingWindow(options: HoppingWindowOptions<MetaEvent<E>>): Stream<E[]> {
             const win = new HoppingWindow(options)
             const sub = initWindow(subjectFromStream(source), win)
-            return streamFromSubject(source.name(), sub) 
+            return streamFromSubject(source.ctx sub) 
         },
 
         sessionWindow(options: SessionWindowOptions<MetaEvent<E>>): Stream<E[]> {
             const win = new SessionWindow(options)
             const sub = initWindow(subjectFromStream(source), win)
-            return streamFromSubject(source.name(), sub) 
+            return streamFromSubject(source.ctx, sub) 
         },
     }
 }

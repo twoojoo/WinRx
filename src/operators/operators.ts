@@ -21,12 +21,12 @@ export function operatorsFactory<E>(source: Stream<E>): Operators<E> {
 
             subjectFromStream(source).subscribe({
                 async next(event: MetaEvent<E>) {
-                    const newValue = await callback(event.value) as R
+                    const newValue = await callback(event.spec) as R
                     subj.next(parseIntenalEvent(newValue, event))
                 }
             })
 
-            return streamFromSubject(source.name(), subj)
+            return streamFromSubject(source.ctx, subj)
         },
 
         forEach(callback: OperatorCallback<E, void>): Stream<E> {
@@ -34,12 +34,12 @@ export function operatorsFactory<E>(source: Stream<E>): Operators<E> {
 
             subjectFromStream(source).subscribe({
                 async next(event: MetaEvent<E>) {
-                    await callback(event.value)
+                    await callback(event.spec)
                     subj.next(event)
                 }
             })
 
-            return streamFromSubject(source.name(), subj)
+            return streamFromSubject(source.ctx, subj)
         },
 
         filter(callback: OperatorCallback<E, boolean>): Stream<E> {
@@ -47,13 +47,13 @@ export function operatorsFactory<E>(source: Stream<E>): Operators<E> {
 
             subjectFromStream(source).subscribe({
                 async next(event: MetaEvent<E>) {
-                    if (await callback(event.value)) {
+                    if (await callback(event.spec)) {
                         subj.next(event)
                     }
                 }
             })
 
-            return streamFromSubject(source.name(), subj)
+            return streamFromSubject(source.ctx, subj)
         },
     }
 }

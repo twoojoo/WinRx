@@ -3,31 +3,32 @@ import { LoggerOptions, WinRxlogger } from "../utils/Logger"
 import { Duration, toMs } from "../types/Duration";
 import { StateMananger } from "./StateManager";
 import { Memory } from "../stateManagers";
-import { Subscriber } from "rxjs";
+import { Subject } from "rxjs";
+import { MetaEvent } from "../../event";
 
-type TimestampEtractor<T> = (value: T) => number
-type KeyExtractor<T> = (value: T) => EventKey
+type TimestampEtractor<E> = (value: E) => number
+type KeyExtractor<E> = (value: E) => EventKey
 
-export type WindowingOptions<T> = {
+export type WindowingOptions<E> = {
     id?: string | number
     stateManager?: StateMananger<any>,
     watermark?: Duration,
-    withEventTime?: TimestampEtractor<T>,
+    withEventTime?: TimestampEtractor<E>,
     logger?: LoggerOptions
 }
 
-export abstract class WindowingSystem<T> {
+export abstract class WindowingSystem<E> {
     readonly id: string | number
-    readonly stateManager: StateMananger<T>
+    readonly stateManager: StateMananger<E>
     readonly logger: WinRxlogger
 
     protected watermark: number
-    protected timestampExtractor: TimestampEtractor<T> 
-    protected keyExtractor: KeyExtractor<T> 
+    protected timestampExtractor: TimestampEtractor<E> 
+    protected keyExtractor: KeyExtractor<E> 
 
     isLooping: boolean = false
 
-    constructor(options: WindowingOptions<T>) {
+    constructor(options: WindowingOptions<E>) {
         this.watermark = toMs(options.watermark) > 1 ? toMs(options.watermark) : 1 //min 1 ms
         this.stateManager = (options.stateManager || new Memory()).setlogger(this.logger)
         this.timestampExtractor = options.withEventTime
@@ -35,13 +36,13 @@ export abstract class WindowingSystem<T> {
         this.logger = new WinRxlogger(options.logger, this.id)
     }
 
-    getEventTimestamp(value: T): number {
+    getEventTimestamp(value: E): number {
         return this.timestampExtractor ?
             this.timestampExtractor(value) :
             Date.now()
     }
 
-    formatEvent(event: T): IncomingEvent<T> {
+    formatEvent(event: E): IncomingEvent<E> {
         return {
             eventKey: "default",
             eventTime: this.getEventTimestamp(event),
@@ -49,8 +50,8 @@ export abstract class WindowingSystem<T> {
         }
     }
 
-    release(subscriber: Subscriber<T[]>, events: AssignedEvent<T>[]) {
-        subscriber.next(events.map(e => e.value))
+    release(subject: Subject<MetaEvent<E>[]>, events: AssignedEvent<MetaEvent<E>>[]) {
+        subject.next(events.map(e => e.value))
     }
 
     logWindowStart(kind: "session" | "tumbling" | "hopping" | "sliding" | "counting") {
@@ -58,6 +59,6 @@ export abstract class WindowingSystem<T> {
         this.logger.info(`[window started]  | kind: ${this.logger.cyan(kind + " window")}`)
     }
 
-    abstract onStart(subscriber: Subscriber<T[]>): Promise<void>
-    abstract onDequeuedEvent(subscriber: Subscriber<T[]>, event: DequeuedEvent<T>): Promise<void>
+    abstract onStart(subject: Subject<MetaEvent<E>[]>): Promise<void>
+    abstract onDequeuedEvent(subject: Subject<MetaEvent<E>[]>, event: DequeuedEvent<MetaEvent<E>>): Promise<void>
 }

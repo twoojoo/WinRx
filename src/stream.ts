@@ -2,50 +2,53 @@ import { Consumer, ConsumerConfig } from "kafkajs";
 import { EventEmitter } from "events"
 import { randomUUID } from "crypto";
 import { Subject } from "rxjs";
-import { Join, joinFactory } from "./operators/join"
+// import { Join, joinFactory } from "./operators/join"
 import { Merge, mergeFactory } from "./operators/merge"
 import { Operators, operatorsFactory } from "./operators/operators"
 import { Sinks, sinksFactory } from "./operators/sinks"
-import { Windows, windowsFactory } from "./operators/windows"
+// import { Windows, windowsFactory } from "./operators/windows"
 import { streamPool } from "./pool";
-import { StateMananger } from "./windows/models/StateManager";
+import { StateManager } from "./state/state-manager";
 import { MetaEvent, makeMetaEvent } from "./event";
+import { Init, initFactory } from "./operators/init";
 
 export type StreamContext = {
-    name: String,
-    stateManager: StateMananger<any>
+    name: string,
+    stateManager: StateManager<any>
 }
 
 export type Stream<E> =
+    Init<E> &
     Operators<E> &
-    Windows<E> &
-    Join<E> &
+    // Windows<E> &
+    // Join<E> &
     Merge<E> &
     Sinks<E> &
-    { name: () => string }
+    { name: () => string } &
+    { ctx: StreamContext }
 
-type KafkaEvent<T> = {
+type KafkaEvent<E> = {
     key: string,
-    value: T
+    value: E
 }
 
-type EmitterEvent<T> = {
+type EmitterEvent<E> = {
     name: string,
-    value: T
+    value: E
 }
 
 export type Sources = {   
     /**Create a stream of kafka messages consumed from a topic or more*/
-    fromKafka: <T>(consumer: Consumer, topics: string[], config?: ConsumerConfig) => Stream<KafkaEvent<T>>
+    fromKafka: <E>(consumer: Consumer, topics: string[], config?: ConsumerConfig) => Stream<KafkaEvent<E>>
     /**Create a stream from a named event*/
-    fromEvent: <T>(emitter: EventEmitter, name: string) => Stream<EmitterEvent<T>>
+    fromEvent: <E>(emitter: EventEmitter, name: string) => Stream<EmitterEvent<E>>
 }
 
 // Stream functions is a sourceFactory
-export function Stream(name: string = randomUUID()): Sources {
+export function Stream(name: string = randomUUID(), stateManager: StateManager<any>): Sources {
     return {
-        fromKafka<T>(consumer: Consumer, topics: string[], config?: ConsumerConfig): Stream<KafkaEvent<T>> {
-            const sub = new Subject<MetaEvent<KafkaEvent<T>>>();
+        fromKafka<E>(consumer: Consumer, topics: string[], config?: ConsumerConfig): Stream<KafkaEvent<E>> {
+            const sub = new Subject<MetaEvent<KafkaEvent<E>>>();
             consumer.run({
                 ...config,
                 eachMessage: async ({ message, topic }) => {
@@ -60,11 +63,16 @@ export function Stream(name: string = randomUUID()): Sources {
                 }
             })
 
-            return streamFromSubject(name, sub)
+            const ctx: StreamContext = {
+                name,
+                stateManager
+            }
+
+            return streamFromSubject(ctx, sub)
         },
 
-        fromEvent<T>(emitter: EventEmitter, name: string): Stream<EmitterEvent<T>> {
-            const sub = new Subject<MetaEvent<EmitterEvent<T>>>();
+        fromEvent<E>(emitter: EventEmitter, name: string): Stream<EmitterEvent<E>> {
+            const sub = new Subject<MetaEvent<EmitterEvent<E>>>();
             emitter.on(name, async (value) => {
                 const event = {
                     name,
@@ -74,7 +82,12 @@ export function Stream(name: string = randomUUID()): Sources {
                 sub.next(makeMetaEvent(event))
             })
 
-            return streamFromSubject(name, sub)
+            const ctx: StreamContext= {
+                name,
+                stateManager
+            }
+
+            return streamFromSubject(ctx, sub)
         }
     }
 }
@@ -88,20 +101,25 @@ function attemptJsonParsing(value: string): any {
 }
 
 /** Converts an RXJS Subject into a Stream object */
-export function streamFromSubject<E>(name: string, subj: Subject<MetaEvent<E>>): Stream<E> {
+export function streamFromSubject<E>(ctx: StreamContext, subj: Subject<MetaEvent<E>>): Stream<E> {
     const stream = subj as any
 
     Object.assign(
         stream,
+        initFactory<E>(stream),
         sinksFactory<E>(stream),
-        windowsFactory<E>(stream),
-        joinFactory<E>(stream),
+        // windowsFactory<E>(stream),
+        // joinFactory<E>(stream),
         mergeFactory<E>(stream),
         operatorsFactory<E>(stream),
-        { name: () => name }
+        { name: () => ctx.name },
+        { ctx }
     )
 
-    streamPool[name] = stream as Stream<E>
+    //experimental
+    // Object.freeze(stream) //conflicting with rxjs subject
+
+    streamPool[ctx.name] = stream as Stream<E>
     return stream as Stream<E>
 }
 

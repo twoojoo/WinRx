@@ -1,24 +1,39 @@
 import { randomUUID } from "node:crypto"
 
-//properties of the internal event are arrays because,
-//if winodw is applied to the stream, the result will
-//be a single event containing the collection of windowed
-//events as values.
-
-export type MetaEvent<T> = {
-	value: T,
-	id: string[], 
-	ingestionTime: number[],
+export type MetaEvent<E> = {
+	metadata: {
+		id: string, 
+		key: string
+	},
+	tracking: {
+		ingestionTime: number,
+		eventTime: number,
+		windows: {
+			[windowName: string]: {
+				ingestionTime: number
+			}
+		}
+	}
+	spec: E,
 }
 
-export function makeMetaEvent<T>(event: T): MetaEvent<T> {
+export function makeMetaEvent<E>(
+	event: E, 
+): MetaEvent<E> {
 	return {
-		value: event,
-		id: [randomUUID()],
-		ingestionTime: [Date.now()]
+		metadata: {
+			id: randomUUID(),
+			key: "__default"
+		},
+		tracking: {
+			ingestionTime: Date.now(),
+			eventTime: undefined,
+			windows: {}
+		},
+		spec: event,
 	}
 }
 
-export function parseIntenalEvent<T, R>(newEventValue: T, oldEvent: MetaEvent<R>): MetaEvent<T> {
-	return { ...oldEvent, value: newEventValue }
+export function parseIntenalEvent<E, R>(newEventValue: E, oldEvent: MetaEvent<R>): MetaEvent<E> {
+	return { ...oldEvent, spec: newEventValue }
 }

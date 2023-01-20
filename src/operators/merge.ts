@@ -39,8 +39,9 @@ export function mergeFactory<E1>(source: Stream<E1>): Merge<E1> {
                 }
             })
 
-            return streamFromSubject(source.name(), subj)
+            return streamFromSubject(source.ctx, subj)
         },
+        
         mergeMap<E2, R1, R2>(
             stream: Stream<E2>, 
             mapper1: Mapper<E1, R1>, 
@@ -50,19 +51,19 @@ export function mergeFactory<E1>(source: Stream<E1>): Merge<E1> {
 
             subjectFromStream(source).subscribe({
                 async next(event: MetaEvent<E1>) {
-                    const newValue = await mapper1(event.value) as R1
+                    const newValue = await mapper1(event.spec) as R1
                     subj.next(parseIntenalEvent(newValue, event))
                 }
             })
 
             subjectFromStream(stream).subscribe({
                 async next(event: MetaEvent<E2>) {
-                    const newValue = await mapper2(event.value) as R2
+                    const newValue = await mapper2(event.spec) as R2
                     subj.next(parseIntenalEvent(newValue, event))
                 }
             })
 
-            return streamFromSubject(source.name(), subj)
+            return streamFromSubject(source.ctx, subj)
         },
 
         mergeMapSame<E2, R>(
@@ -74,19 +75,19 @@ export function mergeFactory<E1>(source: Stream<E1>): Merge<E1> {
 
             subjectFromStream(source).subscribe({
                 async next(event: MetaEvent<E1>) {
-                    const newValue = await mapper1(event.value) as R
+                    const newValue = await mapper1(event.spec) as R
                     subj.next(parseIntenalEvent(newValue, event))
                 }
             })
 
             subjectFromStream(stream).subscribe({
                 async next(event: MetaEvent<E2>) {
-                    const newValue = await mapper2(event.value) as R
+                    const newValue = await mapper2(event.spec) as R
                     subj.next(parseIntenalEvent(newValue, event))
                 }
             })
 
-            return streamFromSubject(source.name(), subj)
+            return streamFromSubject(source.ctx, subj)
         },
     }
 }

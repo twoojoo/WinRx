@@ -57,14 +57,14 @@ function applyFactory<E1, E2>(stream1: Stream<E1>, stream2: Stream<E2>, window: 
 
             subjectFromStream(stream1).subscribe({
                 async next(event: MetaEvent<E1>) {
-                    const tuple = parseIntenalEvent([event.value, undefined], event)
+                    const tuple = parseIntenalEvent([event.spec, undefined], event)
                     await pushEventToWindow(tuple, window, windowSub)
                 }
             });
 
             subjectFromStream(stream2).subscribe({
                 async next(event: MetaEvent<E2>) {
-                    const tuple = parseIntenalEvent([undefined, event.value], event)
+                    const tuple = parseIntenalEvent([undefined, event.spec], event)
                     await pushEventToWindow(tuple, window, windowSub)
                 }
             })
@@ -76,7 +76,7 @@ function applyFactory<E1, E2>(stream1: Stream<E1>, stream2: Stream<E2>, window: 
                     const events1: E1[] = [], events2: E2[] = []
 
                     eventsWindow.forEach(e => {
-                        const tuple = e.value
+                        const tuple = e.spec
                         if (!tuple[0]) events2.push(tuple[1] as E2)
                         else events1.push(tuple[0] as E1)
                     })
@@ -94,7 +94,8 @@ function applyFactory<E1, E2>(stream1: Stream<E1>, stream2: Stream<E2>, window: 
                 }
             })
 
-            return streamFromSubject(stream1.name(), finalSubject)
+            //merging two diferent ctx????
+            return streamFromSubject(stream1.ctx, finalSubject)
         }
     }
 }

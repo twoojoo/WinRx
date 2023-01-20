@@ -1,37 +1,38 @@
-import { Observer, Subscriber } from "rxjs"
+import { Subject } from "rxjs"
 import { DequeuedEvent, EventKey } from "../types/Event"
 import { Bucket } from "../models/Bucket"
 import { Duration, toMs } from "../types/Duration"
 import { KeyedWindowingOptions, KeyedWindowingSystem } from "../models/KeyedWindowingSystem"
+import { MetaEvent } from "../../event"
 
-export type SessionWindowOptions<T> = KeyedWindowingOptions<T> & { size: Duration, timeout: Duration }
+export type SessionWindowOptions<E> = KeyedWindowingOptions<E> & { size: Duration, timeout: Duration }
 
-export class SessionWindow<T> extends KeyedWindowingSystem<T> {
+export class SessionWindow<E> extends KeyedWindowingSystem<E> {
     private maxDuration: number
     private timeoutSize: number
 
     private buckets: {
         [key: EventKey]: {
-            bucket: Bucket<T>
+            bucket: Bucket<E>
             durationTimer: NodeJS.Timeout,
             timeoutTimer: NodeJS.Timeout
         }[]
     } = {}
 
-    private closedBuckets: { [key: EventKey]: Bucket<T>[] } = {}
+    private closedBuckets: { [key: EventKey]: Bucket<E>[] } = {}
 
-    constructor(options: SessionWindowOptions<T>) {
+    constructor(options: SessionWindowOptions<E>) {
         super(options)
 
         this.maxDuration = toMs(options.size)
         this.timeoutSize = toMs(options.timeout)
     }
 
-    async onStart(observer: Observer<T[]>): Promise<void> {
+    async onStart(sub: Subject<MetaEvent<E>[]>): Promise<void> {
         this.logWindowStart("session")
     }
 
-    async onDequeuedEvent(subscriber: Subscriber<T[]>, event: DequeuedEvent<T>): Promise<void> {
+    async onDequeuedEvent(subject: Subject<MetaEvent<E>[]>, event: DequeuedEvent<MetaEvent<E>>): Promise<void> {
         const eventKey = event.eventKey
         let assigned = false
 

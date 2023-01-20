@@ -1,13 +1,14 @@
 import { Stream } from "../src/stream";
 import { EventEmitter } from "events"
+import { MemoryStateManager } from "../src/state/Memory";
 
 const emitter = new EventEmitter()
 
-const stream2 = Stream("stream2")
+const stream2 = Stream("stream2", new MemoryStateManager("stream2", "smMem2"))
     .fromEvent<string>(emitter, "stream2")
     .map(e => e.value)
 
-const stream1 = Stream("stream1")
+const stream1 = Stream("stream1", new MemoryStateManager("stream1", "smMem1"))
     .fromEvent<number>(emitter, "stream1")
     .map(e => e.value)
     .mergeMapSame(

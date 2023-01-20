@@ -9,20 +9,20 @@ type KeyExtractor<T> = (event: T) => string | number
 type ValueExtractor<T> = (event: T) => any
 
 export type Sinks<E> = {
-    /**Send stream output to a kafka broker on a specific topic*/
+    /**Send stream output to a kafka broker on a specific topic (if a key is not specified, the event key will be used as message key)*/
     toKafka: (producer: Producer, topic: string, keyFrom: KeyExtractor<E>, valueFrom?: ValueExtractor<E>) => Stream<E>
-    /**Trigger an event passing the stream output*/
+    /**Trigger an event passing the stream output (if a name is not specified, the event key will be used as event name*/
     toEvent: (emitter: EventEmitter, name: string) => Stream<E>
 }
 
 export function sinksFactory<E>(source: Stream<E>): Sinks<E> {
     return {
-        toKafka(producer: Producer, topic: string, keyFrom: KeyExtractor<E>, valueFrom: ValueExtractor<E> = e => e) {
+        toKafka(producer: Producer, topic: string, keyFrom?: KeyExtractor<E>) {
             const subj = new Subject<MetaEvent<E>>()
             subjectFromStream(source).subscribe({
                 async next(event) {
-                    const key = keyFrom(event.value).toString()
-                    const value = stringifyValue(valueFrom(event.value))
+                    const key = keyFrom ? keyFrom(event.spec).toString() : event.metadata.key
+                    const value = stringifyValue(event.spec)
 
                     producer.send({
                         topic, messages: [{
@@ -33,18 +33,18 @@ export function sinksFactory<E>(source: Stream<E>): Sinks<E> {
                 }
             })
 
-            return streamFromSubject(source.name(), subj)
+            return streamFromSubject(source.ctx, subj)
         },
 
-        toEvent(emitter: EventEmitter, name: string) {
+        toEvent(emitter: EventEmitter, name?: string) {
             const subj = new Subject<MetaEvent<E>>()
             subjectFromStream(source).subscribe({
                 async next(event) {
-                    emitter.emit(name, event.value)
+                    emitter.emit(name || event.metadata.key, event.spec)
                 }
             })
 
-            return streamFromSubject(source.name(), subj)
+            return streamFromSubject(source.ctx, subj)
         }
     }
 }

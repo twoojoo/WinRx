@@ -1,14 +1,16 @@
 import { Stream, Pool } from "../src";
 import { EventEmitter } from "events"
+import { MemoryStateManager } from "../src/state/Memory"
 
 const emitter = new EventEmitter()
 
-Stream("stream2")
+Stream("stream2", new MemoryStateManager("stream2", "smMem2"))
     .fromEvent<string>(emitter, "stream2")
     .map(e => e.value)
 
-Stream("stream1")
+Stream("stream1", new MemoryStateManager("stream1", "smMem1"))
     .fromEvent<number>(emitter, "stream1")
+    .withEventKey(_ => "default")
     .map(e => e.value)
     .mergeMap(
         Pool().getStream<string>("stream2"),
