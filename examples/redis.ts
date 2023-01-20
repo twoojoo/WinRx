@@ -11,7 +11,7 @@ const stream2 = Stream("stream2", redis(client))
     .map(e => e.value)
 
 const stream1 = Stream("stream1", redis(client))
-    .fromEvent<number>(emitter, "stream1")
+    .fromEvent<number>(emitter)
     .withEventKey(e => "blblba")
     .map(e => e.value)
     .mergeMapSame(

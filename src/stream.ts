@@ -39,9 +39,9 @@ type EmitterEvent<E> = {
 
 export type Sources = {   
     /**Create a stream of kafka messages consumed from a topic or more (uses stream name as topic name if topics array is not provided)*/
-    fromKafka: <E>(consumer: Consumer, topics: string[], config?: ConsumerConfig) => Stream<KafkaEvent<E>>
+    fromKafka: <E>(consumer: Consumer, topics?: string[], config?: ConsumerConfig) => Stream<KafkaEvent<E>>
     /**Create a stream from a named event (uses stream name as event name if not provided)*/
-    fromEvent: <E>(emitter: EventEmitter, name: string) => Stream<EmitterEvent<E>>
+    fromEvent: <E>(emitter: EventEmitter, name?: string) => Stream<EmitterEvent<E>>
 }
 
 /**Create a stream. Use the stream name as unique ideintifier. If a state manager is not provided, the state will be persited in memory.*/
