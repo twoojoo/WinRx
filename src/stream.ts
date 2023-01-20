@@ -117,8 +117,9 @@ export function streamFromSubject<E>(ctx: StreamContext, subj: Subject<MetaEvent
         { ctx }
     )
 
-    //experimental
-    // Object.freeze(stream) //conflicting with rxjs subject
+    //prevent modifications (EXPERIMENTAL) 
+    Object.defineProperty(stream, "name", {writable: false}) 
+    Object.defineProperty(stream, "ctx", {writable: false}) 
 
     streamPool[ctx.name] = stream as Stream<E>
     return stream as Stream<E>
