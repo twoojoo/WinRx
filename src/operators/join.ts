@@ -40,7 +40,7 @@ export function joinFactory<E1>(source: Stream<E1>): Join<E1> {
                 on(condition: JoinCondition<E1, E2>): JoinWindows<E1, E2> {
                     return {
                         tumblingWindow(name: string, options: TumblingWindowOptions): Apply<E1, E2> {
-                            const windowSub = new Subject<MetaEvent<JoinEvent<E1, E2>[]>>()
+                            const windowSub = init<E1, E2>(name, source)//new Subject<MetaEvent<JoinEvent<E1, E2>[]>>()
                             const window = tumblingWindow<JoinEvent<E1, E2>>(source.ctx, name, options, windowSub)
                             return applyFactory(name, source, stream, window, windowSub, condition)
                         }
@@ -115,3 +115,12 @@ function applyFactory<E1, E2>(windowName: string, stream1: Stream<E1>, stream2: 
         }
     }
 }
+
+function init<E1, E2>(name: string, source: Stream<E1>): Subject<MetaEvent<JoinEvent<E1, E2>[]>> {
+    if (source.ctx.windows.includes(name)) throw Error(`a window named "${name}" already exists for stream "${source.name()}"`)
+    source.ctx.windows.push(name)
+    return new Subject<MetaEvent<JoinEvent<E1, E2>[]>>()
+}
+
+
+
