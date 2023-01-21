@@ -15,6 +15,7 @@ export function onLostEvent<E>(ctx: StreamContext, windowName: string, event: Me
 	Logger(ctx).warning(`event lost in window "${windowName}" - key: ${event.metadata.key}`)
 }
 
+/** Creates a brand new MetaEvent from an array of events released from a window bucket. The new event has a new id and a new ingestion/event time.*/
 export function releaseEvents<E>(ctx: StreamContext, windowName: string, sub: Subject<MetaEvent<E[]>>, events: MetaEvent<E>[]) {
 	const eventsByKey = {}
 	events.forEach(e => {
