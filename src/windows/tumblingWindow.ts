@@ -32,7 +32,7 @@ export function tumblingWindow<E>(ctx: StreamContext, name: string, opts: Tumbli
 	}, size)
 
 	return {
-		async onEvent(event: MetaEvent<E>) {
+		async pushEvent(event: MetaEvent<E>) {
 			let assigned = false
 
 			for (let bucket of closedBuckets) {

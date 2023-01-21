@@ -1,18 +1,20 @@
 import { streamFromSubject, subjectFromStream } from "../tools/stream"
-import { EventEmitter } from "events"
 import { MetaEvent } from "../tools/event";
 import { Stream } from "../tools/stream";
 import { Logger } from "../tools/logger";
+import { EventEmitter } from "events"
 import { Producer } from "kafkajs"
 import { Subject } from "rxjs"
 
-type KeyExtractor<T> = (event: T) => string | number
-type ValueExtractor<T> = (event: T) => any
+/**/
+export type KeyExtractor<E> = (event: E) => string | number
+
+export type ValueExtractor<E> = (event: E) => any
 
 export type Sinks<E> = {
     /**Send stream output to a kafka broker on a specific topic (if a key is not specified, the event key will be used as message key)*/
     toKafka: (producer: Producer, topic: string, keyFrom: KeyExtractor<E>, valueFrom?: ValueExtractor<E>) => Stream<E>
-    /**Trigger an event passing the stream output (if a name is not specified, the event key will be used as event name*/
+    /**Trigger an event passing the stream output (if a name is not specified, the event key will be used as event name)*/
     toEvent: (emitter: EventEmitter, name: string) => Stream<E>
 }
 

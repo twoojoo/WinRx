@@ -8,7 +8,7 @@ import { randomUUID } from "crypto"
 export type WindowOptions = { watermark: Duration }
 
 export type Window<E> = {
-	onEvent: (event: MetaEvent<E>) => Promise<void>
+	pushEvent: (event: MetaEvent<E>) => Promise<void>
 }
 
 export function onLostEvent<E>(ctx: StreamContext, windowName: string, event: MetaEvent<E>) {
