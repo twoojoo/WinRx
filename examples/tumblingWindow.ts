@@ -4,7 +4,8 @@ import { randomInt } from "crypto"
 
 const emitter = new EventEmitter()
 
-const MAX_COUNT = 2000
+const MAX_COUNT = 20000
+const DELAY = 100
 const FREQ = 1
 
 const counters = {
@@ -18,30 +19,29 @@ type myEvent = {
     counter: number
 }
 
-Stream("stream1")
-    .fromEvent<myEvent>(emitter, "stream1")
+Stream("input", undefined, false)
+    .fromEvent<myEvent>(emitter)
     .map(e => e.value)
     .withEventKey(e => e.key)
-    .every(2000, () => console.log("LAST EVENT!!!!"))
+    .withEventTime(e => e.time)
+    .every(MAX_COUNT, () => console.log(`EVENT #`, MAX_COUNT))
     .tumblingWindow("tw1", { size: 3000, watermark: 500 })
-    .forEach(e => {
-        // counters.output += e.length
-        // e.map(_ => _.counter)
-        // if (e.map(_ => _.counter).includes(MAX_COUNT - 1)) {
-        //     console.log(counters.output, "/", counters.input)
-        //     if (counters.output == counters.input) process.exit(0)
-        //     else throw Error("counters mismatch")   
-        // }
-    })
+    .toEvent(emitter, "output")
+    
+setTimeout(() => {
+    setInterval(() => {
+        if (counters.input >= MAX_COUNT) return
+        emitter.emit("input", {
+            counter: counters.input,
+            key: randomInt(2),
+            time: Date.now() - DELAY
+        })
+        counters.input += 1
+    }, FREQ)
+}, DELAY)
 
-setInterval(() => {
-    if (counters.input >= MAX_COUNT) return
-    emitter.emit("stream1", {
-        counter: counters.input,
-        key: randomInt(2),
-        time: Date.now() - 100
-    })
-    counters.input += 1
-}, FREQ)
-
-// emitter.on("test-result", (v) => console.log(v))
+emitter.on("output", (e: myEvent[]) => {
+    counters.output += e.length
+    console.log(e.length, "=> [", counters.output, "/", MAX_COUNT, "]")
+    if (counters.output == MAX_COUNT) setTimeout(() => process.exit(0), 500)
+})
