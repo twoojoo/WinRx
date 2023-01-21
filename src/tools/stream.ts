@@ -22,7 +22,7 @@ export type Stream<E> =
     Init<E> &
     Operators<E> &
     Windows<E> &
-    // Join<E> &
+    Join<E> &
     Merge<E> &
     Sinks<E> &
     { name: () => string } &

@@ -4,7 +4,7 @@ import { streamFromSubject, subjectFromStream } from "../tools/stream"
 import { MetaEvent, parseIntenalEvent } from "../tools/event";
 import { randomUUID } from "crypto"
 import { tumblingWindow, TumblingWindowOptions } from "../windows/tumblingWindow"
-import { Subject, Subscriber } from "rxjs"
+import { Subject } from "rxjs"
 import { Stream } from "../tools/stream";
 import { Window } from "../windows/window";
 
@@ -42,7 +42,7 @@ export function joinFactory<E1>(source: Stream<E1>): Join<E1> {
                         tumblingWindow(name: string, options: TumblingWindowOptions): Apply<E1, E2> {
                             const windowSub = new Subject<MetaEvent<JoinEvent<E1, E2>[]>>()
                             const window = tumblingWindow<JoinEvent<E1, E2>>(source.ctx, name, options, windowSub)
-                            return applyFactory(source, stream, window, windowSub, condition)
+                            return applyFactory(name, source, stream, window, windowSub, condition)
                         }
                     }
                 }
@@ -51,13 +51,14 @@ export function joinFactory<E1>(source: Stream<E1>): Join<E1> {
     }
 }
 
-function applyFactory<E1, E2>(stream1: Stream<E1>, stream2: Stream<E2>, window: Window<JoinEvent<E1, E2>>, windowSub: Subject<MetaEvent<JoinEvent<E1, E2>[]>>, condition: JoinCondition<E1, E2>): Apply<E1, E2> {
+function applyFactory<E1, E2>(windowName: string, stream1: Stream<E1>, stream2: Stream<E2>, window: Window<JoinEvent<E1, E2>>, windowSub: Subject<MetaEvent<JoinEvent<E1, E2>[]>>, condition: JoinCondition<E1, E2>): Apply<E1, E2> {
     return {
         apply<N>(operation: JoinOperation<E1, E2, N>): Stream<N> {
 
             subjectFromStream(stream1).subscribe({
                 async next(event: MetaEvent<E1>) {
                     const tuple = parseIntenalEvent([event.spec, undefined], event)
+                    tuple.tracking.windows[windowName] = {ingestionTime: Date.now()}
                     await window.pushEvent(tuple)
                 }
             });
@@ -65,6 +66,7 @@ function applyFactory<E1, E2>(stream1: Stream<E1>, stream2: Stream<E2>, window: 
             subjectFromStream(stream2).subscribe({
                 async next(event: MetaEvent<E2>) {
                     const tuple = parseIntenalEvent([undefined, event.spec], event)
+                    tuple.tracking.windows[windowName] = {ingestionTime: Date.now()}
                     await window.pushEvent(tuple)
                 }
             })

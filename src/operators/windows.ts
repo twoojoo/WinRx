@@ -19,7 +19,7 @@ export function windowsFactory<E>(source: Stream<E>): Windows<E> {
             subjectFromStream(source).subscribe({
                 async next(event: MetaEvent<E>) {
                     event.tracking.windows[name] = {ingestionTime: Date.now()}
-                    win.onEvent(event)
+                    win.pushEvent(event)
                 }
             })
 

@@ -5,7 +5,7 @@ import { StreamContext } from "../tools/stream"
 import { Duration } from "../tools/duration"
 import { randomUUID } from "crypto"
 
-export type WindowOptions = { watermark: Duration }
+export type WindowOptions = { watermark?: Duration }
 
 export type Window<E> = {
 	pushEvent: (event: MetaEvent<E>) => Promise<void>
