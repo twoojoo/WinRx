@@ -3,7 +3,7 @@ import { MetaEvent, parseIntenalEvent } from "../tools/event";
 import { Stream } from "../tools/stream";
 import { Subject } from "rxjs";
 
-type OperatorCallback<E, R> = (event: E) => Promise<R> | R
+export type OperatorCallback<E, R> = (event: E) => Promise<R> | R
 
 export type Operators<E> = {
     /**Transforms stream's events */

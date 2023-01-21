@@ -29,8 +29,8 @@ type Apply<E1, E2> = {
 }
 
 type JoinEvent<E1, E2> = (E1 | E2)[]
-type JoinCondition<E1, E2> = (event1: E1, event2: E2) => boolean
-type JoinOperation<E1, E2, R> = (...args: (E1 | E2)[]) => R
+export type JoinCondition<E1, E2> = (event1: E1, event2: E2) => boolean
+export type JoinOperation<E1, E2, R> = (...args: (E1 | E2)[]) => R
 
 
 export function joinFactory<E1>(source: Stream<E1>): Join<E1> {

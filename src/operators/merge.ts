@@ -3,7 +3,7 @@ import { MetaEvent, parseIntenalEvent } from "../tools/event";
 import { Stream } from "../tools/stream";
 import { Subject } from "rxjs"
 
-type Mapper<E, R> = (event: E) => Promise<R> | R
+export type Mapper<E, R> = (event: E) => Promise<R> | R
 
 export type Merge<E1> = {
     /** Merge the current stream of type T with a stream of type R creating a stream which events are of type T | R */
