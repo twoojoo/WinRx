@@ -1,5 +1,5 @@
 import { Subject } from "rxjs";
-// import { Join, joinFactory } from "../operators/join"
+import { Join, joinFactory } from "../operators/join"
 import { Merge, mergeFactory } from "../operators/merge"
 import { Operators, operatorsFactory } from "../operators/operators"
 import { Sinks, sinksFactory } from "../operators/sinks"
@@ -61,7 +61,7 @@ export function streamFromSubject<E>(ctx: StreamContext, subj: Subject<MetaEvent
         initFactory<E>(stream),
         sinksFactory<E>(stream),
         windowsFactory<E>(stream),
-        // joinFactory<E>(stream),
+        joinFactory<E>(stream),
         mergeFactory<E>(stream),
         operatorsFactory<E>(stream),
         { name: () => ctx.name },
