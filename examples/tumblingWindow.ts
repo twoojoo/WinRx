@@ -1,10 +1,10 @@
-import { Stream } from "../src";
+import { redis, Stream } from "../src";
 import { EventEmitter } from "events";
 import { randomInt } from "crypto"
 
 const emitter = new EventEmitter()
 
-const MAX_COUNT = 20000
+const MAX_COUNT = 100000
 const DELAY = 100
 const FREQ = 1
 
@@ -19,8 +19,8 @@ type myEvent = {
     counter: number
 }
 
-Stream("input", undefined, false)
-    .fromEvent<myEvent>(emitter)
+Stream<myEvent>("input", { logger: false })
+    .fromEvent(emitter)
     .map(e => e.value)
     .withEventKey(e => e.key)
     .withEventTime(e => e.time)

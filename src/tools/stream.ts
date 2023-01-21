@@ -28,16 +28,28 @@ export type Stream<E> =
     { name: () => string } &
     { ctx: StreamContext }
 
+export type StreamOptions = {
+    logger?: boolean
+    stateManager?: StateManager<any>,
+}
 
 /**Create a stream. Use the stream name as unique ideintifier. If a state manager is not provided, the state will be persited in memory.*/
-export function Stream(name: string, stateManager: StateManager<any> = newMemoryStateManager(), logger: boolean = true): Sources {
+export function Stream<E>(name: string, options: StreamOptions = {}): Sources<E> {
+    validateOptions(options)
+    const { stateManager, logger } = options
+
     if (!!streamPool[name]) throw Error(`a stream named "${name}" already exists in the stream pool`)
 
     //setup stream context
     stateManager.setStreamName(name)
-    const ctx: StreamContext = { name, stateManager, windows: [], logger }
+    const ctx: StreamContext = { 
+        name, 
+        stateManager, 
+        windows: [], 
+        logger
+    }
 
-    return sourcesFactory(ctx)
+    return sourcesFactory<E>(ctx)
 }
 
 /** Converts an RXJS Subject into a Stream object */
@@ -66,4 +78,9 @@ export function streamFromSubject<E>(ctx: StreamContext, subj: Subject<MetaEvent
 /** Just Typescript sintactic sugar to parse a Stream into a RxJs Subject */
 export function subjectFromStream<E>(stream: Stream<E>) {
     return (stream as unknown) as Subject<MetaEvent<E>>
+}
+
+function validateOptions(opts: StreamOptions) {
+    opts.stateManager = opts.stateManager || newMemoryStateManager()
+    opts.logger = opts.logger !== false  //default to true
 }
