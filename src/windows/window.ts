@@ -2,7 +2,7 @@ import { Subject } from "rxjs"
 import { MetaEvent } from "../event"
 import { Logger } from "../logger"
 import { StreamContext } from "../stream"
-import { Duration } from "../windows.old/types/Duration"
+import { Duration } from "../duration"
 import { randomUUID } from "crypto"
 
 export type WindowOptions = { watermark: Duration }
@@ -16,13 +16,11 @@ export function onLostEvent<E>(ctx: StreamContext, windowName: string, event: Me
 }
 
 export function releaseEvents<E>(ctx: StreamContext, windowName: string, sub: Subject<MetaEvent<E[]>>, events: MetaEvent<E>[]) {
-	
-
 	const eventsByKey = {}
 	events.forEach(e => {
 		const key = e.metadata.key
-		if (!eventsByKey[e.metadata.key]) eventsByKey[e.metadata.key] = []
-		eventsByKey[e.metadata.key].push(e)
+		if (!eventsByKey[key]) eventsByKey[key] = []
+		eventsByKey[key].push(e)
 	})
 
 	for (const key in eventsByKey) {

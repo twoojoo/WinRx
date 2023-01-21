@@ -41,7 +41,7 @@ export function sourcesFactory(ctx: StreamContext): Sources {
                     Logger(ctx).info(`ingested Kafka event - topic: ${topic} - key: ${event.key}`)
 
                     await ctx.stateManager.enqueueEvent(makeMetaEvent(event))
-                    ctx.stateManager.dequeueLoop(sub)
+                    ctx.stateManager.dequeueLoop(ctx.stateManager, sub)
                 }
             })
 
@@ -61,7 +61,7 @@ export function sourcesFactory(ctx: StreamContext): Sources {
                 Logger(ctx).info("ingested native event - name: " + event.name)
 
                 await ctx.stateManager.enqueueEvent(makeMetaEvent(event))
-                ctx.stateManager.dequeueLoop(sub)
+                ctx.stateManager.dequeueLoop(ctx.stateManager, sub)
             })
 
             return streamFromSubject(ctx, sub)

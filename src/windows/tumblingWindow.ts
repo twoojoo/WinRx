@@ -1,5 +1,5 @@
 import { onLostEvent, releaseEvents, Window, WindowOptions } from "./window"
-import { Duration, toMs } from "../windows.old/types/Duration"
+import { Duration, toMs } from "../duration"
 import { StreamContext } from "../stream"
 import { MetaEvent } from "../event"
 import { Bucket, newBucket } from "./bucket"

@@ -8,7 +8,7 @@ import { streamPool } from "./pool";
 import { StateManager } from "./state/state-manager";
 import { MetaEvent } from "./event";
 import { Init, initFactory } from "./operators/init";
-import { MemoryStateManager } from "./state/Memory";
+import { newMemoryStateManager } from "./state/memory";
 import { sourcesFactory, Sources } from "./operators/sources";
 
 export type StreamContext = {
@@ -30,7 +30,7 @@ export type Stream<E> =
 
 
 /**Create a stream. Use the stream name as unique ideintifier. If a state manager is not provided, the state will be persited in memory.*/
-export function Stream(name: string, stateManager: StateManager<any> = new MemoryStateManager(), logger: boolean = true): Sources {
+export function Stream(name: string, stateManager: StateManager<any> = newMemoryStateManager(), logger: boolean = true): Sources {
     if (!!streamPool[name]) throw Error(`a stream named "${name}" already exists in the stream pool`)
 
     //setup stream context
