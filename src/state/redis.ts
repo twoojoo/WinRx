@@ -1,7 +1,7 @@
-import { MetaEvent } from "../event";
+import { MetaEvent } from "../tools/event";
 import { newBaseStateManager, StateManager } from "./state-manager";
 import { default as RedisClient } from "ioredis"
-import { Duration } from "../duration"
+import { Duration } from "../tools/duration"
 
 export type RedisStateManager<E> = StateManager<E> 
 

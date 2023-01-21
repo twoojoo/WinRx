@@ -1,6 +1,6 @@
 import { timestamp } from "rxjs"
-import { MetaEvent } from "../event"
-import { StreamContext } from "../stream"
+import { MetaEvent } from "../tools/event"
+import { StreamContext } from "../tools/stream"
 
 export type Bucket = {
 	isDestroyed: () => boolean,

@@ -1,4 +1,4 @@
-import { MetaEvent } from "../event";
+import { MetaEvent } from "../tools/event";
 import { newBaseStateManager, StateManager } from "./state-manager";
 
 export type MemoryStateManager<E> = StateManager<E>

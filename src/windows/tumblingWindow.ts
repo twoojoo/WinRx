@@ -1,7 +1,7 @@
 import { onLostEvent, releaseEvents, Window, WindowOptions } from "./window"
-import { Duration, toMs } from "../duration"
-import { StreamContext } from "../stream"
-import { MetaEvent } from "../event"
+import { Duration, toMs } from "../tools/duration"
+import { StreamContext } from "../tools/stream"
+import { MetaEvent } from "../tools/event"
 import { Bucket, newBucket } from "./bucket"
 import { Subject } from "rxjs"
 

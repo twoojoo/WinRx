@@ -1,6 +1,5 @@
-import { Stream } from "../src/stream";
+import { Stream } from "../src";
 import { EventEmitter } from "events"
-import { MemoryStateManager } from "../src/state/Memory";
 
 const emitter = new EventEmitter()
 

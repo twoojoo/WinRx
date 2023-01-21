@@ -1,8 +1,8 @@
-import { streamFromSubject, subjectFromStream } from "../stream"
+import { streamFromSubject, subjectFromStream } from "../tools/stream"
 import { EventEmitter } from "events"
-import { MetaEvent } from "../event";
-import { Stream } from "../stream";
-import { Logger } from "../logger";
+import { MetaEvent } from "../tools/event";
+import { Stream } from "../tools/stream";
+import { Logger } from "../tools/logger";
 import { Producer } from "kafkajs"
 import { Subject } from "rxjs"
 

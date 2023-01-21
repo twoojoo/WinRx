@@ -1,5 +1,5 @@
 import { Subject } from "rxjs"
-import { MetaEvent } from "../event"
+import { MetaEvent } from "../tools/event"
 
 export type BaseStateManager = {
 	streamName: string,

@@ -1,8 +1,8 @@
 import { Subject } from "rxjs"
-import { MetaEvent } from "../event"
-import { Logger } from "../logger"
-import { StreamContext } from "../stream"
-import { Duration } from "../duration"
+import { MetaEvent } from "../tools/event"
+import { Logger } from "../tools/logger"
+import { StreamContext } from "../tools/stream"
+import { Duration } from "../tools/duration"
 import { randomUUID } from "crypto"
 
 export type WindowOptions = { watermark: Duration }

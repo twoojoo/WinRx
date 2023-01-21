@@ -1,10 +1,10 @@
 import { TumblingWindow, TumblingWindowOptions } from "../windows/windowingSystems"
 import { WindowingSystem } from "../windows/models/WindowingSystem"
-import { streamFromSubject, subjectFromStream } from "../stream"
-import { MetaEvent, parseIntenalEvent } from "../event";
+import { streamFromSubject, subjectFromStream } from "../tools/stream"
+import { MetaEvent, parseIntenalEvent } from "../tools/event";
 import { pushEventToWindow } from "./windows"
 import { Subject, Subscriber } from "rxjs"
-import { Stream } from "../stream";
+import { Stream } from "../tools/stream";
 
 export type Join<E1> = {
     /** Join the current stream with another stream*/

@@ -1,7 +1,7 @@
 import { tumblingWindow, TumblingWindowOptions } from "../windows/tumblingWindow";
-import { streamFromSubject, subjectFromStream } from "../stream";
-import { MetaEvent } from "../event";
-import { Stream } from "../stream";
+import { streamFromSubject, subjectFromStream } from "../tools/stream";
+import { MetaEvent } from "../tools/event";
+import { Stream } from "../tools/stream";
 import { Subject } from "rxjs";
 
 export type Windows<E> = {

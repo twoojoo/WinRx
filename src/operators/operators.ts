@@ -1,6 +1,6 @@
-import { streamFromSubject, subjectFromStream } from "../stream";
-import { MetaEvent, parseIntenalEvent } from "../event";
-import { Stream } from "../stream";
+import { streamFromSubject, subjectFromStream } from "../tools/stream";
+import { MetaEvent, parseIntenalEvent } from "../tools/event";
+import { Stream } from "../tools/stream";
 import { Subject } from "rxjs";
 
 type OperatorCallback<E, R> = (event: E) => Promise<R> | R

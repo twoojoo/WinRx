@@ -1,15 +1,15 @@
 import { Subject } from "rxjs";
-// import { Join, joinFactory } from "./operators/join"
-import { Merge, mergeFactory } from "./operators/merge"
-import { Operators, operatorsFactory } from "./operators/operators"
-import { Sinks, sinksFactory } from "./operators/sinks"
-import { Windows, windowsFactory } from "./operators/windows"
+// import { Join, joinFactory } from "../operators/join"
+import { Merge, mergeFactory } from "../operators/merge"
+import { Operators, operatorsFactory } from "../operators/operators"
+import { Sinks, sinksFactory } from "../operators/sinks"
+import { Windows, windowsFactory } from "../operators/windows"
 import { streamPool } from "./pool";
-import { StateManager } from "./state/state-manager";
+import { StateManager } from "../state/state-manager";
 import { MetaEvent } from "./event";
-import { Init, initFactory } from "./operators/init";
-import { newMemoryStateManager } from "./state/memory";
-import { sourcesFactory, Sources } from "./operators/sources";
+import { Init, initFactory } from "../operators/init";
+import { newMemoryStateManager } from "../state/memory";
+import { sourcesFactory, Sources } from "../operators/sources";
 
 export type StreamContext = {
     name: string, //must be uniqued (checked at startup)
