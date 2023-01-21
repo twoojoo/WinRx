@@ -16,23 +16,31 @@ export function onLostEvent<E>(ctx: StreamContext, windowName: string, event: Me
 }
 
 export function releaseEvents<E>(ctx: StreamContext, windowName: string, sub: Subject<MetaEvent<E[]>>, events: MetaEvent<E>[]) {
-	Logger(ctx).info(`released bucket for window "${windowName}" - key: ${events[0].metadata.key} - size: ${events.length}`)
-	sub.next(parseWindowedEvents(events))
-}
+	
 
-function parseWindowedEvents<E>(events: MetaEvent<E>[]): MetaEvent<E[]> {
-	const now = Date.now()
+	const eventsByKey = {}
+	events.forEach(e => {
+		const key = e.metadata.key
+		if (!eventsByKey[e.metadata.key]) eventsByKey[e.metadata.key] = []
+		eventsByKey[e.metadata.key].push(e)
+	})
 
-	return {
-		metadata: {
-			id: randomUUID(),
-			key: events[0].metadata.key
-		},
-		tracking: {
-			eventTime: now,
-			ingestionTime: now,
-			windows: {},
-		},
-		spec: events.map(e => e.spec)
+	for (const key in eventsByKey) {
+		const now = Date.now()
+		
+		sub.next({
+			metadata: {
+				id: randomUUID(),
+				key: eventsByKey[key][0].metadata.key
+			},
+			tracking: {
+				eventTime: now,
+				ingestionTime: now,
+				windows: {},
+			},
+			spec: eventsByKey[key].map(e => e.spec)
+		})
+
+		Logger(ctx).info(`released bucket for window "${windowName}" - key: ${events[0].metadata.key} - size: ${events.length}`)
 	}
 }

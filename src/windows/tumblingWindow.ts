@@ -2,7 +2,7 @@ import { onLostEvent, releaseEvents, Window, WindowOptions } from "./window"
 import { Duration, toMs } from "../windows.old/types/Duration"
 import { StreamContext } from "../stream"
 import { MetaEvent } from "../event"
-import { Bucket,  newBucket } from "./bucket"
+import { Bucket, newBucket } from "./bucket"
 import { Subject } from "rxjs"
 
 export type TumblingWindow<E> = Window<E>

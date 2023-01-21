@@ -1,10 +1,8 @@
-// import { HoppingWindow, HoppingWindowOptions, SessionWindow, SessionWindowOptions, TumblingWindow, TumblingWindowOptions } from "../windows/windowingSystems";
-// import { WindowingSystem } from "../windows/models/WindowingSystem";
-import { streamFromSubject, subjectFromStream } from "../stream";
-import { Subject } from "rxjs";
-import { Stream } from "../stream";
-import { MetaEvent } from "../event";
 import { tumblingWindow, TumblingWindowOptions } from "../windows/tumblingWindow";
+import { streamFromSubject, subjectFromStream } from "../stream";
+import { MetaEvent } from "../event";
+import { Stream } from "../stream";
+import { Subject } from "rxjs";
 
 export type Windows<E> = {
     tumblingWindow: (name: string, options: TumblingWindowOptions) => Stream<E[]>,

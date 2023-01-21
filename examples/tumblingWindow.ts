@@ -1,11 +1,13 @@
 import { Stream } from "../src/stream";
-import { EventEmitter } from "events"
+import { EventEmitter } from "events";
+import { randomInt } from "crypto"
 
 const emitter = new EventEmitter()
 
 const stream1 = Stream("stream1")
     .fromEvent<number>(emitter, "stream1")
-    .tumblingWindow("tw1", {size: 3000, watermark: 500})
+    .withEventKey(e => randomInt(2))
+    .tumblingWindow("tw1", { size: 3000, watermark: 500 })
 
 stream1.toEvent(emitter, "test-result")
 

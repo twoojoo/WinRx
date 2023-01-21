@@ -25,26 +25,22 @@ export function newBucket(ctx: StreamContext, windowName: string, openedAt: numb
 		return await ctx.stateManager.flush(windowName, id)
 	}
 
-	function destroy() {
-		destroyedAt = Date.now()
-	}
+	const self = {
+		destroy() {
+			destroyedAt = Date.now()
+		},
 
-	function isDestroyed() {
-		return !!destroyedAt
-	}
-
-	function isClosed() {
-		return !!closedAt
-	}
-
-	return {
 		isDestroyed() {
 			return !!destroyedAt
 		},
 
 		isClosed() {
 			return !!closedAt
-		},
+		}
+	}
+
+	return {
+		...self,
 
 		isAfterEvent<E>(event: MetaEvent<E>) {
 			const eTime = getTimeFromEvent(windowName, event)
@@ -52,9 +48,9 @@ export function newBucket(ctx: StreamContext, windowName: string, openedAt: numb
 		},
 
 		ownsEvent<E>(event: MetaEvent<E>): boolean {
-			if (isDestroyed()) return false
+			if (self.isDestroyed()) return false
 			const eTime = getTimeFromEvent(windowName, event)
-			if (isClosed()) return eTime >= openedAt && eTime < closedAt
+			if (self.isClosed()) return eTime >= openedAt && eTime < closedAt
 			else return eTime >= openedAt
 		},
 
@@ -67,7 +63,7 @@ export function newBucket(ctx: StreamContext, windowName: string, openedAt: numb
 			closedAt = timestamp
         
 			setTimeout(async () => {
-				destroy()
+				self.destroy()
 				callback(await flush())
 			}, watermark)
 		}
