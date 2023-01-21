@@ -39,6 +39,6 @@ export function releaseEvents<E>(ctx: StreamContext, windowName: string, sub: Su
 			spec: eventsByKey[key].map(e => e.spec)
 		})
 
-		Logger(ctx).info(`released bucket for window "${windowName}" - key: ${events[0].metadata.key} - size: ${events.length}`)
+		Logger(ctx).info(`released bucket for window "${windowName}" - key: ${eventsByKey[key][0].metadata.key} - size: ${eventsByKey[key].length}`)
 	}
 }
